@@ -1,8 +1,37 @@
 # Maritime MaaS
 Django application that acts as an integration layer that mediates the connection between ticket sales platforms and MaaS providers.
 
+## Development with [Docker](https://docs.docker.com/)
 
-## Development
+Prerequisites:
+* Docker
+* Docker Compose
+
+1. Create a `docker-compose.env.yaml` file in the project folder:
+   * Use `docker-compose.env.yaml.example` as a base, it does not need any changes for getting the project running.
+   * Set entrypoint/startup variables according to taste.
+     * `DEBUG`, controls debug mode on/off
+     * `APPLY_MIGRATIONS`, applies migrations on startup
+     * `CREATE_DJANGO_SUPERUSER`, creates an admin user with credentials `kuva-admin`:(password, see below)
+     (kuva-admin@hel.ninja)
+     * `DJANGO_SUPERUSER_PASSWORD`, the admin user's password. If this is not given, a random password is generated
+     and written into stdout when an admin user is created automatically.
+
+2. Run `docker-compose up`
+    * The project is now running at [localhost:8081](http://localhost:8081)
+
+**Optional steps**
+
+1. Run migrations:
+    * Taken care by the example env
+    * `docker exec maritime-maas-backend python manage.py migrate`
+
+2. Create superuser:
+    * Taken care by the example env
+    * `docker exec -it maritime-maas-backend python manage.py createsuperuser`
+
+
+## Development without Docker
 
 Prerequisites:
 * PostgreSQL 11
