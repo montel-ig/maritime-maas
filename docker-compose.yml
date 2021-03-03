@@ -1,0 +1,41 @@
+version: '3.7'
+services:
+    postgres:
+        image: helsinkitest/postgis:11-2.5-alpine
+        restart: on-failure
+        environment:
+            POSTGRES_USER: maritime_maas
+            POSTGRES_PASSWORD: maritime_maas
+            POSTGRES_DB: maritime_maas
+        ports:
+            - 5432:5432
+        volumes:
+          - pgdata:/var/lib/postgresql/data
+        container_name: maritime-maas-db
+
+    django:
+        build:
+            context: .
+            target: development
+        env_file:
+            - docker-compose.env.yaml
+        environment:
+            DATABASE_URL: postgres://maritime_maas:maritime_maas@maritime-maas-db/maritime_maas
+            DATABASE_HOST: "maritime-maas-db"
+        volumes:
+            - .:/app
+            - django-media-volume:/var/media/
+        ports:
+            - "8081:8000"
+        depends_on:
+            - postgres
+        container_name: maritime-maas-backend
+
+volumes:
+        pgdata:
+            driver: local
+        django-media-volume:
+
+networks:
+    default:
+        name: helsinki
