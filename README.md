@@ -12,9 +12,9 @@ Prerequisites:
    * Set entrypoint/startup variables according to taste.
      * `DEBUG`, controls debug mode on/off
      * `APPLY_MIGRATIONS`, applies migrations on startup
-     * `CREATE_DJANGO_SUPERUSER`, creates an admin user with credentials `kuva-admin`:(password, see below)
+     * `CREATE_ADMIN_USER`, creates an admin user with credentials `kuva-admin`:(password, see below)
      (kuva-admin@hel.ninja)
-     * `DJANGO_SUPERUSER_PASSWORD`, the admin user's password. If this is not given, a random password is generated
+     * `ADMIN_USER_PASSWORD`, the admin user's password. If this is not given, a random password is generated
      and written into stdout when an admin user is created automatically.
 
 2. Run `docker-compose up`
@@ -28,7 +28,7 @@ Prerequisites:
 
 2. Create superuser:
     * Taken care by the example env
-    * `docker exec -it maritime-maas-backend python manage.py createsuperuser`
+    * `docker exec -it maritime-maas-backend python manage.py add_admin_user`
 
 
 ## Development without Docker
@@ -63,7 +63,7 @@ Allow user to create test database
 * Create `.env` file: `touch .env`
 * Set the `DEBUG` environment variable to `1`.
 * Run `python manage.py migrate`
-* Run `python manage.py createsuperuser`
+* Run `python manage.py add_admin_user`
 * Run `python manage.py runserver 0:8000`
 
 The project is now running at [localhost:8000](http://localhost:8000)
