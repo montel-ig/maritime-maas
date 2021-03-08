@@ -1,0 +1,8 @@
+sequenceDiagram
+    User->>MaaS Operator Backend:Show Ticket
+    MaaS Operator Backend->>Vesiliikenne MaaS API:Get Ticket
+    Vesiliikenne MaaS API-->>Ticketing System:(Get Ticket)
+    Ticketing System-->>Vesiliikenne MaaS API:(Ticket)
+    Vesiliikenne MaaS API->>MaaS Operator Backend:Ticket
+    MaaS Operator Backend->>User:Ticket
+    User->>Ticketing System:Read QR Code

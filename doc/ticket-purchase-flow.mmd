@@ -1,0 +1,20 @@
+sequenceDiagram
+    User->>MaaS Operator Backend:Ferry
+    MaaS Operator Backend->>Vesiliikenne MaaS API:Get Routes
+    Vesiliikenne MaaS API->>MaaS Operator Backend:Routes
+    MaaS Operator Backend->>User:Show Route Options
+    User->>MaaS Operator Backend:Select Route
+    MaaS Operator Backend-->>Vesiliikenne MaaS API:(Get Departures)
+    Vesiliikenne MaaS API-->>MaaS Operator Backend:(Departures)
+    MaaS Operator Backend->>Vesiliikenne MaaS API:Get Ticket Types
+    Vesiliikenne MaaS API->>MaaS Operator Backend:Ticket Types
+    MaaS Operator Backend->>User:Show Departures & Ticket Types
+    Note over User:(Select Departure)
+    Note over User:Select Ticket Type
+    User->>MaaS Operator Backend:Purchase Ticket
+    MaaS Operator Backend->>Vesiliikenne MaaS API:Purchase Ticket
+    Vesiliikenne MaaS API->>Ticketing System:Purchase Ticket
+    Ticketing System->>Vesiliikenne MaaS API:Ticket
+    Note over Vesiliikenne MaaS API:Save Ticket
+    Vesiliikenne MaaS API-->>MaaS Operator Backend:Ticket
+    MaaS Operator Backend->>User:Display Ticket
