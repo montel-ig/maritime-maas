@@ -10,6 +10,8 @@ RUN apt-install.sh \
     build-essential \
     libpq-dev \
     netcat \
+    gdal-bin \
+    python3-gdal \
     && pip install -U pip \
     && pip install --no-cache-dir -r /app/requirements.txt \
     && pip install --no-cache-dir -r /app/requirements-prod.txt \
