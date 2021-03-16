@@ -26,7 +26,7 @@ env = environ.Env(
     ALLOWED_HOSTS=(list, []),
     DATABASE_URL=(
         str,
-        "postgres://maritime_maas:maritime_maas@localhost/maritime_maas",
+        "postgis://maritime_maas:maritime_maas@localhost/maritime_maas",
     ),
     SENTRY_DSN=(str, ""),
     SENTRY_ENVIRONMENT=(str, ""),
@@ -43,8 +43,6 @@ if DEBUG and not SECRET_KEY:
 ALLOWED_HOSTS = env("ALLOWED_HOSTS")
 
 DATABASES = {"default": env.db()}
-# Ensure postgres engine
-DATABASES["default"]["ENGINE"] = "django.db.backends.postgresql"
 
 LANGUAGES = (("fi", "Finnish"), ("en", "English"), ("sv", "Swedish"))
 
@@ -86,10 +84,12 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django.contrib.gis",
     # third party apps
     "rest_framework",
     # local apps
     "utils",
+    "gtfs",
 ]
 
 MIDDLEWARE = [

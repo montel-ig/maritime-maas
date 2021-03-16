@@ -20,7 +20,7 @@ services:
         env_file:
             - docker-compose.env.yaml
         environment:
-            DATABASE_URL: postgres://maritime_maas:maritime_maas@maritime-maas-db/maritime_maas
+            DATABASE_URL: postgis://maritime_maas:maritime_maas@maritime-maas-db/maritime_maas
             DATABASE_HOST: "maritime-maas-db"
         volumes:
             - .:/app
