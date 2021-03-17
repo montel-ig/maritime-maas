@@ -14,7 +14,6 @@ env:
   BASE_DOMAIN: ${{ secrets.BASE_DOMAIN_STAGING }}
   BUILD_ARTIFACT_FOLDER: 'build_artifacts'
   SERVICE_ARTIFACT_FOLDER: 'service_artifacts'
-  ADD_DEFAULT_LANGUAGES: 1
   APP_MIGRATE_COMMAND: /app/.prod/on_deploy.sh
   K8S_REQUEST_CPU: 50m
   K8S_REQUEST_RAM: 250Mi
