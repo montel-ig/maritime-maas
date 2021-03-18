@@ -60,7 +60,7 @@ jobs:
       - name: Run tests
         run: pytest -ra -vv --doctest-modules --cov=.
         env:
-          DATABASE_URL: postgres://maritime_maas:maritime_maas@localhost:5432/maritime_maas
+          DATABASE_URL: postgis://maritime_maas:maritime_maas@localhost:5432/maritime_maas
 
       - name: Coverage
         run: codecov
