@@ -1,6 +1,7 @@
-from django.contrib.gis.geos import Point
 from django.contrib.gis.db.models.functions import Distance
-from rest_framework import serializers, viewsets, filters, exceptions
+from django.contrib.gis.geos import Point
+from rest_framework import exceptions, filters, serializers, viewsets
+
 from gtfs.models import Stop
 
 

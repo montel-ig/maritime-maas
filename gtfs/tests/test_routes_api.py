@@ -1,7 +1,9 @@
-import pytest
 import json
+
+import pytest
 from model_bakery import baker
-from gtfs.models import Route, Stop, Feed
+
+from gtfs.models import Feed, Route, Stop
 
 
 @pytest.mark.django_db

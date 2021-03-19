@@ -1,6 +1,7 @@
-from rest_framework import serializers, viewsets, filters
-from gtfs.models import Route, Stop
+from rest_framework import filters, serializers, viewsets
+
 from gtfs.api.stops import StopSerializer
+from gtfs.models import Route, Stop
 
 
 class RouteSerializer(serializers.ModelSerializer):

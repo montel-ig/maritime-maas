@@ -1,9 +1,10 @@
 from django.conf import settings
-from rest_framework import routers
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.http import HttpResponse
-from django.urls import path, include
+from django.urls import include, path
+from rest_framework import routers
+
 from gtfs.api.routes import RoutesViewSet
 from gtfs.api.stops import StopViewSet
 

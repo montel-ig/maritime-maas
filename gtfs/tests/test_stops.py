@@ -1,7 +1,9 @@
-import pytest
 import json
+
+import pytest
 from django.contrib.gis.geos import Point
 from model_bakery import baker
+
 from gtfs.models import Stop
 
 
