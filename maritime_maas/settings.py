@@ -89,6 +89,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "django_filters",
     "rest_framework_gis",
+    "rest_framework.authtoken",
     # local apps
     "utils",
     "gtfs",
@@ -120,6 +121,15 @@ TEMPLATES = [
         },
     },
 ]
+
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "maas.authentication.ApiKeyAuthentication",
+        "rest_framework.authentication.BasicAuthentication",
+        "rest_framework.authentication.SessionAuthentication",
+    ]
+}
+
 
 LOGGING = {
     "version": 1,
