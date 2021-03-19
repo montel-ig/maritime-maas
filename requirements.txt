@@ -26,9 +26,12 @@ cligj==0.7.1
     # via fiona
 django-environ==0.4.5
     # via -r requirements.in
+django-filter==2.4.0
+    # via -r requirements.in
 django==3.1.7
     # via
     #   -r requirements.in
+    #   django-filter
     #   djangorestframework
 djangorestframework==3.12.2
     # via -r requirements.in

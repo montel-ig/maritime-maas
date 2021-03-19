@@ -87,6 +87,7 @@ INSTALLED_APPS = [
     "django.contrib.gis",
     # third party apps
     "rest_framework",
+    "django_filters",
     # local apps
     "utils",
     "gtfs",

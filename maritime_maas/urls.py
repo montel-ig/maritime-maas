@@ -1,12 +1,18 @@
 from django.conf import settings
+from rest_framework import routers
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.http import HttpResponse
-from django.urls import path
+from django.urls import path, include
+from gtfs.api.routes import RoutesViewSet
+from gtfs.api.stops import StopViewSet
 
-urlpatterns = [
-    path("admin/", admin.site.urls),
-]
+router = routers.DefaultRouter()
+router.register(r"routes", RoutesViewSet, basename="routes")
+router.register(r"stops", StopViewSet, basename="stops")
+
+
+urlpatterns = [path("admin/", admin.site.urls), path("v1/", include(router.urls))]
 
 
 #
