@@ -8,7 +8,7 @@ from .trip import Trip
 
 class StopTime(GTFSModel):
     trip = models.ForeignKey(Trip, verbose_name=_("trip"), on_delete=models.CASCADE)
-    stop = models.ForeignKey(Stop, on_delete=models.CASCADE)
+    stop = models.ForeignKey(Stop, verbose_name=_("stop"), on_delete=models.CASCADE)
     arrival_time = models.TimeField(
         verbose_name=_("arrival time"), null=True, blank=True
     )
@@ -17,7 +17,7 @@ class StopTime(GTFSModel):
     )
     stop_sequence = models.PositiveIntegerField(verbose_name=_("stop sequence"))
 
-    class Meta(GTFSModel.Meta):
+    class Meta:
         verbose_name = _("stop times")
         verbose_name_plural = _("stop times")
         default_related_name = "stop_times"

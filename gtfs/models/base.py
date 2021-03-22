@@ -10,11 +10,15 @@ class TimeStampedModel(models.Model):
         abstract = True
 
 
-class GTFSModel(TimeStampedModel):
+class GTFSModel(models.Model):
     feed = models.ForeignKey("Feed", verbose_name=_("feed"), on_delete=models.CASCADE)
-    source_id = models.CharField(
-        verbose_name=_("source ID"), max_length=64, db_index=True
-    )
+
+    class Meta:
+        abstract = True
+
+
+class GTFSModelWithSourceID(GTFSModel):
+    source_id = models.CharField(verbose_name=_("source ID"), max_length=255)
 
     class Meta:
         abstract = True

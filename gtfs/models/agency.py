@@ -1,10 +1,10 @@
 from django.contrib.gis.db import models
 from django.utils.translation import gettext_lazy as _
 
-from .base import GTFSModel
+from gtfs.models.base import GTFSModelWithSourceID
 
 
-class Agency(GTFSModel):
+class Agency(GTFSModelWithSourceID):
     name = models.CharField(verbose_name=_("name"), max_length=64)
     url = models.URLField(verbose_name=_("URL"))
     timezone = models.CharField(
@@ -23,7 +23,7 @@ class Agency(GTFSModel):
         blank=True,
     )
 
-    class Meta(GTFSModel.Meta):
+    class Meta(GTFSModelWithSourceID.Meta):
         verbose_name = _("agency")
         verbose_name_plural = _("agencies")
         default_related_name = "agencies"

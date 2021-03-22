@@ -2,10 +2,10 @@ from django.contrib.gis.db import models
 from django.utils.translation import gettext_lazy as _
 
 from .agency import Agency
-from .base import GTFSModel
+from .base import GTFSModelWithSourceID
 
 
-class Route(GTFSModel):
+class Route(GTFSModelWithSourceID):
     class Type(models.IntegerChoices):
         TRAM = 0, _("Tram")
         SUBWAY = 1, _("Subway")
@@ -35,7 +35,7 @@ class Route(GTFSModel):
     )
     url = models.URLField(verbose_name=_("URL"), blank=True)
 
-    class Meta(GTFSModel.Meta):
+    class Meta(GTFSModelWithSourceID.Meta):
         verbose_name = _("route")
         verbose_name_plural = _("routes")
         default_related_name = "routes"

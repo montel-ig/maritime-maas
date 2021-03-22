@@ -7,8 +7,8 @@ from .calendar import Calendar
 
 class CalendarDate(GTFSModel):
     class ExceptionType(models.IntegerChoices):
-        ADDED = 0, _("Added")
-        REMOVED = 1, _("Removed")
+        ADDED = 1, _("Added")
+        REMOVED = 2, _("Removed")
 
     calendar = models.ForeignKey(
         Calendar, related_name="calendar_dates", on_delete=models.CASCADE
