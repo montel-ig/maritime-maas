@@ -189,14 +189,13 @@ class GTFSFeedImporter:
             if model == CalendarDate and creation_attributes["calendar_id"] is None:
                 # We don't support calendar dates without a calendar at least for now
                 num_of_skipped += 1
-                continue
-
-            objs_to_create.append(
-                model(
-                    feed_id=feed.id,
-                    **creation_attributes,
+            else:
+                objs_to_create.append(
+                    model(
+                        feed_id=feed.id,
+                        **creation_attributes,
+                    )
                 )
-            )
 
             if (
                 num_of_processed % self.object_creation_batch_size == 0
