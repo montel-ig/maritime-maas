@@ -19,13 +19,13 @@ class RouteSerializer(serializers.ModelSerializer):
 
 
 class RouteFilter(filters.FilterSet):
-    stopId = filters.NumberFilter(
+    stop_id = filters.NumberFilter(
         field_name="trips__stop_times__stop_id", lookup_expr="exact"
     )
 
     class Meta:
         model: Route
-        fields = "stopId"
+        fields = "stop_id"
 
 
 class RoutesViewSet(viewsets.ReadOnlyModelViewSet):
