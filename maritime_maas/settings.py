@@ -88,6 +88,7 @@ INSTALLED_APPS = [
     # third party apps
     "rest_framework",
     "django_filters",
+    "rest_framework_gis",
     # local apps
     "utils",
     "gtfs",

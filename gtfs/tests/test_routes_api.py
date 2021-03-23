@@ -3,7 +3,7 @@ import json
 import pytest
 from model_bakery import baker
 
-from gtfs.models import Feed, Route, Stop
+from gtfs.models import Route, Stop, StopTime, Trip
 
 
 @pytest.mark.django_db
@@ -11,9 +11,10 @@ def test_routes(api_client):
 
     endpoint = "/v1/routes/"
 
-    feed = baker.make(Feed)
-    baker.make(Route, feed=feed)
-    baker.make(Stop, feed=feed)
+    route = baker.make(Route)
+    trip = baker.make(Trip, route=route)
+    stop = baker.make(Stop)
+    baker.make(StopTime, trip=trip, stop=stop)
 
     response = api_client().get(endpoint)
 
@@ -25,7 +26,9 @@ def test_routes(api_client):
 def test_routes_with_stop_id(api_client):
 
     routes = baker.make(Route, _quantity=3)
-    stop = baker.make(Stop, feed=routes[0].feed)
+    trip = baker.make(Trip, route=routes[0])
+    stop = baker.make(Stop)
+    baker.make(StopTime, trip=trip, stop=stop)
 
     endpoint = "/v1/routes/"
     url = f"{endpoint}?stopId={stop.id}"
