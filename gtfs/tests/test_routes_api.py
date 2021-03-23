@@ -31,7 +31,7 @@ def test_routes_with_stop_id(api_client):
     baker.make(StopTime, trip=trip, stop=stop)
 
     endpoint = "/v1/routes/"
-    url = f"{endpoint}?stopId={stop.id}"
+    url = f"{endpoint}?stop_id={stop.id}"
 
     response = api_client().get(url)
 
