@@ -1,16 +1,16 @@
 from django.contrib.gis.db import models
 from django.utils.translation import gettext_lazy as _
 
-from .base import GTFSModel
+from .base import GTFSModelWithSourceID
 
 
-class Stop(GTFSModel):
+class Stop(GTFSModelWithSourceID):
     name = models.CharField(verbose_name=_("name"), max_length=255, blank=True)
     code = models.CharField(verbose_name=_("code"), max_length=255, blank=True)
     desc = models.TextField(verbose_name=_("description"), blank=True)
     point = models.PointField(verbose_name=_("point"))
 
-    class Meta(GTFSModel.Meta):
+    class Meta(GTFSModelWithSourceID.Meta):
         verbose_name = _("stop")
         verbose_name_plural = _("stops")
         default_related_name = "stops"

@@ -3,3 +3,4 @@ django-environ
 psycopg2
 sentry_sdk
 djangorestframework
+gtfs_kit

@@ -1,10 +1,10 @@
 from django.contrib.gis.db import models
 from django.utils.translation import gettext_lazy as _
 
-from .base import GTFSModel
+from .base import GTFSModelWithSourceID
 
 
-class Calendar(GTFSModel):
+class Calendar(GTFSModelWithSourceID):
     class DayAvailability(models.IntegerChoices):
         NOT_AVAILABLE = 0, _("Not available")
         AVAILABLE = 1, _("Available")
@@ -33,7 +33,7 @@ class Calendar(GTFSModel):
     start_date = models.DateField(verbose_name=_("start date"))
     end_date = models.DateField(verbose_name=_("end date"))
 
-    class Meta(GTFSModel.Meta):
+    class Meta(GTFSModelWithSourceID.Meta):
         verbose_name = _("calendar")
         verbose_name_plural = _("calendars")
         default_related_name = "calendars"

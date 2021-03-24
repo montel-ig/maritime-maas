@@ -1,12 +1,12 @@
 from django.contrib.gis.db import models
 from django.utils.translation import gettext_lazy as _
 
-from .base import GTFSModel
+from .base import GTFSModelWithSourceID
 from .calendar import Calendar
 from .route import Route
 
 
-class Trip(GTFSModel):
+class Trip(GTFSModelWithSourceID):
     route = models.ForeignKey(Route, verbose_name=_("route"), on_delete=models.CASCADE)
     calendar = models.ForeignKey(
         Calendar, verbose_name=_("calendar"), on_delete=models.CASCADE

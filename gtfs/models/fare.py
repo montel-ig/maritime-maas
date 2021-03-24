@@ -2,10 +2,10 @@ from django.contrib.gis.db import models
 from django.utils.translation import gettext_lazy as _
 
 from .agency import Agency
-from .base import GTFSModel
+from .base import GTFSModelWithSourceID
 
 
-class Fare(GTFSModel):
+class Fare(GTFSModelWithSourceID):
     class PaymentMethod(models.IntegerChoices):
         ON_BOARD = 0, _("Fare is paid on board")
         BEFORE_BOARDING = 1, _("Fare must be paid before boarding")
@@ -34,7 +34,7 @@ class Fare(GTFSModel):
         verbose_name=_("transfers"), choices=Transfers.choices, null=True
     )
 
-    class Meta(GTFSModel.Meta):
+    class Meta(GTFSModelWithSourceID.Meta):
         verbose_name = _("fare")
         verbose_name_plural = _("fares")
         default_related_name = "fares"
