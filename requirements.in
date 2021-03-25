@@ -4,3 +4,5 @@ psycopg2
 sentry_sdk
 djangorestframework
 gtfs_kit
+django-filter
+djangorestframework-gis
