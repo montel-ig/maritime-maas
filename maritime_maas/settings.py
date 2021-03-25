@@ -123,11 +123,12 @@ TEMPLATES = [
 ]
 
 REST_FRAMEWORK = {
+    "DEFAULT_PERMISSION_CLASSES": ["maas.permissions.IsMaasOperator"],
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "maas.authentication.ApiKeyAuthentication",
         "rest_framework.authentication.BasicAuthentication",
         "rest_framework.authentication.SessionAuthentication",
-    ]
+    ],
 }
 
 
