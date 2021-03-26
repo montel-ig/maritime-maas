@@ -9,6 +9,7 @@ class StopSerializer(serializers.ModelSerializer):
         model = Stop
         fields = ("id", "name", "coordinates")
 
+    id = serializers.UUIDField(source="api_id")
     coordinates = serializers.SerializerMethodField()
 
     def get_coordinates(self, obj):
@@ -23,7 +24,9 @@ class RadiusToLocationFilter(DistanceToPointFilter):
 
 class StopViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Stop.objects.all()
+
     serializer_class = StopSerializer
     distance_filter_field = "point"
     filter_backends = [RadiusToLocationFilter]
     distance_filter_convert_meters = True
+    lookup_field = "api_id"
