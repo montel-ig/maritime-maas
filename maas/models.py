@@ -1,16 +1,18 @@
-import secrets
-
+from django.conf import settings
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 
 class MaasOperator(models.Model):
     name = models.CharField(verbose_name=_("name"), max_length=64)
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name="maas_operator",
+        verbose_name=_("user"),
+    )
     transport_service_providers = models.ManyToManyField(
         "TransportServiceProvider", related_name="maas_operators", through="Permission"
-    )
-    api_token = models.CharField(
-        _("api_token"), blank=True, max_length=100, db_index=True
     )
 
     class Meta:
@@ -19,14 +21,6 @@ class MaasOperator(models.Model):
 
     def __str__(self):
         return self.name
-
-    def save(self, *args, **kwargs):
-        if not self.api_token:
-            self.api_token = self.generate_api_token()
-        return super().save(*args, **kwargs)
-
-    def generate_api_token(self):
-        return secrets.token_urlsafe(64)[:100]
 
 
 class TransportServiceProvider(models.Model):
