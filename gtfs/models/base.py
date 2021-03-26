@@ -1,5 +1,9 @@
+from uuid import UUID, uuid5
+
 from django.contrib.gis.db import models
 from django.utils.translation import gettext_lazy as _
+
+API_ID_NAMESPACE = UUID("4d5d9db9-a18e-4e83-aeb9-369e32a966fd")
 
 
 class TimeStampedModel(models.Model):
@@ -19,6 +23,7 @@ class GTFSModel(models.Model):
 
 class GTFSModelWithSourceID(GTFSModel):
     source_id = models.CharField(verbose_name=_("source ID"), max_length=255)
+    api_id = models.UUIDField(verbose_name=_("API ID"), unique=True)
 
     class Meta:
         abstract = True
@@ -28,3 +33,14 @@ class GTFSModelWithSourceID(GTFSModel):
                 name="unique_feed_%(app_label)s_%(class)s",
             )
         ]
+
+    def populate_api_id(self):
+        self.api_id = uuid5(
+            API_ID_NAMESPACE,
+            f"{self.__class__.__name__}:{self.feed_id}:{self.source_id}",
+        )
+
+    def save(self, *args, **kwargs):
+        if not self.api_id:
+            self.populate_api_id()
+        super().save(*args, **kwargs)
