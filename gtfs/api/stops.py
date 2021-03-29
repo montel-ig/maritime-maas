@@ -30,3 +30,8 @@ class StopViewSet(viewsets.ReadOnlyModelViewSet):
     filter_backends = [RadiusToLocationFilter]
     distance_filter_convert_meters = True
     lookup_field = "api_id"
+
+    def get_queryset(self):
+        maas_operator = self.request.user.maas_operator
+        qs = super().get_queryset()
+        return qs.for_maas_operator(maas_operator)

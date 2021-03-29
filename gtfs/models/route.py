@@ -1,8 +1,17 @@
 from django.contrib.gis.db import models
 from django.utils.translation import gettext_lazy as _
 
+from maas.models import MaasOperator
+
 from .agency import Agency
 from .base import GTFSModelWithSourceID
+from .feed import Feed
+
+
+class RouteQueryset(models.QuerySet):
+    def for_maas_operator(self, maas_operator: MaasOperator):
+        feeds = Feed.objects.for_maas_operator(maas_operator)
+        return self.filter(feed__in=feeds)
 
 
 class Route(GTFSModelWithSourceID):
@@ -34,6 +43,8 @@ class Route(GTFSModelWithSourceID):
         verbose_name=_("type"), choices=Type.choices
     )
     url = models.URLField(verbose_name=_("URL"), blank=True)
+
+    objects = RouteQueryset.as_manager()
 
     class Meta(GTFSModelWithSourceID.Meta):
         verbose_name = _("route")

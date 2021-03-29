@@ -1,7 +1,16 @@
 from django.contrib.gis.db import models
 from django.utils.translation import gettext_lazy as _
 
+from maas.models import MaasOperator
+
 from .base import TimeStampedModel
+
+
+class FeedQueryset(models.QuerySet):
+    def for_maas_operator(self, maas_operator: MaasOperator):
+        return self.filter(
+            ticketing_system__transport_service_providers__maas_operators=maas_operator
+        )
 
 
 class Feed(TimeStampedModel):
@@ -13,6 +22,8 @@ class Feed(TimeStampedModel):
         blank=True,
         verbose_name=_("ticketing system"),
     )
+
+    objects = FeedQueryset.as_manager()
 
     class Meta:
         verbose_name = _("feed")
