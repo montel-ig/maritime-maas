@@ -53,6 +53,7 @@ class GTFSFeedImporter:
             "source_id": "trip_id",
             "calendar_id": "service_id",
             "route_id": "route_id",
+            "direction_id": "direction_id",
         },
         Calendar: {
             "source_id": "service_id",
@@ -89,6 +90,7 @@ class GTFSFeedImporter:
             "arrival_time": "arrival_time",
             "departure_time": "departure_time",
             "stop_sequence": "stop_sequence",
+            "stop_headsign": "stop_headsign",
         },
         Fare: {
             "source_id": "fare_id",

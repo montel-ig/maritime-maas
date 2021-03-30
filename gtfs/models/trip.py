@@ -15,6 +15,7 @@ class Trip(GTFSModelWithSourceID):
     short_name = models.CharField(
         verbose_name=_("short name"), max_length=64, blank=True
     )
+    direction_id = models.PositiveSmallIntegerField(verbose_name=_("direction ID"))
 
     class Meta:
         verbose_name = _("trip")
