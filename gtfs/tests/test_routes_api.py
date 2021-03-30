@@ -31,7 +31,7 @@ def test_routes_with_stop_id(maas_api_client):
     baker.make(StopTime, trip=trip, stop=stop)
 
     endpoint = "/v1/routes/"
-    url = f"{endpoint}?stop_id={stop.id}"
+    url = f"{endpoint}?stop_id={stop.api_id}"
 
     response = maas_api_client.get(url)
 

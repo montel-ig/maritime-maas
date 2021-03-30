@@ -10,6 +10,7 @@ class RouteSerializer(serializers.ModelSerializer):
         model = Route
         fields = ("id", "name", "stops")
 
+    id = serializers.UUIDField(source="api_id")
     name = serializers.CharField(source="short_name")
     stops = serializers.SerializerMethodField()
 
@@ -19,9 +20,7 @@ class RouteSerializer(serializers.ModelSerializer):
 
 
 class RouteFilter(filters.FilterSet):
-    stop_id = filters.NumberFilter(
-        field_name="trips__stop_times__stop_id", lookup_expr="exact"
-    )
+    stop_id = filters.UUIDFilter(field_name="trips__stop_times__stop__api_id")
 
     class Meta:
         model: Route
@@ -33,3 +32,4 @@ class RoutesViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = RouteSerializer
     filter_backends = [filters.DjangoFilterBackend]
     filterset_class = RouteFilter
+    lookup_field = "api_id"

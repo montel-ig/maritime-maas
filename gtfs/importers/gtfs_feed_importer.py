@@ -20,6 +20,7 @@ from gtfs.models import (
     StopTime,
     Trip,
 )
+from gtfs.models.base import GTFSModelWithSourceID
 
 
 class GTFSFeedImporterError(Exception):
@@ -190,12 +191,10 @@ class GTFSFeedImporter:
                 # We don't support calendar dates without a calendar at least for now
                 num_of_skipped += 1
             else:
-                objs_to_create.append(
-                    model(
-                        feed_id=feed.id,
-                        **creation_attributes,
-                    )
-                )
+                new_obj = model(feed_id=feed.id, **creation_attributes)
+                if issubclass(model, GTFSModelWithSourceID):
+                    new_obj.populate_api_id()
+                objs_to_create.append(new_obj)
 
             if (
                 num_of_processed % self.object_creation_batch_size == 0
