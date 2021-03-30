@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("gtfs", "0004_make_api_id_unique"),
+        ("gtfs", "0005_link_feed_to_ticketing_system"),
     ]
 
     operations = [
