@@ -30,6 +30,8 @@ env = environ.Env(
     ),
     SENTRY_DSN=(str, ""),
     SENTRY_ENVIRONMENT=(str, ""),
+    CORS_ORIGIN_WHITELIST=(list, []),
+    CORS_ORIGIN_ALLOW_ALL=(bool, False),
 )
 if os.path.exists(env_file):
     env.read_env(env_file)
@@ -90,6 +92,7 @@ INSTALLED_APPS = [
     "django_filters",
     "rest_framework_gis",
     "rest_framework.authtoken",
+    "corsheaders",
     # local apps
     "utils",
     "gtfs",
@@ -97,11 +100,12 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.middleware.security.SecurityMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
-    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
@@ -131,6 +135,8 @@ REST_FRAMEWORK = {
     ],
 }
 
+CORS_ORIGIN_WHITELIST = env.list("CORS_ORIGIN_WHITELIST")
+CORS_ORIGIN_ALLOW_ALL = env.bool("CORS_ORIGIN_ALLOW_ALL")
 
 LOGGING = {
     "version": 1,

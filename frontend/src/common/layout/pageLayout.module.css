@@ -1,0 +1,20 @@
+body {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.header {
+    height: 25px;
+    width: 100%;
+    border-bottom: 1px solid black;
+    padding: 5px;
+}
+
+.link {
+    margin-left: 15px;
+}
+
+.main {
+    text-align: center;
+}

@@ -1,0 +1,10 @@
+.form {
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    width: 300px;
+}
+
+.input {
+    margin-bottom: 20px;
+}
