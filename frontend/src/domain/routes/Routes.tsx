@@ -19,11 +19,8 @@ const Routes = () => {
 
   const search = (e: React.SyntheticEvent) => {
     e.preventDefault();
-    const target = e.target as typeof e.target & {
-      stopId: { value: string };
-    };
-    const stopId = target.stopId.value;
-    const params = `?stop_id=${stopId}`;
+    const formData = new FormData(e.target as HTMLFormElement);
+    const params = new URLSearchParams(formData as URLSearchParams).toString();
     setParams(params);
     setTimeout(() => {
       refetch();
@@ -40,8 +37,8 @@ const Routes = () => {
     <>
       <h1>Routes</h1>
       <form onSubmit={search} className={styles.form}>
-        <label htmlFor="stopId">Stop id</label>
-        <input name="stopId" className={styles.input} />
+        <label htmlFor="stop_id">Stop id</label>
+        <input name="stop_id" className={styles.input} />
         <button type="submit">Search</button>
       </form>
       <Map>

@@ -20,13 +20,8 @@ const Stops = () => {
 
   const search = (e: React.SyntheticEvent) => {
     e.preventDefault();
-    const target = e.target as typeof e.target & {
-      location: { value: string };
-      radius: { value: number };
-    };
-    const location = target.location.value;
-    const radius = target.radius.value;
-    const params = `?location=${location}&radius=${radius}`;
+    const formData = new FormData(e.target as HTMLFormElement);
+    const params = new URLSearchParams(formData as URLSearchParams).toString();
     setParams(params);
     setTimeout(() => {
       refetch();
@@ -38,9 +33,9 @@ const Stops = () => {
       <h1>Stops</h1>
       <form onSubmit={search} className={styles.form}>
         <label htmlFor="location">Location</label>
-        <input name={'location'} className={styles.input} />
+        <input name="location" className={styles.input} />
         <label htmlFor="radius">Radius</label>
-        <input name={'radius'} className={styles.input} />
+        <input name="radius" className={styles.input} />
         <button type="submit">Search</button>
       </form>
 
