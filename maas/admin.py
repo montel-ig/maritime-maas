@@ -1,6 +1,8 @@
 from django.contrib import admin
 
-from .models import MaasOperator, Permission, TransportServiceProvider
+from gtfs.admin import FeedInline
+
+from .models import MaasOperator, Permission, TicketingSystem, TransportServiceProvider
 
 
 class PermissionInline(admin.TabularInline):
@@ -16,3 +18,8 @@ class MaasOperatorAdmin(admin.ModelAdmin):
 @admin.register(TransportServiceProvider)
 class TransportServiceProviderAdmin(admin.ModelAdmin):
     inlines = (PermissionInline,)
+
+
+@admin.register(TicketingSystem)
+class TicketingSystemAdmin(admin.ModelAdmin):
+    inlines = (FeedInline,)

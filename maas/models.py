@@ -25,10 +25,18 @@ class MaasOperator(models.Model):
 
 class TransportServiceProvider(models.Model):
     name = models.CharField(verbose_name=_("name"), max_length=64)
+    ticketing_system = models.ForeignKey(
+        "maas.TicketingSystem",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        verbose_name=_("ticketing system"),
+    )
 
     class Meta:
         verbose_name = _("transport service provider")
         verbose_name_plural = _("transport service provider")
+        default_related_name = "transport_service_providers"
 
     def __str__(self):
         return self.name
@@ -48,3 +56,14 @@ class Permission(models.Model):
 
     def __str__(self):
         return f"{self.maas_operator.name} - {self.transport_service_provider.name}"
+
+
+class TicketingSystem(models.Model):
+    name = models.CharField(verbose_name=_("name"), max_length=64)
+
+    class Meta:
+        verbose_name = _("ticketing system")
+        verbose_name_plural = _("ticketing systems")
+
+    def __str__(self):
+        return self.name

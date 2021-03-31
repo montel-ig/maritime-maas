@@ -13,6 +13,12 @@ from .models import (
     Trip,
 )
 
+
+class FeedInline(admin.TabularInline):
+    model = Feed
+    extra = 0
+
+
 admin.site.register(Agency)
 admin.site.register(Calendar)
 admin.site.register(Fare)
