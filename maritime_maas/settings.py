@@ -92,7 +92,7 @@ INSTALLED_APPS = [
     "django_filters",
     "rest_framework_gis",
     "rest_framework.authtoken",
-    'corsheaders',
+    "corsheaders",
     # local apps
     "utils",
     "gtfs",
