@@ -35,7 +35,7 @@ const Routes = () => {
       return [stop.coordinates.latitude, stop.coordinates.longitude];
     });
   };
-  console.log(data);
+
   return (
     <>
       <h1>Routes</h1>
