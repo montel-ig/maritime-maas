@@ -1,6 +1,7 @@
 from django_filters import rest_framework as filters
-from rest_framework import serializers, viewsets
+from rest_framework import serializers
 
+from gtfs.api.base import BaseGTFSViewSet, NestedDepartureQueryParamsSerializer
 from gtfs.api.stops import StopSerializer
 from gtfs.models import Route, Stop
 
@@ -16,7 +17,11 @@ class RouteSerializer(serializers.ModelSerializer):
 
     def get_stops(self, obj):
         stops = Stop.objects.filter(stop_times__trip__route_id=obj.id).distinct()
-        return StopSerializer(stops, many=True).data
+        return StopSerializer(
+            stops,
+            many=True,
+            context=dict(**self.context, route_id=obj.id),
+        ).data
 
 
 class RouteFilter(filters.FilterSet):
@@ -27,14 +32,9 @@ class RouteFilter(filters.FilterSet):
         fields = "stop_id"
 
 
-class RoutesViewSet(viewsets.ReadOnlyModelViewSet):
+class RoutesViewSet(BaseGTFSViewSet):
     queryset = Route.objects.all()
     serializer_class = RouteSerializer
     filter_backends = [filters.DjangoFilterBackend]
     filterset_class = RouteFilter
-    lookup_field = "api_id"
-
-    def get_queryset(self):
-        maas_operator = self.request.user.maas_operator
-        qs = super().get_queryset()
-        return qs.for_maas_operator(maas_operator)
+    detail_query_params_serializer_class = NestedDepartureQueryParamsSerializer

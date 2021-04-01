@@ -1,12 +1,13 @@
 from datetime import datetime, timezone
 
 from django.db.models import Prefetch
-from rest_framework import serializers, viewsets
-from rest_framework.exceptions import ParseError
+from rest_framework import serializers
 from rest_framework_gis.filters import DistanceToPointFilter
 
 from gtfs.models import Stop, StopTime
 from gtfs.models.departure import Departure
+
+from .base import BaseGTFSViewSet, NestedDepartureQueryParamsSerializer
 
 
 class DepartureSerializer(serializers.ModelSerializer):
@@ -35,6 +36,12 @@ class DepartureSerializer(serializers.ModelSerializer):
             "stop_sequence",
             "route_id",
         )
+
+    def get_fields(self):
+        fields = super().get_fields()
+        if self.context.get("route_id"):
+            del fields["route_id"]
+        return fields
 
     def get_arrival_time(self, obj):
         return datetime.combine(
@@ -89,6 +96,8 @@ class StopSerializer(serializers.ModelSerializer):
         )
         if "direction_id" in self.context:
             queryset = queryset.filter(trip__direction_id=self.context["direction_id"])
+        if "route_id" in self.context:
+            queryset = queryset.filter(trip__route_id=self.context["route_id"])
 
         return DepartureSerializer(queryset, many=True, context=self.context).data
 
@@ -98,39 +107,11 @@ class RadiusToLocationFilter(DistanceToPointFilter):
     point_param = "location"
 
 
-class QueryParamsSerializer(serializers.Serializer):
-    date = serializers.DateField(required=False)
-    direction_id = serializers.IntegerField(min_value=0, max_value=1, required=False)
-
-    class Meta:
-        fields = ("date", "direction_id")
-
-
-class StopViewSet(viewsets.ReadOnlyModelViewSet):
+class StopViewSet(BaseGTFSViewSet):
     queryset = Stop.objects.all()
 
     serializer_class = StopSerializer
     distance_filter_field = "point"
     filter_backends = [RadiusToLocationFilter]
     distance_filter_convert_meters = True
-    lookup_field = "api_id"
-
-    def get_queryset(self):
-        maas_operator = self.request.user.maas_operator
-        qs = super().get_queryset()
-        return qs.for_maas_operator(maas_operator)
-
-    def get_serializer_context(self):
-        context = super().get_serializer_context()
-
-        if self.action == "retrieve":
-            filters_serializer = QueryParamsSerializer(
-                data=context["request"].query_params
-            )
-            if not filters_serializer.is_valid():
-                raise ParseError(filters_serializer.errors)
-
-            for field, value in filters_serializer.validated_data.items():
-                context[field] = value
-
-        return context
+    detail_query_params_serializer_class = NestedDepartureQueryParamsSerializer
