@@ -45,6 +45,7 @@ if DEBUG and not SECRET_KEY:
 ALLOWED_HOSTS = env("ALLOWED_HOSTS")
 
 DATABASES = {"default": env.db()}
+DATABASES["default"]["ENGINE"] = "django.contrib.gis.db.backends.postgis"
 
 LANGUAGES = (("fi", "Finnish"), ("en", "English"), ("sv", "Swedish"))
 
