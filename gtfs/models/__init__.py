@@ -1,6 +1,4 @@
 from .agency import Agency
-from .calendar import Calendar
-from .calendar_date import CalendarDate
 from .departure import Departure
 from .fare import Fare
 from .fare_rule import FareRule
@@ -12,8 +10,6 @@ from .trip import Trip
 
 __all__ = [
     "Agency",
-    "Calendar",
-    "CalendarDate",
     "Departure",
     "Fare",
     "FareRule",

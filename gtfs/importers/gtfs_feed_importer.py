@@ -9,18 +9,7 @@ from django.contrib.gis.db import models
 from django.contrib.gis.geos import Point
 from django.db import transaction
 
-from gtfs.models import (
-    Agency,
-    Calendar,
-    CalendarDate,
-    Fare,
-    FareRule,
-    Feed,
-    Route,
-    Stop,
-    StopTime,
-    Trip,
-)
+from gtfs.models import Agency, Fare, FareRule, Feed, Route, Stop, StopTime, Trip
 from gtfs.models.base import GTFSModelWithSourceID
 from gtfs.models.departure import Departure
 
@@ -32,8 +21,6 @@ class GTFSFeedImporterError(Exception):
 class GTFSFeedImporter:
     MODELS_AND_GTFS_KIT_ATTRIBUTES = (
         (Agency, "agency"),
-        (Calendar, "calendar"),
-        (CalendarDate, "calendar_dates"),
         (Route, "routes"),
         (Trip, "trips"),
         (Stop, "stops"),
@@ -53,26 +40,8 @@ class GTFSFeedImporter:
         },
         Trip: {
             "source_id": "trip_id",
-            "calendar_id": "service_id",
             "route_id": "route_id",
             "direction_id": "direction_id",
-        },
-        Calendar: {
-            "source_id": "service_id",
-            "monday": "monday",
-            "tuesday": "tuesday",
-            "wednesday": "wednesday",
-            "thursday": "thursday",
-            "friday": "friday",
-            "saturday": "saturday",
-            "sunday": "sunday",
-            "start_date": "start_date",
-            "end_date": "end_date",
-        },
-        CalendarDate: {
-            "calendar_id": "service_id",
-            "date": "date",
-            "exception_type": "exception_type",
         },
         Route: {
             "source_id": "route_id",
@@ -196,14 +165,11 @@ class GTFSFeedImporter:
                 creation_attributes[model_field_name] = self._convert_value(
                     gtfs_value, model_field, gtfs_field
                 )
-            if model == CalendarDate and creation_attributes["calendar_id"] is None:
-                # We don't support calendar dates without a calendar at least for now
-                num_of_skipped += 1
-            else:
-                new_obj = model(feed_id=feed.id, **creation_attributes)
-                if issubclass(model, GTFSModelWithSourceID):
-                    new_obj.populate_api_id()
-                objs_to_create.append(new_obj)
+
+            new_obj = model(feed_id=feed.id, **creation_attributes)
+            if issubclass(model, GTFSModelWithSourceID):
+                new_obj.populate_api_id()
+            objs_to_create.append(new_obj)
 
             if (
                 num_of_processed % self.object_creation_batch_size == 0

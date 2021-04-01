@@ -1,18 +1,6 @@
 from django.contrib import admin
 
-from .models import (
-    Agency,
-    Calendar,
-    CalendarDate,
-    Departure,
-    Fare,
-    FareRule,
-    Feed,
-    Route,
-    Stop,
-    StopTime,
-    Trip,
-)
+from .models import Agency, Departure, Fare, FareRule, Feed, Route, Stop, StopTime, Trip
 
 
 class FeedInline(admin.TabularInline):
@@ -21,8 +9,6 @@ class FeedInline(admin.TabularInline):
 
 
 admin.site.register(Agency)
-admin.site.register(Calendar)
-admin.site.register(CalendarDate)
 admin.site.register(Departure)
 admin.site.register(Fare)
 admin.site.register(FareRule)
