@@ -3,7 +3,7 @@ import datetime
 import pytest
 
 from gtfs.importers import GTFSFeedImporter
-from gtfs.models import Agency, Calendar
+from gtfs.models import Agency
 
 
 @pytest.mark.django_db
@@ -17,16 +17,6 @@ def test_gtfs_feed_importer():
     assert agency.name == "Ferry Company"
     assert agency.url == "https://ferry.company"
     assert agency.timezone == "Europe/Helsinki"
-
-    assert Calendar.objects.count() == 1
-    calendar = Calendar.objects.first()
-    assert calendar.source_id == "all_days_except_sunday"
-
-    for day in ("monday", "tuesday", "wednesday", "thursday", "friday", "saturday"):
-        assert getattr(calendar, day) == Calendar.DayAvailability.AVAILABLE
-    assert calendar.sunday == Calendar.DayAvailability.NOT_AVAILABLE
-    assert calendar.start_date == datetime.date(2021, 5, 1)
-    assert calendar.end_date == datetime.date(2021, 9, 30)
 
     assert agency.routes.count() == 1
     route = agency.routes.first()

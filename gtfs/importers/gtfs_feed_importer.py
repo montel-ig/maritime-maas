@@ -1,6 +1,7 @@
 import logging
 from collections import defaultdict
 from datetime import datetime, time
+from math import isnan
 from timeit import default_timer as timer
 
 import gtfs_kit
@@ -8,19 +9,9 @@ from django.contrib.gis.db import models
 from django.contrib.gis.geos import Point
 from django.db import transaction
 
-from gtfs.models import (
-    Agency,
-    Calendar,
-    CalendarDate,
-    Fare,
-    FareRule,
-    Feed,
-    Route,
-    Stop,
-    StopTime,
-    Trip,
-)
+from gtfs.models import Agency, Fare, FareRule, Feed, Route, Stop, StopTime, Trip
 from gtfs.models.base import GTFSModelWithSourceID
+from gtfs.models.departure import Departure
 
 
 class GTFSFeedImporterError(Exception):
@@ -30,8 +21,6 @@ class GTFSFeedImporterError(Exception):
 class GTFSFeedImporter:
     MODELS_AND_GTFS_KIT_ATTRIBUTES = (
         (Agency, "agency"),
-        (Calendar, "calendar"),
-        (CalendarDate, "calendar_dates"),
         (Route, "routes"),
         (Trip, "trips"),
         (Stop, "stops"),
@@ -51,25 +40,8 @@ class GTFSFeedImporter:
         },
         Trip: {
             "source_id": "trip_id",
-            "calendar_id": "service_id",
             "route_id": "route_id",
-        },
-        Calendar: {
-            "source_id": "service_id",
-            "monday": "monday",
-            "tuesday": "tuesday",
-            "wednesday": "wednesday",
-            "thursday": "thursday",
-            "friday": "friday",
-            "saturday": "saturday",
-            "sunday": "sunday",
-            "start_date": "start_date",
-            "end_date": "end_date",
-        },
-        CalendarDate: {
-            "calendar_id": "service_id",
-            "date": "date",
-            "exception_type": "exception_type",
+            "direction_id": "direction_id",
         },
         Route: {
             "source_id": "route_id",
@@ -89,6 +61,7 @@ class GTFSFeedImporter:
             "arrival_time": "arrival_time",
             "departure_time": "departure_time",
             "stop_sequence": "stop_sequence",
+            "stop_headsign": "stop_headsign",
         },
         Fare: {
             "source_id": "fare_id",
@@ -141,6 +114,8 @@ class GTFSFeedImporter:
             for model, gtfs_attribute in self.MODELS_AND_GTFS_KIT_ATTRIBUTES:
                 self._import_model(feed, model, getattr(gtfs_feed, gtfs_attribute))
 
+            self._create_departures(gtfs_feed)
+
             # Update the feed's updated_at. We might want to do something else here.
             feed.save()
 
@@ -153,7 +128,10 @@ class GTFSFeedImporter:
 
     def _delete_existing_gtfs_objects(self, feed):
         for model, _ in self.MODELS_AND_GTFS_KIT_ATTRIBUTES:
-            self.logger.debug(f"Deleting existing {model._meta.verbose_name_plural}...")
+            self.logger.debug(
+                f"Deleting existing {model._meta.verbose_name_plural}"
+                f"{' and departures' if model == Trip else ''}..."
+            )
             model.objects.filter(feed=feed).delete()
 
     def _import_model(self, feed, model, gtfs_data):
@@ -187,14 +165,11 @@ class GTFSFeedImporter:
                 creation_attributes[model_field_name] = self._convert_value(
                     gtfs_value, model_field, gtfs_field
                 )
-            if model == CalendarDate and creation_attributes["calendar_id"] is None:
-                # We don't support calendar dates without a calendar at least for now
-                num_of_skipped += 1
-            else:
-                new_obj = model(feed_id=feed.id, **creation_attributes)
-                if issubclass(model, GTFSModelWithSourceID):
-                    new_obj.populate_api_id()
-                objs_to_create.append(new_obj)
+
+            new_obj = model(feed_id=feed.id, **creation_attributes)
+            if issubclass(model, GTFSModelWithSourceID):
+                new_obj.populate_api_id()
+            objs_to_create.append(new_obj)
 
             if (
                 num_of_processed % self.object_creation_batch_size == 0
@@ -216,6 +191,42 @@ class GTFSFeedImporter:
                 if num_of_processed >= num_of_rows and num_of_skipped:
                     self.logger.info(f"Skipped {num_of_skipped} {plural_name}")
 
+    def _create_departures(self, gtfs_feed):
+        self.logger.info("Creating departures...")
+
+        self.logger.debug("Computing trip activity...")
+        dates = gtfs_kit.calendar.get_dates(gtfs_feed)
+        trip_activities = gtfs_kit.compute_trip_activity(gtfs_feed, dates)
+
+        num_of_activities = len(trip_activities)
+        objs_to_create = []
+        total_num_of_created = 0
+
+        for index, trip_activity in trip_activities.iterrows():
+            num_of_processed = int(index) + 1
+            if (num_of_processed % self.object_creation_batch_size) == 0:
+                self.logger.debug(
+                    f"Processed {num_of_processed}/{num_of_activities} trips"
+                )
+
+            for date_str in trip_activity[trip_activity == 1].index:
+                trip = self.id_cache[Trip][trip_activity["trip_id"]]
+                trip_date = gtfs_kit.datestr_to_date(date_str)
+
+                departure = Departure(trip_id=trip, date=trip_date)
+                departure.populate_api_id()
+                objs_to_create.append(departure)
+
+                if len(objs_to_create) % self.object_creation_batch_size == 0:
+                    Departure.objects.bulk_create(objs_to_create)
+                    total_num_of_created += len(objs_to_create)
+                    objs_to_create = []
+
+        total_num_of_created += len(objs_to_create)
+        Departure.objects.bulk_create(objs_to_create)
+
+        self.logger.debug(f"Created {total_num_of_created} departures")
+
     def _convert_value(self, gtfs_value, model_field, gtfs_field):
         if isinstance(model_field, models.ForeignKey):
             value = self._get_related_obj_id(model_field.related_model, gtfs_value)
@@ -232,6 +243,10 @@ class GTFSFeedImporter:
             return self._convert_point(gtfs_value)
         elif isinstance(model_field, models.IntegerField):
             return self._convert_int(gtfs_value)
+        elif isinstance(model_field, models.CharField) or isinstance(
+            model_field, models.TextField
+        ):
+            return self._convert_str(gtfs_value)
         else:
             # no conversion needed
             return gtfs_value
@@ -249,16 +264,16 @@ class GTFSFeedImporter:
         return next(iter(agency_ids))
 
     @staticmethod
-    def _convert_date(gtfs_date_str):
-        return datetime.strptime(gtfs_date_str, "%Y%m%d").date()
+    def _convert_date(gtfs_value):
+        return datetime.strptime(gtfs_value, "%Y%m%d").date()
 
     @staticmethod
-    def _convert_time(gtfs_time_str):
+    def _convert_time(gtfs_time_value):
         # TODO THIS DOES NOT ACTUALLY WORK IN ALL SITUATIONS!
         # In GTFS it is possible for a time to go past midnight like 26:00:00.
         # It is probably not possible to support those with Django's TimeField which we
         # are using ATM. For now the times that go too far are just clipped.
-        hours, mins, secs = map(int, gtfs_time_str.split(":"))
+        hours, mins, secs = map(int, gtfs_time_value.split(":"))
         if hours > 23:
             hours = 23
             mins = 59
@@ -266,12 +281,20 @@ class GTFSFeedImporter:
         return time(hours, mins, secs)
 
     @staticmethod
-    def _convert_point(gtfs_point):
-        return Point(gtfs_point[1], gtfs_point[0])
+    def _convert_point(gtfs_value):
+        return Point(gtfs_value[1], gtfs_value[0])
 
     @staticmethod
-    def _convert_int(gtfs_int):
+    def _convert_int(gtfs_value):
         try:
-            return int(gtfs_int)
-        except ValueError:  # empty value Pandas nan
+            return int(gtfs_value or 0)
+        except ValueError:  # nan
             return None
+
+    @staticmethod
+    def _convert_str(gtfs_value):
+        try:
+            if isnan(gtfs_value):
+                return ""
+        except TypeError:
+            return gtfs_value or ""

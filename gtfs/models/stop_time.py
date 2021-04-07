@@ -16,6 +16,9 @@ class StopTime(GTFSModel):
         verbose_name=_("departure time"), null=True, blank=True
     )
     stop_sequence = models.PositiveIntegerField(verbose_name=_("stop sequence"))
+    stop_headsign = models.CharField(
+        verbose_name=_("stop headsign"), max_length=255, blank=True
+    )
 
     class Meta:
         verbose_name = _("stop times")
