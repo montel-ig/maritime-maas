@@ -22,6 +22,7 @@ class Agency(GTFSModelWithSourceID):
         verbose_name=_("email"),
         blank=True,
     )
+    logo_url = models.URLField(verbose_name=_("logo URL"), blank=True)
 
     class Meta(GTFSModelWithSourceID.Meta):
         verbose_name = _("agency")

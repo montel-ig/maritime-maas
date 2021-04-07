@@ -51,11 +51,15 @@ class GTFSFeedImporter:
             "name": "agency_name",
             "url": "agency_url",
             "timezone": "agency_timezone",
+            "logo_url": "agency_logo_url",
         },
         Trip: {
             "source_id": "trip_id",
             "route_id": "route_id",
             "direction_id": "direction_id",
+            "wheelchair_accessible": "wheelchair_accessible",
+            "bikes_allowed": "bikes_allowed",
+            "capacity_sales": "capacity_sales",
         },
         Route: {
             "source_id": "route_id",
@@ -63,11 +67,14 @@ class GTFSFeedImporter:
             "short_name": "route_short_name",
             "long_name": "route_long_name",
             "type": "route_type",
+            "sort_order": "route_sort_order",
         },
         Stop: {
             "source_id": "stop_id",
             "name": "stop_name",
+            "tts_name": "tts_stop_name",
             "point": ("stop_lat", "stop_lon"),
+            "wheelchair_boarding": "wheelchair_boarding",
         },
         StopTime: {
             "trip_id": "trip_id",
@@ -76,6 +83,7 @@ class GTFSFeedImporter:
             "departure_time": "departure_time",
             "stop_sequence": "stop_sequence",
             "stop_headsign": "stop_headsign",
+            "timepoint": "timepoint",
         },
         Fare: {
             "source_id": "fare_id",
@@ -139,7 +147,6 @@ class GTFSFeedImporter:
 
             for model, gtfs_attribute in self.MODELS_AND_GTFS_KIT_ATTRIBUTES:
                 self._import_model(feed, model, getattr(gtfs_feed, gtfs_attribute))
-
             self._create_departures(gtfs_feed)
 
             # Update the feed's updated_at. We might want to do something else here.
@@ -193,9 +200,12 @@ class GTFSFeedImporter:
                     else [getattr(gtfs_row, f, None) for f in gtfs_field]
                 )
                 model_field = model._meta.get_field(model_field_name)
-                creation_attributes[model_field_name] = self._convert_value(
-                    gtfs_value, model_field, gtfs_field
-                )
+                if (
+                    converted_value := self._convert_value(
+                        gtfs_value, model_field, gtfs_field
+                    )
+                ) is not None:
+                    creation_attributes[model_field_name] = converted_value
 
             new_obj = model(feed_id=feed.id, **creation_attributes)
             if issubclass(model, GTFSModelWithSourceID):
@@ -318,8 +328,10 @@ class GTFSFeedImporter:
     @staticmethod
     def _convert_int(gtfs_value):
         try:
-            return int(gtfs_value or 0)
-        except ValueError:  # nan
+            # if there are any empty values in the current column all of the column's
+            # values have been converted to floats, hence the round()
+            return round(gtfs_value)
+        except (ValueError, TypeError):  # nan, None
             return None
 
     @staticmethod
