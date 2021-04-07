@@ -14,6 +14,18 @@ class TimeStampedModel(models.Model):
         abstract = True
 
 
+class PriceModel(models.Model):
+    price = models.DecimalField(
+        verbose_name=_("price"), max_digits=10, decimal_places=2
+    )
+    currency_type = models.CharField(
+        max_length=3, help_text=_("ISO 4217 alphabetical currency code")
+    )
+
+    class Meta:
+        abstract = True
+
+
 class GTFSModel(models.Model):
     feed = models.ForeignKey("Feed", verbose_name=_("feed"), on_delete=models.CASCADE)
 
