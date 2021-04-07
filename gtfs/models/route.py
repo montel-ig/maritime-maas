@@ -43,6 +43,9 @@ class Route(GTFSModelWithSourceID):
         verbose_name=_("type"), choices=Type.choices
     )
     url = models.URLField(verbose_name=_("URL"), blank=True)
+    sort_order = models.PositiveSmallIntegerField(
+        verbose_name=_("sort order"), null=True, blank=True
+    )
 
     objects = RouteQueryset.as_manager()
 

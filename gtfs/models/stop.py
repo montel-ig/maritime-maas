@@ -14,10 +14,26 @@ class StopQueryset(models.QuerySet):
 
 
 class Stop(GTFSModelWithSourceID):
+    class WheelchairBoarding(models.IntegerChoices):
+        UNKNOWN = 0, _("Unknown")
+        POSSIBLE = 1, _("Possible")
+        NOT_POSSIBLE = 2, _("Not possible")
+
     name = models.CharField(verbose_name=_("name"), max_length=255, blank=True)
+    tts_name = models.CharField(
+        verbose_name=_("TTS name"),
+        max_length=255,
+        help_text=_("readable version of the name"),
+        blank=True,
+    )
     code = models.CharField(verbose_name=_("code"), max_length=255, blank=True)
     desc = models.TextField(verbose_name=_("description"), blank=True)
     point = models.PointField(verbose_name=_("point"))
+    wheelchair_boarding = models.PositiveSmallIntegerField(
+        verbose_name=_("wheelchair boarding"),
+        choices=WheelchairBoarding.choices,
+        default=WheelchairBoarding.UNKNOWN,
+    )
 
     objects = StopQueryset.as_manager()
 
