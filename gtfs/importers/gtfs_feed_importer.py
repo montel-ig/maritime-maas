@@ -71,16 +71,11 @@ class GTFSFeedImporter:
             "payment_method": "payment_method",
             "transfers": "transfers",
         },
-        FareRule: {
-            "fare_id": "fare_id",
-            "route_id": "route_id",
-        },
+        FareRule: {"fare_id": "fare_id", "route_id": "route_id"},
     }
 
     def __init__(
-        self,
-        object_creation_batch_size=2000,  # Stetson-Harrison method
-        logger=None,
+        self, object_creation_batch_size=2000, logger=None  # Stetson-Harrison method
     ):
         self.object_creation_batch_size = object_creation_batch_size
         self.logger = logger or logging.getLogger(__name__)
@@ -100,10 +95,13 @@ class GTFSFeedImporter:
         if not skip_validation:
             self.logger.debug("Validating data...")
             results = gtfs_kit.validate(gtfs_feed, as_df=False)
-            if results:
+            if "error" in [result[0] for result in results]:
                 self.logger.info("Validation errors:")
                 self.logger.info(results)
                 return
+            elif results:
+                self.logger.info("Validation warnings:")
+                self.logger.info(results)
 
         with transaction.atomic():
             # TODO just some temporary feed handling to get things rolling
