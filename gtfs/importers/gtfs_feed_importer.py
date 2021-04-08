@@ -9,7 +9,19 @@ from django.contrib.gis.db import models
 from django.contrib.gis.geos import Point
 from django.db import transaction
 
-from gtfs.models import Agency, Fare, FareRule, Feed, Route, Stop, StopTime, Trip
+from gtfs.importers.gtfs_feed_reader import GTFSFeedReader
+from gtfs.models import (
+    Agency,
+    Fare,
+    FareRiderCategory,
+    FareRule,
+    Feed,
+    RiderCategory,
+    Route,
+    Stop,
+    StopTime,
+    Trip,
+)
 from gtfs.models.base import GTFSModelWithSourceID
 from gtfs.models.departure import Departure
 
@@ -27,6 +39,8 @@ class GTFSFeedImporter:
         (StopTime, "stop_times"),
         (Fare, "fare_attributes"),
         (FareRule, "fare_rules"),
+        (RiderCategory, "rider_categories"),
+        (FareRiderCategory, "fare_rider_categories"),
     )
 
     # Mapping from GTFSModel field to GTFS field.
@@ -75,6 +89,17 @@ class GTFSFeedImporter:
             "fare_id": "fare_id",
             "route_id": "route_id",
         },
+        RiderCategory: {
+            "source_id": "rider_category_id",
+            "name": "rider_category_name",
+            "description": "rider_category_description",
+        },
+        FareRiderCategory: {
+            "fare_id": "fare_id",
+            "rider_category_id": "rider_category_id",
+            "price": "price",
+            "currency_type": "currency_type",
+        },
     }
 
     def __init__(
@@ -92,14 +117,15 @@ class GTFSFeedImporter:
     def run(self, url_or_filename, skip_validation=False):
         self.logger.info(f'Importing a GTFS feed from "{url_or_filename}"...')
         self.id_cache.clear()
+        feed_reader = GTFSFeedReader()
         start_time = timer()
 
         self.logger.info("Reading data...")
-        gtfs_feed = gtfs_kit.read_feed(url_or_filename, dist_units="km")
+        gtfs_feed = feed_reader.read_feed(url_or_filename)
 
         if not skip_validation:
             self.logger.debug("Validating data...")
-            results = gtfs_kit.validate(gtfs_feed, as_df=False)
+            results = feed_reader.validate(gtfs_feed)
             if results:
                 self.logger.info("Validation errors:")
                 self.logger.info(results)
@@ -147,7 +173,12 @@ class GTFSFeedImporter:
         objs_to_create = []
         num_of_skipped = 0
 
-        for num_of_processed, gtfs_row in enumerate(gtfs_data.itertuples(), 1):
+        # gtfs_kit returns DataFrames and extra dataset uses list
+        iterable_data = (
+            gtfs_data if isinstance(gtfs_data, list) else gtfs_data.itertuples()
+        )
+
+        for num_of_processed, gtfs_row in enumerate(iterable_data, 1):
             creation_attributes = {}
 
             # Populate object creation attributes using the mapping from model fields
