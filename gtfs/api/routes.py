@@ -25,7 +25,9 @@ class RouteSerializer(serializers.ModelSerializer):
 
 
 class RouteFilter(filters.FilterSet):
-    stop_id = filters.UUIDFilter(field_name="trips__stop_times__stop__api_id")
+    stop_id = filters.UUIDFilter(
+        field_name="trips__stop_times__stop__api_id", distinct=True
+    )
 
     class Meta:
         model: Route
