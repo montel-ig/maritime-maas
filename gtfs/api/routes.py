@@ -4,6 +4,7 @@ from rest_framework import serializers
 from gtfs.api.base import BaseGTFSViewSet, NestedDepartureQueryParamsSerializer
 from gtfs.api.stops import StopSerializer
 from gtfs.models import Agency, Route, Stop
+from gtfs.models import Fare, FareRiderCategory, Route, Stop
 
 
 class AgencySerializer(serializers.ModelSerializer):
@@ -12,15 +13,53 @@ class AgencySerializer(serializers.ModelSerializer):
         fields = ("name", "url", "logo_url")
 
 
+class FareRiderCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FareRiderCategory
+        fields = ("id", "name", "description", "price", "currency_type")
+
+    # TODO Need to change the id field
+    id = serializers.UUIDField(source="rider_category.api_id")
+    name = serializers.CharField(source="rider_category.name")
+    description = serializers.CharField(source="rider_category.description")
+
+
+class FareSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Fare
+        fields = ("id", "name", "description", "instructions", "customer_types")
+
+    id = serializers.UUIDField(source="api_id")
+    name = serializers.SerializerMethodField()
+    description = serializers.SerializerMethodField()
+    instructions = serializers.SerializerMethodField()
+    customer_types = FareRiderCategorySerializer(
+        source="fare_rider_categories", many=True
+    )
+
+    def get_name(self, obj):
+        # TODO Need to be imported (MAAS-74)
+        return "Name"
+
+    def get_description(self, obj):
+        # TODO Need to be imported (MAAS-74)
+        return "Description"
+
+    def get_instructions(self, obj):
+        # TODO Need to be imported (MAAS-74)
+        return "Instructions"
+
+
 class RouteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Route
-        fields = ("id", "name", "stops", "agency")
+        fields = ("id", "name", "stops", "agency", "ticket_types")
 
     id = serializers.UUIDField(source="api_id")
     name = serializers.CharField(source="short_name")
     stops = serializers.SerializerMethodField()
     agency = AgencySerializer(read_only=True)
+    ticket_types = serializers.SerializerMethodField()
 
     def get_stops(self, obj):
         stops = (
@@ -33,6 +72,16 @@ class RouteSerializer(serializers.ModelSerializer):
             many=True,
             context=dict(**self.context, route_id=obj.id),
         ).data
+
+    def get_ticket_types(self, obj):
+        ticket_types = (
+            Fare.objects.filter(fare_rules__route_id=obj.id)
+            .distinct()
+            .prefetch_related(
+                "fare_rider_categories", "fare_rider_categories__rider_category"
+            )
+        )
+        return FareSerializer(ticket_types, many=True, context=self.context).data
 
 
 class RouteFilter(filters.FilterSet):
