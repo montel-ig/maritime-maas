@@ -133,11 +133,12 @@ class GTFSFeedImporter:
 
         if not skip_validation:
             self.logger.debug("Validating data...")
-            results = feed_reader.validate(gtfs_feed)
-            if results:
-                self.logger.info("Validation errors:")
-                self.logger.info(results)
-                return
+            if results := feed_reader.validate(gtfs_feed):
+                if any(r[0] == "error" for r in results):
+                    self.logger.error(f"Validation errors and warnings: {results}")
+                    return
+                else:
+                    self.logger.debug(f"Validation warnings: {results}")
 
         with transaction.atomic():
             # TODO just some temporary feed handling to get things rolling
