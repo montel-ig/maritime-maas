@@ -18,7 +18,6 @@ from gtfs.models import (
     FareRule,
     Feed,
     FeedInfo,
-    GTFSModelWithSourceID,
     RiderCategory,
     Route,
     Stop,
@@ -221,7 +220,7 @@ class GTFSFeedImporter:
                     creation_attributes[model_field_name] = converted_value
 
             new_obj = model(feed_id=feed.id, **creation_attributes)
-            if issubclass(model, GTFSModelWithSourceID):
+            if hasattr(model, "populate_api_id"):
                 new_obj.populate_api_id()
             objs_to_create.append(new_obj)
 

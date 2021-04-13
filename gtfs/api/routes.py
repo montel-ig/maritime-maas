@@ -3,8 +3,7 @@ from rest_framework import serializers
 
 from gtfs.api.base import BaseGTFSViewSet, NestedDepartureQueryParamsSerializer
 from gtfs.api.stops import StopSerializer
-from gtfs.models import Agency, Route, Stop
-from gtfs.models import Fare, FareRiderCategory, Route, Stop
+from gtfs.models import Agency, Fare, FareRiderCategory, Route, Stop
 
 
 class AgencySerializer(serializers.ModelSerializer):
@@ -18,8 +17,7 @@ class FareRiderCategorySerializer(serializers.ModelSerializer):
         model = FareRiderCategory
         fields = ("id", "name", "description", "price", "currency_type")
 
-    # TODO Need to change the id field
-    id = serializers.UUIDField(source="rider_category.api_id")
+    id = serializers.UUIDField(source="api_id")
     name = serializers.CharField(source="rider_category.name")
     description = serializers.CharField(source="rider_category.description")
 

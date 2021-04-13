@@ -122,7 +122,6 @@ def test_rider_categories_with_prices(
         RiderCategory,
         feed=feed,
         source_id=seq("source_id of test rider category "),
-        api_id=api_id_generator,
         name=seq("name of test rider category "),
         description=seq("description of test rider category "),
         _quantity=3,
@@ -130,6 +129,7 @@ def test_rider_categories_with_prices(
     baker.make(
         FareRiderCategory,
         feed=feed,
+        api_id=api_id_generator,
         fare=fare,
         rider_category=iter(rider_categories),
         currency_type="EUR",
