@@ -19,6 +19,12 @@ class DepartureSerializer(serializers.ModelSerializer):
     departure_headsign = serializers.CharField(source="trip.headsign")
     stop_headsign = serializers.SerializerMethodField()
     stop_sequence = serializers.SerializerMethodField()
+    wheelchair_accessible = serializers.IntegerField(
+        source="trip.wheelchair_accessible"
+    )
+    bikes_allowed = serializers.IntegerField(source="trip.bikes_allowed")
+    capacity_sales = serializers.IntegerField(source="trip.capacity_sales")
+    stop_timepoint = serializers.SerializerMethodField()
     route_id = serializers.SlugRelatedField(
         source="trip.route", slug_field="api_id", read_only=True
     )
@@ -34,6 +40,10 @@ class DepartureSerializer(serializers.ModelSerializer):
             "departure_headsign",
             "stop_headsign",
             "stop_sequence",
+            "wheelchair_accessible",
+            "bikes_allowed",
+            "capacity_sales",
+            "stop_timepoint",
             "route_id",
         )
 
@@ -59,11 +69,21 @@ class DepartureSerializer(serializers.ModelSerializer):
     def get_stop_sequence(self, obj):
         return obj.trip.stops_stop_times[0].stop_sequence
 
+    def get_stop_timepoint(self, obj):
+        return obj.trip.stops_stop_times[0].timepoint
+
 
 class StopSerializer(serializers.ModelSerializer):
     class Meta:
         model = Stop
-        fields = ("id", "name", "coordinates", "departures")
+        fields = (
+            "id",
+            "name",
+            "coordinates",
+            "departures",
+            "tts_name",
+            "wheelchair_boarding",
+        )
 
     id = serializers.UUIDField(source="api_id")
     coordinates = serializers.SerializerMethodField()
@@ -108,7 +128,7 @@ class RadiusToLocationFilter(DistanceToPointFilter):
 
 
 class StopViewSet(BaseGTFSViewSet):
-    queryset = Stop.objects.all()
+    queryset = Stop.objects.order_by("id")
 
     serializer_class = StopSerializer
     distance_filter_field = "point"
