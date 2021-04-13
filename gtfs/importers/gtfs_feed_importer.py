@@ -12,18 +12,19 @@ from django.db import transaction
 from gtfs.importers.gtfs_feed_reader import GTFSFeedReader
 from gtfs.models import (
     Agency,
+    Departure,
     Fare,
     FareRiderCategory,
     FareRule,
     Feed,
+    FeedInfo,
+    GTFSModelWithSourceID,
     RiderCategory,
     Route,
     Stop,
     StopTime,
     Trip,
 )
-from gtfs.models.base import GTFSModelWithSourceID
-from gtfs.models.departure import Departure
 
 
 class GTFSFeedImporterError(Exception):
@@ -41,6 +42,7 @@ class GTFSFeedImporter:
         (FareRule, "fare_rules"),
         (RiderCategory, "rider_categories"),
         (FareRiderCategory, "fare_rider_categories"),
+        (FeedInfo, "feed_info"),
     )
 
     # Mapping from GTFSModel field to GTFS field.
@@ -107,6 +109,16 @@ class GTFSFeedImporter:
             "rider_category_id": "rider_category_id",
             "price": "price",
             "currency_type": "currency_type",
+        },
+        FeedInfo: {
+            "publisher_name": "feed_publisher_name",
+            "publisher_url": "feed_publisher_url",
+            "lang": "feed_lang",
+            "default_lang": "default_lang",
+            "start_date": "feed_start_date",
+            "end_date": "feed_end_date",
+            "version": "feed_version",
+            "contact_email": "feed_contact_email",
         },
     }
 
