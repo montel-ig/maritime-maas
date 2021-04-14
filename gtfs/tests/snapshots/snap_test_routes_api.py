@@ -6,6 +6,38 @@ from snapshottest import Snapshot
 
 snapshots = Snapshot()
 
+snapshots["test_rider_categories_with_prices 1"] = [
+    {
+        "customer_types": [
+            {
+                "currency_type": "EUR",
+                "description": "description of test rider category 1",
+                "id": "00000000-0000-0000-0000-000000000001",
+                "name": "name of test rider category 1",
+                "price": "1.00",
+            },
+            {
+                "currency_type": "EUR",
+                "description": "description of test rider category 2",
+                "id": "00000000-0000-0000-0000-000000000002",
+                "name": "name of test rider category 2",
+                "price": "2.00",
+            },
+            {
+                "currency_type": "EUR",
+                "description": "description of test rider category 3",
+                "id": "00000000-0000-0000-0000-000000000003",
+                "name": "name of test rider category 3",
+                "price": "3.00",
+            },
+        ],
+        "description": "Description",
+        "id": "00000000-0000-0000-0000-000000000000",
+        "instructions": "Instructions",
+        "name": "Name",
+    }
+]
+
 snapshots["test_routes 1"] = [
     {
         "agency": {
@@ -29,6 +61,7 @@ snapshots["test_routes 1"] = [
                 "wheelchair_boarding": 0,
             },
         ],
+        "ticket_types": [],
     }
 ]
 
