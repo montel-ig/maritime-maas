@@ -19,7 +19,7 @@ from gtfs.models import (
 @pytest.mark.django_db
 def test_gtfs_feed_importer():
     importer = GTFSFeedImporter()
-    importer.run("gtfs/tests/data/gtfs_test_feed.zip")
+    importer.run("gtfs/tests/data/gtfs_test_feed")
 
     assert Feed.objects.count() == 1
     feed = Feed.objects.first()

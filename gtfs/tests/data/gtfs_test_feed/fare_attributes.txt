@@ -1,0 +1,2 @@
+fare_id,price,currency_type,payment_method,transfers
+vallisaari_rengas_fare,5.50,EUR,1,2

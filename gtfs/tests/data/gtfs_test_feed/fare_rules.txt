@@ -1,0 +1,2 @@
+fare_id,route_id
+vallisaari_rengas_fare,vallisaari_rengas
