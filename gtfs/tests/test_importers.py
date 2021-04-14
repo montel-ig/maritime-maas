@@ -69,6 +69,9 @@ def test_gtfs_feed_importer():
     assert fare.currency_type == "EUR"
     assert fare.payment_method == Fare.PaymentMethod.BEFORE_BOARDING
     assert fare.transfers == Fare.Transfers.TWO_TRANSFERS
+    assert fare.name == "Matkalippu"
+    assert fare.description == "Lippu vallisaareen ja rengasreitille"
+    assert fare.instructions == "Esitä lippu, kun astut alukseen."
 
     assert fare.fare_rider_categories.count() == 3
     fare_rider_category = fare.fare_rider_categories.first()
