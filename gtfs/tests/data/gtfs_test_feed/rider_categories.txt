@@ -1,0 +1,4 @@
+rider_category_id,rider_category_description,rider_category_name
+pensioner,Eläkeläinen,Eläkeläinen
+default,Aikuinen,Aikuinen
+child,Lapsi,Lapsi

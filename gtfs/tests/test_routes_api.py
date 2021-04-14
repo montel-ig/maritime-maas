@@ -116,6 +116,9 @@ def test_rider_categories_with_prices(
         feed=feed,
         source_id=seq("source_id of test fare "),
         api_id=api_id_generator,
+        name="Name",
+        description="Description",
+        instructions="Instructions",
     )
     baker.make(FareRule, feed=feed, fare=fare, route=route)
     rider_categories = baker.make(

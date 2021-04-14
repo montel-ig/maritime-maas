@@ -1,0 +1,16 @@
+trip_id,arrival_time,departure_time,stop_id,stop_sequence,stop_headsign,timepoint
+kauppatori_vallisaari_1,08:00:00,08:00:00,kauppatori,1,,
+kauppatori_vallisaari_1,08:20:00,08:20:00,vallisaari_tulo,2,,0
+kauppatori_vallisaari_2,09:00:00,09:00:00,kauppatori,1,,
+kauppatori_vallisaari_2,09:20:00,09:20:00,vallisaari_tulo,2,0
+vallisaari_kauppatori_1,09:25:00,09:25:00,vallisaari_lahto,1,,
+vallisaari_kauppatori_1,09:45:00,09:45:00,kauppatori,2,,0
+vallisaari_rengas_1,12:00:00,12:00:00,vallisaari_lahto,1,Suomenlinna,
+vallisaari_rengas_1,12:10:00,12:10:00,suomenlinna,2,Lonna,0
+vallisaari_rengas_1,12:20:00,12:20:00,lonna,3,Vallisaari,0
+vallisaari_rengas_1,12:30:00,12:30:00,vallisaari_tulo,4,,0
+vallisaari_rengas_2,13:00:00,13:00:00,vallisaari_lahto,1,Suomenlinna,
+vallisaari_rengas_2,13:10:00,13:10:00,suomenlinna,2,Lonna,0
+vallisaari_rengas_2,13:20:00,13:20:00,lonna,3,Vallisaari,0
+vallisaari_rengas_2,13:30:00,13:30:00,vallisaari_tulo,4,,0
+

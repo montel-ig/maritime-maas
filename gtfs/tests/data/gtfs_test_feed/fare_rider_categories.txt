@@ -1,0 +1,4 @@
+fare_id,rider_category_id,price,currency_type
+vallisaari_rengas_fare,pensioner,4.50,EUR
+vallisaari_rengas_fare,default,5.50,EUR
+vallisaari_rengas_fare,child,3.50,EUR

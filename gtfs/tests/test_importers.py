@@ -19,7 +19,7 @@ from gtfs.models import (
 @pytest.mark.django_db
 def test_gtfs_feed_importer():
     importer = GTFSFeedImporter()
-    importer.run("gtfs/tests/data/gtfs_test_feed.zip")
+    importer.run("gtfs/tests/data/gtfs_test_feed")
 
     assert Feed.objects.count() == 1
     feed = Feed.objects.first()
@@ -69,6 +69,9 @@ def test_gtfs_feed_importer():
     assert fare.currency_type == "EUR"
     assert fare.payment_method == Fare.PaymentMethod.BEFORE_BOARDING
     assert fare.transfers == Fare.Transfers.TWO_TRANSFERS
+    assert fare.name == "Matkalippu"
+    assert fare.description == "Lippu vallisaareen ja rengasreitille"
+    assert fare.instructions == "Esitä lippu, kun astut alukseen."
 
     assert fare.fare_rider_categories.count() == 3
     fare_rider_category = fare.fare_rider_categories.first()

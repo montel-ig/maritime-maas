@@ -28,24 +28,9 @@ class FareSerializer(serializers.ModelSerializer):
         fields = ("id", "name", "description", "instructions", "customer_types")
 
     id = serializers.UUIDField(source="api_id")
-    name = serializers.SerializerMethodField()
-    description = serializers.SerializerMethodField()
-    instructions = serializers.SerializerMethodField()
     customer_types = FareRiderCategorySerializer(
         source="fare_rider_categories", many=True
     )
-
-    def get_name(self, obj):
-        # TODO Need to be imported (MAAS-74)
-        return "Name"
-
-    def get_description(self, obj):
-        # TODO Need to be imported (MAAS-74)
-        return "Description"
-
-    def get_instructions(self, obj):
-        # TODO Need to be imported (MAAS-74)
-        return "Instructions"
 
 
 class RouteSerializer(serializers.ModelSerializer):

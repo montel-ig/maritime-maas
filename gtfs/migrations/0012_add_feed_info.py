@@ -31,7 +31,7 @@ class Migration(migrations.Migration):
                 (
                     "lang",
                     models.CharField(
-                        help_text="Default language for the text in this dataset, used by the feed importer. IETF BCP 47 language code",
+                        help_text="Default language for the text in this dataset. Used by the feed importer. IETF BCP 47 language code",
                         max_length=16,
                         verbose_name="language",
                     ),
