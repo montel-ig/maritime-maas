@@ -4,13 +4,25 @@ from decimal import Decimal
 import pytest
 
 from gtfs.importers import GTFSFeedImporter
-from gtfs.models import Agency, Fare, RiderCategory, Stop, StopTime, Trip
+from gtfs.models import (
+    Agency,
+    Fare,
+    Feed,
+    FeedInfo,
+    RiderCategory,
+    Stop,
+    StopTime,
+    Trip,
+)
 
 
 @pytest.mark.django_db
 def test_gtfs_feed_importer():
     importer = GTFSFeedImporter()
     importer.run("gtfs/tests/data/gtfs_test_feed.zip")
+
+    assert Feed.objects.count() == 1
+    feed = Feed.objects.first()
 
     assert Agency.objects.count() == 1
     agency = Agency.objects.first()
@@ -68,3 +80,15 @@ def test_gtfs_feed_importer():
     assert rider_category.source_id == "pensioner"
     assert rider_category.name == "Eläkeläinen"
     assert rider_category.description == "Eläkeläinen"
+
+    assert FeedInfo.objects.count() == 1
+    feed_info = FeedInfo.objects.first()
+    assert feed_info.feed == feed
+    assert feed_info.publisher_name == "Lipunmyynti Oy"
+    assert feed_info.publisher_url == "https://lipunmyyn.ti"
+    assert feed_info.lang == "fi"
+    assert feed_info.default_lang == "en"
+    assert feed_info.start_date == datetime.date(2021, 1, 1)
+    assert feed_info.end_date == datetime.date(2021, 12, 31)
+    assert feed_info.version == "1"
+    assert feed_info.contact_email == "feed_contact@example.com"
