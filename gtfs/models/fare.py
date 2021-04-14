@@ -27,6 +27,11 @@ class Fare(GTFSModelWithSourceID, PriceModel):
     transfers = models.PositiveSmallIntegerField(
         verbose_name=_("transfers"), choices=Transfers.choices, null=True
     )
+    name = models.CharField(verbose_name=_("name"), max_length=255, blank=True)
+    description = models.CharField(
+        verbose_name=_("description"), max_length=255, blank=True
+    )
+    instructions = models.TextField(verbose_name=_("instructions"), blank=True)
 
     class Meta(GTFSModelWithSourceID.Meta):
         verbose_name = _("fare")

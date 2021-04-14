@@ -93,6 +93,9 @@ class GTFSFeedImporter:
             "currency_type": "currency_type",
             "payment_method": "payment_method",
             "transfers": "transfers",
+            "name": "fare_name",
+            "description": "fare_description",
+            "instructions": "fare_instructions",
         },
         FareRule: {
             "fare_id": "fare_id",
