@@ -11,6 +11,16 @@ class BookingQueryset(models.QuerySet):
     def for_maas_operator(self, maas_operator: MaasOperator):
         return self.filter(maas_operator=maas_operator)
 
+    def create_reservation(self, maas_operator, ticketing_system, *args, **kwargs):
+        # TODO call ticketing system
+        response = {"id": str(uuid4())}
+
+        return Booking.objects.create(
+            source_id=response["id"],
+            maas_operator=maas_operator,
+            ticketing_system=ticketing_system,
+        )
+
 
 class Booking(TimestampedModel):
     class Status(models.TextChoices):
@@ -47,3 +57,8 @@ class Booking(TimestampedModel):
 
     def __str__(self):
         return f"Booking {self.api_id} ({self.status})"
+
+    def confirm(self):
+        # TODO call ticketing system
+        self.status = Booking.Status.CONFIRMED
+        self.save()
