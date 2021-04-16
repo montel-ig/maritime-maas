@@ -2,8 +2,9 @@ import datetime
 from decimal import Decimal
 
 import pytest
+from django.utils.timezone import localdate
 
-from gtfs.importers import GTFSFeedImporter
+from gtfs.importers import GTFSFeedImporter, GTFSFeedUpdater
 from gtfs.models import (
     Agency,
     Fare,
@@ -23,6 +24,8 @@ def test_gtfs_feed_importer():
 
     assert Feed.objects.count() == 1
     feed = Feed.objects.first()
+    assert feed.name == "gtfs/tests/data/gtfs_test_feed"
+    assert feed.fingerprint == datetime.date.today().isoformat()
 
     assert Agency.objects.count() == 1
     agency = Agency.objects.first()
@@ -95,3 +98,14 @@ def test_gtfs_feed_importer():
     assert feed_info.end_date == datetime.date(2021, 12, 31)
     assert feed_info.version == "1"
     assert feed_info.contact_email == "feed_contact@example.com"
+
+
+@pytest.mark.django_db
+def test_feed_updater():
+    feed = Feed.objects.create(name="gtfs/tests/data/gtfs_test_feed")
+    importer = GTFSFeedUpdater()
+    importer.update_feeds()
+
+    feed.refresh_from_db()
+    assert feed.fingerprint == localdate().isoformat()
+    assert Agency.objects.count() == 1
