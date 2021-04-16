@@ -49,3 +49,17 @@ jobs:
           ENVIRONMENT_URL: https://${{ env.K8S_NAMESPACE }}.${{ env.BASE_DOMAIN }}
           K8S_SECRET_ALLOWED_HOSTS: "*"
           K8S_SECRET_DEBUG: 1
+
+      - name: Update GTFS feeds
+        uses: City-of-Helsinki/setup-cronjob-action@main
+        with:
+          name: gtfs-feed-update-cronjob
+          image_repository: ghcr.io/city-of-helsinki/${{ github.event.repository.name }}
+          image_tag: ${{ github.sha }}
+          kubeconfig_raw: ${{ env.KUBECONFIG_RAW}}
+          target_namespace: ${{ env.K8S_NAMESPACE }}
+          single_run: true
+          secret_name: "-secret"
+          command: "{/bin/sh}"
+          args: "{-c,cd /app && python manage.py update_gtfs_feeds}"
+          max_duration: 1770 # 29min 30s
