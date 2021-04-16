@@ -1,5 +1,11 @@
-from django.contrib import admin
+import logging
 
+from django.contrib import admin, messages
+from django.utils.translation import gettext_lazy as _
+from requests import RequestException
+
+from .importers import GTFSFeedUpdater
+from .importers.gtfs_feed_importer import GTFSFeedImporterError
 from .models import (
     Agency,
     Departure,
@@ -15,6 +21,8 @@ from .models import (
     Trip,
 )
 
+logger = logging.getLogger(__name__)
+
 
 class FeedInline(admin.TabularInline):
     model = Feed
@@ -29,6 +37,28 @@ class FeedInfoInline(admin.StackedInline):
 @admin.register(Feed)
 class FeedAdmin(admin.ModelAdmin):
     inlines = [FeedInfoInline]
+    actions = ("update_feed",)
+
+    def update_feed(self, request, queryset):
+        feed_updater = GTFSFeedUpdater()
+        success = True
+
+        for feed in queryset:
+            try:
+                feed_updater.update_single_feed(feed, force=True)
+            except (RequestException, GTFSFeedImporterError) as e:
+                logger.exception(f'Failed to update feed: "{feed.name}"')
+                self.message_user(
+                    request,
+                    _(f'Failed to update feed:"{feed.name}": {e}.'),
+                    messages.ERROR,
+                )
+                success = False
+
+        if success:
+            self.message_user(request, _("Selected feeds updated."), messages.SUCCESS)
+
+    update_feed.short_description = _("Update selected feeds")
 
 
 admin.site.register(Agency)
