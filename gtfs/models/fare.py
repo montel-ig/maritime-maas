@@ -32,6 +32,9 @@ class Fare(GTFSModelWithSourceID, PriceModel):
         verbose_name=_("description"), max_length=255, blank=True
     )
     instructions = models.TextField(verbose_name=_("instructions"), blank=True)
+    routes = models.ManyToManyField(
+        "Route", verbose_name=_("routes"), through="FareRule", blank=True
+    )
 
     class Meta(GTFSModelWithSourceID.Meta):
         verbose_name = _("fare")

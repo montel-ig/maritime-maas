@@ -3,7 +3,7 @@ from django.utils.translation import gettext_lazy as _
 
 from maas.models import MaasOperator
 
-from .base import GTFSModel, TimeStampedModel
+from .base import GTFSModel, TimestampedModel
 
 
 class FeedQueryset(models.QuerySet):
@@ -13,7 +13,7 @@ class FeedQueryset(models.QuerySet):
         )
 
 
-class Feed(TimeStampedModel):
+class Feed(TimestampedModel):
     name = models.CharField(verbose_name=_("name"), max_length=255)
     ticketing_system = models.ForeignKey(
         "maas.TicketingSystem",

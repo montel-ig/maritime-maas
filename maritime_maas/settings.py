@@ -98,6 +98,7 @@ INSTALLED_APPS = [
     "utils",
     "gtfs",
     "maas",
+    "bookings",
 ]
 
 MIDDLEWARE = [
