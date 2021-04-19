@@ -17,7 +17,7 @@ class FareRiderCategorySerializer(serializers.ModelSerializer):
         model = FareRiderCategory
         fields = ("id", "name", "description", "price", "currency_type")
 
-    id = serializers.UUIDField(source="api_id")
+    id = serializers.UUIDField(source="rider_category.api_id")
     name = serializers.CharField(source="rider_category.name")
     description = serializers.CharField(source="rider_category.description")
 
