@@ -64,11 +64,22 @@ class BookingSerializer(serializers.ModelSerializer):
         read_only_fields = ("id", "status")
 
     def validate_route_id(self, value):
-        self.context["route"] = get_object_by_api_id(Route.objects.all(), value)
+        self.context["route"] = get_object_by_api_id(
+            Route.objects.for_maas_operator(self.context["request"].user.maas_operator),
+            value,
+        )
         return self.context["route"]
 
     def validate_departure_ids(self, values):
-        departures = [get_object_by_api_id(Departure.objects.all(), d) for d in values]
+        departures = [
+            get_object_by_api_id(
+                Departure.objects.for_maas_operator(
+                    self.context["request"].user.maas_operator
+                ),
+                departure_id,
+            )
+            for departure_id in values
+        ]
 
         if "route" not in self.context:
             self.context["route"] = departures[0].trip.route
