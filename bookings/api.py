@@ -71,7 +71,7 @@ class BookingSerializer(serializers.ModelSerializer):
         departures = [get_object_by_api_id(Departure.objects.all(), d) for d in values]
 
         if "route" not in self.context:
-            self.context["route"] = departures[0].route
+            self.context["route"] = departures[0].trip.route
 
         if not all(d.trip.route == self.context["route"] for d in departures):
             raise ValidationError(
