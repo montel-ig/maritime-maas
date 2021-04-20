@@ -58,7 +58,7 @@ jobs:
           name: gtfs-feed-update-cronjob
           image_repository: ghcr.io/city-of-helsinki/${{ github.event.repository.name }}
           image_tag: ${{ github.sha }}
-          kubeconfig_raw: ${{ env.KUBECONFIG_RAW_STAGING }}
+          kubeconfig_raw: ${{ env.KUBECONFIG_RAW }}
           target_namespace: ${{ secrets.K8S_NAMESPACE_STAGING }}
           secret_name: "project-staging-maritime-maas-secret"
           schedule: "*/30 * * * *" # every 30 mins
