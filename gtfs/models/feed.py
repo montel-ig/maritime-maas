@@ -22,6 +22,14 @@ class Feed(TimestampedModel):
         blank=True,
         verbose_name=_("ticketing system"),
     )
+    fingerprint = models.CharField(
+        verbose_name=_("fingerprint"),
+        max_length=255,
+        blank=True,
+        help_text=_(
+            "This value will be used to determine if the feed should be updated."
+        ),
+    )
 
     objects = FeedQueryset.as_manager()
 

@@ -131,7 +131,7 @@ class GTFSFeedImporter:
     ):
         self.object_creation_batch_size = object_creation_batch_size
         self.logger = logger or logging.getLogger(__name__)
-
+        self.feed_reader = GTFSFeedReader()
         # IDs of all created objects that have a source ID are cached so that we can
         # use them to populate foreign key fields of later imported object types
         self.id_cache = defaultdict(dict)
@@ -139,18 +139,18 @@ class GTFSFeedImporter:
     def run(self, url_or_filename, skip_validation=False):
         self.logger.info(f'Importing a GTFS feed from "{url_or_filename}"...')
         self.id_cache.clear()
-        feed_reader = GTFSFeedReader()
         start_time = timer()
 
         self.logger.info("Reading data...")
-        gtfs_feed = feed_reader.read_feed(url_or_filename)
+        gtfs_feed = self.feed_reader.read_feed(url_or_filename)
 
         if not skip_validation:
             self.logger.debug("Validating data...")
-            if results := feed_reader.validate(gtfs_feed):
+            if results := self.feed_reader.validate(gtfs_feed):
                 if any(r[0] == "error" for r in results):
-                    self.logger.error(f"Validation errors and warnings: {results}")
-                    return
+                    message = f"Validation errors and warnings: {results}"
+                    self.logger.error(message)
+                    raise GTFSFeedImporterError(message)
                 else:
                     self.logger.debug(f"Validation warnings: {results}")
 
@@ -164,8 +164,8 @@ class GTFSFeedImporter:
                 self._import_model(feed, model, getattr(gtfs_feed, gtfs_attribute))
             self._create_departures(gtfs_feed)
 
-            # Update the feed's updated_at. We might want to do something else here.
-            feed.save()
+            feed.fingerprint = self.feed_reader.get_feed_fingerprint(feed)
+            feed.save()  # Update the feed's updated_at.
 
             self.logger.debug("Committing...")
 

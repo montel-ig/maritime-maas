@@ -57,3 +57,17 @@ jobs:
           K8S_SECRET_DATABASE_DB: ${{ secrets.K8S_SECRET_DATABASE_DB_STABLE }}
           K8S_SECRET_DATABASE_USERNAME: ${{ secrets.K8S_SECRET_DATABASE_USERNAME_STABLE }}
           K8S_SECRET_DATABASE_PASSWORD: ${{ secrets.K8S_SECRET_DATABASE_PASSWORD_STABLE }}
+
+      - name: Update GTFS feeds
+        uses: City-of-Helsinki/setup-cronjob-action@main
+        with:
+          name: gtfs-feed-update-cronjob
+          image_repository: ghcr.io/city-of-helsinki/${{ github.event.repository.name }}
+          image_tag: ${{ github.sha }}
+          kubeconfig_raw: ${{ env.KUBECONFIG_RAW_STABLE }}
+          target_namespace: ${{ secrets.K8S_NAMESPACE_STABLE }}
+          secret_name: "project-maritime-maas-secret"
+          schedule: "*/30 * * * *" # every 30 mins
+          command: "{/bin/sh}"
+          args: "{-c,cd /app && python manage.py update_gtfs_feeds}"
+          max_duration: 1770 # 29min 30s
