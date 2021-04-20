@@ -3,8 +3,17 @@ from uuid import uuid5
 from django.contrib.gis.db import models
 from django.utils.translation import gettext_lazy as _
 
+from maas.models import MaasOperator
+
 from .base import API_ID_NAMESPACE
+from .feed import Feed
 from .trip import Trip
+
+
+class DepartureQueryset(models.QuerySet):
+    def for_maas_operator(self, maas_operator: MaasOperator):
+        feeds = Feed.objects.for_maas_operator(maas_operator)
+        return self.filter(trip__feed__in=feeds)
 
 
 class Departure(models.Model):
@@ -15,6 +24,8 @@ class Departure(models.Model):
         on_delete=models.CASCADE,
     )
     date = models.DateField(verbose_name=_("date"))
+
+    objects = DepartureQueryset.as_manager()
 
     class Meta:
         verbose_name = _("departure")
