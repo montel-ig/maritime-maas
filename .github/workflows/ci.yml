@@ -61,6 +61,7 @@ jobs:
         run: pytest -ra -vv --doctest-modules --cov=.
         env:
           DATABASE_URL: postgis://maritime_maas:maritime_maas@localhost:5432/maritime_maas
+          MOCK_TICKETING_API: 1
 
       - name: Coverage
         run: codecov

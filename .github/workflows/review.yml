@@ -49,6 +49,7 @@ jobs:
           ENVIRONMENT_URL: https://${{ env.K8S_NAMESPACE }}.${{ env.BASE_DOMAIN }}
           K8S_SECRET_ALLOWED_HOSTS: "*"
           K8S_SECRET_DEBUG: 1
+          K8S_SECRET_MOCK_TICKETING_API: 1
 
       - name: Update GTFS feeds
         uses: City-of-Helsinki/setup-cronjob-action@main
