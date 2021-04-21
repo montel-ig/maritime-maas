@@ -321,7 +321,7 @@ class GTFSFeedImporter:
 
     @staticmethod
     def _convert_date(gtfs_value):
-        return datetime.strptime(gtfs_value, "%Y%m%d").date()
+        return datetime.strptime(gtfs_value, "%Y%m%d").date() if gtfs_value else None
 
     @staticmethod
     def _convert_time(gtfs_time_value):
