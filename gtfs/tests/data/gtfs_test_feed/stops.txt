@@ -1,0 +1,6 @@
+stop_id,stop_name,tts_stop_name,stop_desc,stop_lat,stop_lon,wheelchair_boarding
+kauppatori,Kauppatori - Lyypekinlaituri,Kauppatori,Tähän pysäkin kuvaus,60.166998796889565,24.9537888130286,1
+vallisaari_tulo,Vallisaari - Luotsipiha,Vallisaari,Tähän pysäkin kuvaus,60.141343078357636,25.007303171060478,0
+vallisaari_lahto,Vallisaari - Torpedolahti,Vallisaari,Tähän pysäkin kuvaus,60.13675362718967,25.009671689739587,0
+suomenlinna,Suomenlinna - Tykistölahti,Suomenlinna,Tähän pysäkin kuvaus,60.14502182484794,24.98761744080349,1
+lonna,Lonna,Lonna,Tähän pysäkin kuvaus,60.153752578085914,24.98902779847419,2

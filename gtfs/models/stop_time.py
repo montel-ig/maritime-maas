@@ -8,6 +8,9 @@ from .trip import Trip
 
 
 class StopTime(TranslatableModel, GTFSModel):
+    class Timepoint(models.IntegerChoices):
+        APPROXIMATE = 0, _("Times are considered approximate")
+        EXACT = 1, _("Times are considered exact")
     translations = TranslatedFields(
         stop_headsign=models.CharField(
             verbose_name=_("stop headsign"), max_length=255, blank=True
@@ -22,6 +25,11 @@ class StopTime(TranslatableModel, GTFSModel):
         verbose_name=_("departure time"), null=True, blank=True
     )
     stop_sequence = models.PositiveIntegerField(verbose_name=_("stop sequence"))
+    timepoint = models.PositiveSmallIntegerField(
+        verbose_name=_("timepoint"),
+        choices=Timepoint.choices,
+        default=Timepoint.EXACT,
+    )
 
     class Meta:
         verbose_name = _("stop times")
@@ -36,10 +44,10 @@ class StopTime(TranslatableModel, GTFSModel):
 
     def __str__(self):
         return (
-                f"{self.trip} | {self.stop_sequence} | {self.stop} | {self.arrival_time}"
-                + (
-                    f" | {self.departure_time}"
-                    if self.departure_time != self.arrival_time
-                    else ""
-                )
+            f"{self.trip} | {self.stop_sequence} | {self.stop} | {self.arrival_time}"
+            + (
+                f" | {self.departure_time}"
+                if self.departure_time != self.arrival_time
+                else ""
+            )
         )

@@ -12,18 +12,18 @@ from django.db import transaction
 from gtfs.importers.gtfs_feed_reader import GTFSFeedReader
 from gtfs.models import (
     Agency,
+    Departure,
     Fare,
     FareRiderCategory,
     FareRule,
     Feed,
+    FeedInfo,
     RiderCategory,
     Route,
     Stop,
     StopTime,
     Trip,
 )
-from gtfs.models.base import GTFSModelWithSourceID
-from gtfs.models.departure import Departure
 
 
 class GTFSFeedImporterError(Exception):
@@ -41,6 +41,7 @@ class GTFSFeedImporter:
         (FareRule, "fare_rules"),
         (RiderCategory, "rider_categories"),
         (FareRiderCategory, "fare_rider_categories"),
+        (FeedInfo, "feed_info"),
     )
 
     TRANSLATION_MAPPING = {
@@ -59,11 +60,15 @@ class GTFSFeedImporter:
             "name": "agency_name",
             "url": "agency_url",
             "timezone": "agency_timezone",
+            "logo_url": "agency_logo_url",
         },
         Trip: {
             "source_id": "trip_id",
             "route_id": "route_id",
             "direction_id": "direction_id",
+            "wheelchair_accessible": "wheelchair_accessible",
+            "bikes_allowed": "bikes_allowed",
+            "capacity_sales": "capacity_sales",
         },
         Route: {
             "source_id": "route_id",
@@ -71,11 +76,14 @@ class GTFSFeedImporter:
             "short_name": "route_short_name",
             "long_name": "route_long_name",
             "type": "route_type",
+            "sort_order": "route_sort_order",
         },
         Stop: {
             "source_id": "stop_id",
             "name": "stop_name",
+            "tts_name": "tts_stop_name",
             "point": ("stop_lat", "stop_lon"),
+            "wheelchair_boarding": "wheelchair_boarding",
         },
         StopTime: {
             "trip_id": "trip_id",
@@ -84,6 +92,7 @@ class GTFSFeedImporter:
             "departure_time": "departure_time",
             "stop_sequence": "stop_sequence",
             "stop_headsign": "stop_headsign",
+            "timepoint": "timepoint",
         },
         Fare: {
             "source_id": "fare_id",
@@ -92,6 +101,9 @@ class GTFSFeedImporter:
             "currency_type": "currency_type",
             "payment_method": "payment_method",
             "transfers": "transfers",
+            "name": "fare_name",
+            "description": "fare_description",
+            "instructions": "fare_instructions",
         },
         FareRule: {
             "fare_id": "fare_id",
@@ -108,6 +120,16 @@ class GTFSFeedImporter:
             "price": "price",
             "currency_type": "currency_type",
         },
+        FeedInfo: {
+            "publisher_name": "feed_publisher_name",
+            "publisher_url": "feed_publisher_url",
+            "lang": "feed_lang",
+            "default_lang": "default_lang",
+            "start_date": "feed_start_date",
+            "end_date": "feed_end_date",
+            "version": "feed_version",
+            "contact_email": "feed_contact_email",
+        },
     }
 
     def __init__(
@@ -117,7 +139,7 @@ class GTFSFeedImporter:
     ):
         self.object_creation_batch_size = object_creation_batch_size
         self.logger = logger or logging.getLogger(__name__)
-
+        self.feed_reader = GTFSFeedReader()
         # IDs of all created objects that have a source ID are cached so that we can
         # use them to populate foreign key fields of later imported object types
         self.id_cache = defaultdict(dict)
@@ -125,23 +147,23 @@ class GTFSFeedImporter:
     def run(self, url_or_filename, skip_validation=False):
         self.logger.info(f'Importing a GTFS feed from "{url_or_filename}"...')
         self.id_cache.clear()
-        feed_reader = GTFSFeedReader()
         start_time = timer()
 
         self.logger.info("Reading data...")
-        gtfs_feed = feed_reader.read_feed(url_or_filename)
+        gtfs_feed = self.feed_reader.read_feed(url_or_filename)
 
-        """  
         if not skip_validation:
             self.logger.debug("Validating data...")
-            results = feed_reader.validate(gtfs_feed)
-            if results:
-                self.logger.info("Validation errors:")
-                self.logger.info(results)
-                return
-        """
+            if results := self.feed_reader.validate(gtfs_feed):
+                if any(r[0] == "error" for r in results):
+                    message = f"Validation errors and warnings: {results}"
+                    self.logger.error(message)
+                    raise GTFSFeedImporterError(message)
+                else:
+                    self.logger.debug(f"Validation warnings: {results}")
+
         with transaction.atomic():
-        # TODO just some temporary feed handling to get things rolling
+            # TODO just some temporary feed handling to get things rolling
             feed, _ = Feed.objects.get_or_create(name=url_or_filename)
 
             self._delete_existing_gtfs_objects(feed)
@@ -151,6 +173,8 @@ class GTFSFeedImporter:
 
             self._create_departures(gtfs_feed)
 
+            feed.fingerprint = self.feed_reader.get_feed_fingerprint(feed)
+            feed.save()  # Update the feed's updated_at.
             translation_list = self._form_translation_list(getattr(gtfs_feed, 'translations'))
 
             for model, gtfs_attribute in self.MODELS_AND_GTFS_KIT_ATTRIBUTES:
@@ -161,10 +185,10 @@ class GTFSFeedImporter:
 
             self.logger.debug("Committing...")
 
-            end_time = timer()
-            self.logger.info(
-                f'Successfully imported a GTFS feed from "{url_or_filename}" in {end_time - start_time:.2f} secs!'
-            )
+        end_time = timer()
+        self.logger.info(
+            f'Successfully imported a GTFS feed from "{url_or_filename}" in {end_time - start_time:.2f} secs!'
+        )
 
     def _delete_existing_gtfs_objects(self, feed):
         for model, _ in self.MODELS_AND_GTFS_KIT_ATTRIBUTES:
@@ -184,6 +208,11 @@ class GTFSFeedImporter:
             self.logger.info(f"No {plural_name}")
             return
 
+        try:
+            translation_model = model.translations.rel.related_model
+        except:
+            translation_model = None
+
         objs_to_create = []
         manually_created = []
         num_of_skipped = 0
@@ -196,10 +225,7 @@ class GTFSFeedImporter:
         for num_of_processed, gtfs_row in enumerate(iterable_data, 1):
             creation_attributes = {}
             translation_attributes = {}
-            try:
-                translation_model = model.translations.rel.related_model
-            except:
-                translation_model = None
+
 
             # Populate object creation attributes using the mapping from model fields
             # to GTFS fields. How the values are converted between the two is
@@ -225,12 +251,11 @@ class GTFSFeedImporter:
                     )
 
             new_obj = model(feed_id=feed.id, **creation_attributes)
-
-            if issubclass(model, GTFSModelWithSourceID):
+            if hasattr(model, "populate_api_id"):
                 new_obj.populate_api_id()
 
             if translation_model is not None:
-                # TODO add here a way to use agency language
+                # TODO add here a way to use feed language
                 new_obj.set_current_language('fi')
                 for key in translation_attributes:
                     setattr(new_obj, key, translation_attributes[key])
@@ -373,7 +398,7 @@ class GTFSFeedImporter:
 
     @staticmethod
     def _convert_date(gtfs_value):
-        return datetime.strptime(gtfs_value, "%Y%m%d").date()
+        return datetime.strptime(gtfs_value, "%Y%m%d").date() if gtfs_value else None
 
     @staticmethod
     def _convert_time(gtfs_time_value):
@@ -395,8 +420,10 @@ class GTFSFeedImporter:
     @staticmethod
     def _convert_int(gtfs_value):
         try:
-            return int(gtfs_value or 0)
-        except ValueError:  # nan
+            # if there are any empty values in the current column all of the column's
+            # values have been converted to floats, hence the round()
+            return round(gtfs_value)
+        except (ValueError, TypeError):  # nan, None
             return None
 
     @staticmethod

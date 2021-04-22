@@ -194,7 +194,9 @@ class Migration(migrations.Migration):
                 (
                     "currency_type",
                     models.CharField(
-                        help_text="ISO 4217 alphabetical currency code", max_length=3
+                        help_text="ISO 4217 alphabetical currency code",
+                        max_length=3,
+                        verbose_name="currency type",
                     ),
                 ),
                 (

@@ -46,6 +46,9 @@ class Route(TranslatableModel, GTFSModelWithSourceID):
     type = models.PositiveSmallIntegerField(
         verbose_name=_("type"), choices=Type.choices
     )
+    sort_order = models.PositiveSmallIntegerField(
+        verbose_name=_("sort order"), null=True, blank=True
+    )
 
     objects = RouteQueryset.as_manager()
 

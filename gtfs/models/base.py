@@ -7,7 +7,7 @@ from parler.models import TranslatableModel
 API_ID_NAMESPACE = UUID("4d5d9db9-a18e-4e83-aeb9-369e32a966fd")
 
 
-class TimeStampedModel(models.Model):
+class TimestampedModel(models.Model):
     created_at = models.DateTimeField(verbose_name=_("created at"), auto_now_add=True)
     updated_at = models.DateTimeField(verbose_name=_("updated at"), auto_now=True)
 
@@ -20,7 +20,9 @@ class PriceModel(models.Model):
         verbose_name=_("price"), max_digits=10, decimal_places=2
     )
     currency_type = models.CharField(
-        max_length=3, help_text=_("ISO 4217 alphabetical currency code")
+        verbose_name=_("currency type"),
+        max_length=3,
+        help_text=_("ISO 4217 alphabetical currency code"),
     )
 
     class Meta:

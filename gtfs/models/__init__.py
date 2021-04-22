@@ -1,9 +1,10 @@
 from .agency import Agency
+from .base import GTFSModel, GTFSModelWithSourceID
 from .departure import Departure
 from .fare import Fare
 from .fare_rider_category import FareRiderCategory
 from .fare_rule import FareRule
-from .feed import Feed
+from .feed import Feed, FeedInfo
 from .rider_category import RiderCategory
 from .route import Route
 from .stop import Stop
@@ -17,6 +18,9 @@ __all__ = [
     "FareRiderCategory",
     "FareRule",
     "Feed",
+    "FeedInfo",
+    "GTFSModel",
+    "GTFSModelWithSourceID",
     "RiderCategory",
     "Route",
     "Stop",

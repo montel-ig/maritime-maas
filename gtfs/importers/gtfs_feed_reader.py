@@ -1,4 +1,5 @@
 import csv
+import hashlib
 import shutil
 import tempfile
 from collections import namedtuple
@@ -7,7 +8,11 @@ from typing import List, Union
 
 import gtfs_kit
 import requests
+from django.utils.timezone import localdate
+from requests import RequestException
 from rest_framework import serializers
+
+from gtfs.models import Feed
 
 
 class RiderCategorySerializer(serializers.Serializer):
@@ -42,7 +47,7 @@ class GTFSFeedReader:
     def read_feed(self, url_or_filename):
         feed = gtfs_kit.read_feed(url_or_filename, dist_units="km")
 
-        extra_data = self.read_feed_extra(url_or_filename)
+        extra_data = self._read_feed_extra(url_or_filename)
         for key, value in extra_data.items():
             setattr(feed, key, value)
 
@@ -62,7 +67,7 @@ class GTFSFeedReader:
 
         return problems
 
-    def read_feed_extra(self, path_or_url: Union[Path, str]):
+    def _read_feed_extra(self, path_or_url: Union[Path, str]):
         """Read GTFS extra data
 
         This helper will read defined extra data from files which are ignored
@@ -94,7 +99,7 @@ class GTFSFeedReader:
             zipped = False
             src_path = path
 
-        feed_extra_dict = {}
+        feed_extra_dict = {key: None for key in self.EXTRA_FILES}
         for p in src_path.iterdir():
             dataset_file = p.stem
             # Skip empty files, irrelevant files, and files with no data
@@ -124,3 +129,33 @@ class GTFSFeedReader:
         feed = self._read_feed_extra_from_path(f.name)
         Path(f.name).unlink()
         return feed
+
+    def get_feed_fingerprint(self, feed: Feed) -> str:
+        """Return a fingerprint for the feed.
+
+        Fingerprint can be used to check if the feed has changed and needs to
+        be updated.
+
+        Logic will return the first item on the following list:
+        - HTTP last-modified header
+        - sha1 hash of the zip file
+        - date of last import (fallback to import once per day)
+        """
+        fingerprint = None
+
+        try:
+            response = requests.head(feed.name)
+            response.raise_for_status()
+            if timestamp := response.headers.get("last-modified"):
+                fingerprint = timestamp
+
+            if not fingerprint:
+                response = requests.get(feed.name)
+                response.raise_for_status()
+                sha1 = hashlib.sha1()
+                sha1.update(response.content)
+                fingerprint = sha1.hexdigest()
+        except RequestException:
+            fingerprint = localdate().isoformat()
+
+        return fingerprint[:255]

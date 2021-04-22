@@ -1,0 +1,2 @@
+agency_id,agency_name,agency_url,agency_timezone,agency_lang,agency_phone,agency_email,agency_logo_url
+maasline,MaaS Line Oy,https://maas.line,Europe/Helsinki,fi,+358123456789,maasline@example.com,https://cdn.pixabay.com/photo/2013/07/13/10/44/boat-157680_960_720.png

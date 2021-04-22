@@ -17,6 +17,13 @@ from .base import GTFSModelWithSourceID
 class RiderCategory(GTFSModelWithSourceID):
     name = models.CharField(verbose_name=_("name"), max_length=255)
     description = models.CharField(verbose_name=_("description"), max_length=255)
+    fares = models.ManyToManyField(
+        "gtfs.Fare",
+        verbose_name=_("fares"),
+        related_name="rider_categories",
+        through="gtfs.FareRiderCategory",
+        blank=True,
+    )
 
     class Meta(GTFSModelWithSourceID.Meta):
         verbose_name = _("rider category")

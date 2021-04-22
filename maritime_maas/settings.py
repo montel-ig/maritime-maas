@@ -4,7 +4,6 @@ import subprocess
 import environ
 import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
-from django.utils.translation import gettext_lazy as _
 
 checkout_dir = environ.Path(__file__) - 2
 assert os.path.exists(checkout_dir("manage.py"))
@@ -113,6 +112,7 @@ INSTALLED_APPS = [
     "utils",
     "gtfs",
     "maas",
+    "bookings",
 ]
 
 MIDDLEWARE = [
@@ -150,6 +150,7 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.BasicAuthentication",
         "rest_framework.authentication.SessionAuthentication",
     ],
+    "TEST_REQUEST_DEFAULT_FORMAT": "json",
 }
 
 CORS_ORIGIN_WHITELIST = env.list("CORS_ORIGIN_WHITELIST")

@@ -25,6 +25,7 @@ class Agency(TranslatableModel, GTFSModelWithSourceID):
         max_length=16,
         help_text=_("IETF BCP 47 language code"),
     )
+    logo_url = models.URLField(verbose_name=_("logo URL"), blank=True)
 
     class Meta(GTFSModelWithSourceID.Meta):
         verbose_name = _("agency")
