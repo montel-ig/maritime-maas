@@ -11,6 +11,7 @@ from gtfs.models import (
     Feed,
     FeedInfo,
     RiderCategory,
+    Shape,
     Stop,
     StopTime,
     Trip,
@@ -98,6 +99,9 @@ def test_gtfs_feed_importer():
     assert feed_info.end_date == datetime.date(2021, 12, 31)
     assert feed_info.version == "1"
     assert feed_info.contact_email == "feed_contact@example.com"
+
+    assert Shape.objects.count() == 3
+    assert len(trip.shape.geometry) == 9
 
 
 @pytest.mark.django_db
