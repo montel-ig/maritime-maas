@@ -1,6 +1,6 @@
 from django.contrib.gis.db import models
 from django.utils.translation import gettext_lazy as _
-from parler.models import TranslatedFields, TranslatableModel
+from parler.models import TranslatableModel, TranslatedFields
 
 from gtfs.models.base import GTFSModelWithSourceID
 
@@ -14,7 +14,7 @@ class Agency(TranslatableModel, GTFSModelWithSourceID):
         email=models.EmailField(
             verbose_name=_("email"),
             blank=True,
-        )
+        ),
     )
     timezone = models.CharField(
         verbose_name=_("timezone"), max_length=64, help_text=_("tz database time zone")

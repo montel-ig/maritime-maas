@@ -1,6 +1,6 @@
 from django.contrib.gis.db import models
 from django.utils.translation import gettext_lazy as _
-from parler.models import TranslatedFields, TranslatableModel
+from parler.models import TranslatableModel, TranslatedFields
 
 from .base import GTFSModel
 from .stop import Stop
@@ -11,6 +11,7 @@ class StopTime(TranslatableModel, GTFSModel):
     class Timepoint(models.IntegerChoices):
         APPROXIMATE = 0, _("Times are considered approximate")
         EXACT = 1, _("Times are considered exact")
+
     translations = TranslatedFields(
         stop_headsign=models.CharField(
             verbose_name=_("stop headsign"), max_length=255, blank=True

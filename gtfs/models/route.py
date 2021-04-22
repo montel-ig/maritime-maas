@@ -1,7 +1,8 @@
 from django.contrib.gis.db import models
 from django.utils.translation import gettext_lazy as _
-from parler.models import TranslatedFields, TranslatableModel
 from parler.managers import TranslatableQuerySet
+from parler.models import TranslatableModel, TranslatedFields
+
 from maas.models import MaasOperator
 
 from .agency import Agency
@@ -33,7 +34,7 @@ class Route(TranslatableModel, GTFSModelWithSourceID):
             verbose_name=_("long name"), max_length=255, blank=True
         ),
         desc=models.TextField(verbose_name=_("description"), blank=True),
-        url=models.URLField(verbose_name=_("URL"), blank=True)
+        url=models.URLField(verbose_name=_("URL"), blank=True),
     )
     agency = models.ForeignKey(
         Agency,

@@ -1,11 +1,9 @@
 import logging
 
-from django.contrib import messages
+from django.contrib import admin, messages
 from django.utils.translation import gettext_lazy as _
-from requests import RequestException
-from django.contrib import admin
 from parler.admin import TranslatableAdmin
-
+from requests import RequestException
 
 from .importers import GTFSFeedUpdater
 from .importers.gtfs_feed_importer import GTFSFeedImporterError
@@ -74,8 +72,3 @@ admin.site.register(Route, TranslatableAdmin)
 admin.site.register(Stop, TranslatableAdmin)
 admin.site.register(StopTime, TranslatableAdmin)
 admin.site.register(Trip, TranslatableAdmin)
-
-
-
-
-
