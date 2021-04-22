@@ -36,7 +36,7 @@ class FareSerializer(serializers.ModelSerializer):
 class RouteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Route
-        fields = ("id", "name", "stops", "agency", "ticket_types")
+        fields = ("id", "name", "stops", "agency", "ticket_types", "capacity_sales")
 
     id = serializers.UUIDField(source="api_id")
     name = serializers.CharField(source="short_name")

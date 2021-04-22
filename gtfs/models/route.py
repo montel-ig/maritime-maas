@@ -27,6 +27,11 @@ class Route(GTFSModelWithSourceID):
         TROLLEYBUS = 11, _("Trolleybus")
         MONORAIL = 12, _("Monorail")
 
+    class CapacitySales(models.IntegerChoices):
+        DISABLED = 0, _("Disabled")
+        ENABLED = 1, _("Enabled")
+        REQUIRED = 2, _("Required")
+
     agency = models.ForeignKey(
         Agency,
         verbose_name=_("agency"),
@@ -45,6 +50,11 @@ class Route(GTFSModelWithSourceID):
     url = models.URLField(verbose_name=_("URL"), blank=True)
     sort_order = models.PositiveSmallIntegerField(
         verbose_name=_("sort order"), null=True, blank=True
+    )
+    capacity_sales = models.PositiveSmallIntegerField(
+        verbose_name=_("capacity sales"),
+        choices=CapacitySales.choices,
+        default=CapacitySales.DISABLED,
     )
 
     objects = RouteQueryset.as_manager()
