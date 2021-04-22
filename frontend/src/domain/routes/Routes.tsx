@@ -1,17 +1,12 @@
 import React, { useState, Fragment } from 'react';
+import { Marker, Popup, GeoJSON, Polyline } from 'react-leaflet';
 import { LatLngExpression } from 'leaflet';
-import { Marker, Popup, Polyline } from 'react-leaflet';
 
 import { useRoutes } from '../hooks/api-hooks';
 import Map from '../../common/map/Map';
 import { Stop } from '../stops/Stops';
 import styles from './routes.module.css';
-
-type Route = {
-  id: number;
-  name: string;
-  stops: Stop[];
-};
+import { Route, Shape } from './types';
 
 const Routes = () => {
   const [params, setParams] = useState<string>('');
@@ -31,6 +26,20 @@ const Routes = () => {
     return stops.map((stop: Stop) => {
       return [stop.coordinates.latitude, stop.coordinates.longitude];
     });
+  };
+
+  const getColorForUUID = (uuid: string): string => {
+    return (
+      '#' +
+      (
+        uuid
+          .split('')
+          .map((s) => s.charCodeAt(0))
+          .reduce((a, b) => a * 777 + b, 0) % 0xffffff
+      )
+        .toString(16)
+        .padStart(6, '0')
+    );
   };
 
   return (
@@ -58,7 +67,22 @@ const Routes = () => {
                 </Popup>
               </Marker>
             ))}
-            <Polyline positions={drawLine(route?.stops)} />
+            {route?.shapes.length ? (
+              route.shapes.map((shape: Shape) => (
+                <GeoJSON
+                  key={shape.id}
+                  data={shape.geometry}
+                  pathOptions={{
+                    color: getColorForUUID(shape.id),
+                  }}
+                />
+              ))
+            ) : (
+              <Polyline
+                positions={drawLine(route?.stops)}
+                pathOptions={{ color: 'black' }}
+              />
+            )}
           </Fragment>
         ))}
       </Map>
