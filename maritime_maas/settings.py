@@ -80,8 +80,8 @@ WSGI_APPLICATION = "maritime_maas.wsgi.application"
 try:
     REVISION = (
         subprocess.check_output(["git", "rev-parse", "--short", "HEAD"])
-            .strip()
-            .decode("utf-8")
+        .strip()
+        .decode("utf-8")
     )
 except Exception:
     REVISION = "n/a"

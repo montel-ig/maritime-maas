@@ -2,7 +2,6 @@ from uuid import UUID, uuid5
 
 from django.contrib.gis.db import models
 from django.utils.translation import gettext_lazy as _
-from parler.models import TranslatableModel
 
 API_ID_NAMESPACE = UUID("4d5d9db9-a18e-4e83-aeb9-369e32a966fd")
 

@@ -24,13 +24,14 @@ class Stop(TranslatableModel, GTFSModelWithSourceID):
     translations = TranslatedFields(
         name=models.CharField(verbose_name=_("name"), max_length=255, blank=True),
         desc=models.TextField(verbose_name=_("description"), blank=True),
+        tts_name = models.CharField(
+            verbose_name=_("TTS name"),
+            max_length=255,
+            help_text=_("readable version of the name"),
+            blank=True,
+        )
     )
-    tts_name = models.CharField(
-        verbose_name=_("TTS name"),
-        max_length=255,
-        help_text=_("readable version of the name"),
-        blank=True,
-    )
+
     code = models.CharField(verbose_name=_("code"), max_length=255, blank=True)
     point = models.PointField(verbose_name=_("point"))
     wheelchair_boarding = models.PositiveSmallIntegerField(

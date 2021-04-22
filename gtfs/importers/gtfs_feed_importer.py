@@ -55,6 +55,16 @@ class GTFSFeedImporter:
     # Mapping from GTFSModel field to GTFS field.
     # GTFS field can contain multiple values.
     FIELD_MAPPING = {
+        FeedInfo: {
+            "publisher_name": "feed_publisher_name",
+            "publisher_url": "feed_publisher_url",
+            "lang": "feed_lang",
+            "default_lang": "default_lang",
+            "start_date": "feed_start_date",
+            "end_date": "feed_end_date",
+            "version": "feed_version",
+            "contact_email": "feed_contact_email",
+        },
         Agency: {
             "source_id": "agency_id",
             "name": "agency_name",
@@ -120,16 +130,6 @@ class GTFSFeedImporter:
             "price": "price",
             "currency_type": "currency_type",
         },
-        FeedInfo: {
-            "publisher_name": "feed_publisher_name",
-            "publisher_url": "feed_publisher_url",
-            "lang": "feed_lang",
-            "default_lang": "default_lang",
-            "start_date": "feed_start_date",
-            "end_date": "feed_end_date",
-            "version": "feed_version",
-            "contact_email": "feed_contact_email",
-        },
     }
 
     def __init__(
@@ -143,6 +143,9 @@ class GTFSFeedImporter:
         # IDs of all created objects that have a source ID are cached so that we can
         # use them to populate foreign key fields of later imported object types
         self.id_cache = defaultdict(dict)
+
+        # Save feed_lang, when looping through models we need access to this value
+        self.feed_lang = ""
 
     def run(self, url_or_filename, skip_validation=False):
         self.logger.info(f'Importing a GTFS feed from "{url_or_filename}"...')
@@ -226,7 +229,6 @@ class GTFSFeedImporter:
             creation_attributes = {}
             translation_attributes = {}
 
-
             # Populate object creation attributes using the mapping from model fields
             # to GTFS fields. How the values are converted between the two is
             # determined by the model field's type.
@@ -246,17 +248,22 @@ class GTFSFeedImporter:
                     )
                 else:
                     model_field = model._meta.get_field(model_field_name)
-                    creation_attributes[model_field_name] = self._convert_value(
-                        gtfs_value, model_field, gtfs_field
-                    )
+                    if (
+                            converted_value := self._convert_value(
+                                gtfs_value, model_field, gtfs_field
+                            )
+                    ) is not None:
+                        creation_attributes[model_field_name] = converted_value
 
             new_obj = model(feed_id=feed.id, **creation_attributes)
             if hasattr(model, "populate_api_id"):
                 new_obj.populate_api_id()
 
+            if plural_name == "feed info":
+                self.feed_lang = creation_attributes.get('lang')
+
             if translation_model is not None:
-                # TODO add here a way to use feed language
-                new_obj.set_current_language('fi')
+                new_obj.set_current_language(self.feed_lang)
                 for key in translation_attributes:
                     setattr(new_obj, key, translation_attributes[key])
                 new_obj.save()
