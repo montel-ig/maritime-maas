@@ -7,3 +7,4 @@ gtfs_kit
 django-filter
 djangorestframework-gis
 django-cors-headers
+django-parler

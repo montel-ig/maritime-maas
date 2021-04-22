@@ -1,12 +1,18 @@
 from django.contrib.gis.db import models
 from django.utils.translation import gettext_lazy as _
+from parler.models import TranslatedFields, TranslatableModel
 
 from .base import GTFSModel
 from .stop import Stop
 from .trip import Trip
 
 
-class StopTime(GTFSModel):
+class StopTime(TranslatableModel, GTFSModel):
+    translations = TranslatedFields(
+        stop_headsign=models.CharField(
+            verbose_name=_("stop headsign"), max_length=255, blank=True
+        )
+    )
     trip = models.ForeignKey(Trip, verbose_name=_("trip"), on_delete=models.CASCADE)
     stop = models.ForeignKey(Stop, verbose_name=_("stop"), on_delete=models.CASCADE)
     arrival_time = models.TimeField(
@@ -16,9 +22,6 @@ class StopTime(GTFSModel):
         verbose_name=_("departure time"), null=True, blank=True
     )
     stop_sequence = models.PositiveIntegerField(verbose_name=_("stop sequence"))
-    stop_headsign = models.CharField(
-        verbose_name=_("stop headsign"), max_length=255, blank=True
-    )
 
     class Meta:
         verbose_name = _("stop times")
@@ -33,10 +36,10 @@ class StopTime(GTFSModel):
 
     def __str__(self):
         return (
-            f"{self.trip} | {self.stop_sequence} | {self.stop} | {self.arrival_time}"
-            + (
-                f" | {self.departure_time}"
-                if self.departure_time != self.arrival_time
-                else ""
-            )
+                f"{self.trip} | {self.stop_sequence} | {self.stop} | {self.arrival_time}"
+                + (
+                    f" | {self.departure_time}"
+                    if self.departure_time != self.arrival_time
+                    else ""
+                )
         )

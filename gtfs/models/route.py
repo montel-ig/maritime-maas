@@ -1,6 +1,7 @@
 from django.contrib.gis.db import models
 from django.utils.translation import gettext_lazy as _
-
+from parler.models import TranslatedFields, TranslatableModel
+from parler.managers import TranslatableQuerySet
 from maas.models import MaasOperator
 
 from .agency import Agency
@@ -8,13 +9,13 @@ from .base import GTFSModelWithSourceID
 from .feed import Feed
 
 
-class RouteQueryset(models.QuerySet):
+class RouteQueryset(TranslatableQuerySet):
     def for_maas_operator(self, maas_operator: MaasOperator):
         feeds = Feed.objects.for_maas_operator(maas_operator)
         return self.filter(feed__in=feeds)
 
 
-class Route(GTFSModelWithSourceID):
+class Route(TranslatableModel, GTFSModelWithSourceID):
     class Type(models.IntegerChoices):
         TRAM = 0, _("Tram")
         SUBWAY = 1, _("Subway")
@@ -27,6 +28,13 @@ class Route(GTFSModelWithSourceID):
         TROLLEYBUS = 11, _("Trolleybus")
         MONORAIL = 12, _("Monorail")
 
+    translations = TranslatedFields(
+        long_name=models.CharField(
+            verbose_name=_("long name"), max_length=255, blank=True
+        ),
+        desc=models.TextField(verbose_name=_("description"), blank=True),
+        url=models.URLField(verbose_name=_("URL"), blank=True)
+    )
     agency = models.ForeignKey(
         Agency,
         verbose_name=_("agency"),
@@ -35,14 +43,9 @@ class Route(GTFSModelWithSourceID):
     short_name = models.CharField(
         verbose_name=_("short name"), max_length=32, blank=True
     )
-    long_name = models.CharField(
-        verbose_name=_("long name"), max_length=255, blank=True
-    )
-    desc = models.TextField(verbose_name=_("description"), blank=True)
     type = models.PositiveSmallIntegerField(
         verbose_name=_("type"), choices=Type.choices
     )
-    url = models.URLField(verbose_name=_("URL"), blank=True)
 
     objects = RouteQueryset.as_manager()
 

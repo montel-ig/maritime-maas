@@ -4,6 +4,7 @@ import subprocess
 import environ
 import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
+from django.utils.translation import gettext_lazy as _
 
 checkout_dir = environ.Path(__file__) - 2
 assert os.path.exists(checkout_dir("manage.py"))
@@ -30,7 +31,7 @@ env = environ.Env(
     ),
     SENTRY_DSN=(str, ""),
     SENTRY_ENVIRONMENT=(str, ""),
-    CORS_ORIGIN_WHITELIST=(list, []),
+    CORS_ORIGIN_WHITELIST=(list, ['http://localhost:3000']),
     CORS_ORIGIN_ALLOW_ALL=(bool, False),
 )
 if os.path.exists(env_file):
@@ -48,6 +49,19 @@ DATABASES = {"default": env.db()}
 DATABASES["default"]["ENGINE"] = "django.contrib.gis.db.backends.postgis"
 
 LANGUAGES = (("fi", "Finnish"), ("en", "English"), ("sv", "Swedish"))
+
+PARLER_DEFAULT_LANGUAGE_CODE = 'fi'
+PARLER_LANGUAGES = {
+    None: (
+        {'code': 'fi', },
+        {'code': 'en', },
+        {'code': 'sv', },
+    ),
+    'default': {
+        'fallback': 'fi',  # defaults to PARLER_DEFAULT_LANGUAGE_CODE
+        'hide_untranslated': False,  # the default; let .active_translations() return fallbacks too.
+    }
+}
 
 LANGUAGE_CODE = "fi"
 TIME_ZONE = "Europe/Helsinki"
@@ -67,8 +81,8 @@ WSGI_APPLICATION = "maritime_maas.wsgi.application"
 try:
     REVISION = (
         subprocess.check_output(["git", "rev-parse", "--short", "HEAD"])
-        .strip()
-        .decode("utf-8")
+            .strip()
+            .decode("utf-8")
     )
 except Exception:
     REVISION = "n/a"
@@ -94,6 +108,7 @@ INSTALLED_APPS = [
     "rest_framework_gis",
     "rest_framework.authtoken",
     "corsheaders",
+    'parler',
     # local apps
     "utils",
     "gtfs",
@@ -109,6 +124,7 @@ MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "django.middleware.locale.LocaleMiddleware"
 ]
 
 TEMPLATES = [

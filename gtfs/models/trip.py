@@ -1,16 +1,20 @@
 from django.contrib.gis.db import models
 from django.utils.translation import gettext_lazy as _
+from parler.models import TranslatedFields, TranslatableModel
 
 from .base import GTFSModelWithSourceID
 from .route import Route
 
 
-class Trip(GTFSModelWithSourceID):
-    route = models.ForeignKey(Route, verbose_name=_("route"), on_delete=models.CASCADE)
-    headsign = models.CharField(verbose_name=_("headsign"), max_length=255, blank=True)
-    short_name = models.CharField(
-        verbose_name=_("short name"), max_length=64, blank=True
+class Trip(TranslatableModel, GTFSModelWithSourceID):
+    translations = TranslatedFields(
+        headsign=models.CharField(verbose_name=_("headsign"), max_length=255, blank=True),
+        short_name=models.CharField(
+            verbose_name=_("short name"), max_length=64, blank=True
+        )
     )
+    route = models.ForeignKey(Route, verbose_name=_("route"), on_delete=models.CASCADE)
+
     direction_id = models.PositiveSmallIntegerField(
         verbose_name=_("direction ID"), blank=True, null=True
     )

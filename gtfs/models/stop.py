@@ -1,5 +1,7 @@
 from django.contrib.gis.db import models
 from django.utils.translation import gettext_lazy as _
+from parler.models import TranslatedFields, TranslatableModel
+from parler.managers import TranslatableQuerySet
 
 from maas.models import MaasOperator
 
@@ -7,16 +9,18 @@ from .base import GTFSModelWithSourceID
 from .feed import Feed
 
 
-class StopQueryset(models.QuerySet):
+class StopQueryset(TranslatableQuerySet):
     def for_maas_operator(self, maas_operator: MaasOperator):
         feeds = Feed.objects.for_maas_operator(maas_operator)
         return self.filter(feed__in=feeds)
 
 
-class Stop(GTFSModelWithSourceID):
-    name = models.CharField(verbose_name=_("name"), max_length=255, blank=True)
+class Stop(TranslatableModel, GTFSModelWithSourceID):
+    translations = TranslatedFields(
+        name=models.CharField(verbose_name=_("name"), max_length=255, blank=True),
+        desc=models.TextField(verbose_name=_("description"), blank=True),
+    )
     code = models.CharField(verbose_name=_("code"), max_length=255, blank=True)
-    desc = models.TextField(verbose_name=_("description"), blank=True)
     point = models.PointField(verbose_name=_("point"))
 
     objects = StopQueryset.as_manager()
