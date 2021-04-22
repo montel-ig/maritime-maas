@@ -295,12 +295,6 @@ class GTFSFeedImporter:
         total_num_of_created = 0
 
         for index, trip_activity in trip_activities.iterrows():
-            num_of_processed = int(index) + 1
-            if (num_of_processed % self.object_creation_batch_size) == 0:
-                self.logger.debug(
-                    f"Processed {num_of_processed}/{num_of_activities} trips"
-                )
-
             for date_str in trip_activity[trip_activity == 1].index:
                 trip = self.id_cache[Trip][trip_activity["trip_id"]]
                 trip_date = gtfs_kit.datestr_to_date(date_str)
@@ -313,6 +307,14 @@ class GTFSFeedImporter:
                     Departure.objects.bulk_create(objs_to_create)
                     total_num_of_created += len(objs_to_create)
                     objs_to_create = []
+
+            num_of_processed = int(index) + 1
+            if (
+                num_of_processed % self.object_creation_batch_size
+            ) == 0 or num_of_processed >= num_of_activities:
+                self.logger.debug(
+                    f"Processed {num_of_processed}/{num_of_activities} trips"
+                )
 
         total_num_of_created += len(objs_to_create)
         Departure.objects.bulk_create(objs_to_create)
