@@ -6,9 +6,10 @@ flake8-bugbear
 freezegun
 ipython
 isort
+model_bakery
 pep8-naming
 pytest
 pytest-cov
 pytest-django
-model_bakery
+requests-mock
 snapshottest
