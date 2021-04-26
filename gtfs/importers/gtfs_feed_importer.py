@@ -6,7 +6,7 @@ from timeit import default_timer as timer
 
 import gtfs_kit
 from django.contrib.gis.db import models
-from django.contrib.gis.geos import Point
+from django.contrib.gis.geos import LineString, Point
 from django.db import transaction
 
 from gtfs.importers.gtfs_feed_reader import GTFSFeedReader
@@ -20,6 +20,7 @@ from gtfs.models import (
     FeedInfo,
     RiderCategory,
     Route,
+    Shape,
     Stop,
     StopTime,
     Trip,
@@ -61,6 +62,7 @@ class GTFSFeedImporter:
             "wheelchair_accessible": "wheelchair_accessible",
             "bikes_allowed": "bikes_allowed",
             "capacity_sales": "capacity_sales",
+            "shape_id": "shape_id",
         },
         Route: {
             "source_id": "route_id",
@@ -160,6 +162,7 @@ class GTFSFeedImporter:
 
             self._delete_existing_gtfs_objects(feed)
 
+            self._import_shapes(feed, gtfs_feed)
             for model, gtfs_attribute in self.MODELS_AND_GTFS_KIT_ATTRIBUTES:
                 self._import_model(feed, model, getattr(gtfs_feed, gtfs_attribute))
             self._create_departures(gtfs_feed)
@@ -175,12 +178,45 @@ class GTFSFeedImporter:
         )
 
     def _delete_existing_gtfs_objects(self, feed):
-        for model, _ in self.MODELS_AND_GTFS_KIT_ATTRIBUTES:
+        models_to_delete = [Shape] + [m[0] for m in self.MODELS_AND_GTFS_KIT_ATTRIBUTES]
+        for model in models_to_delete:
             self.logger.debug(
                 f"Deleting existing {model._meta.verbose_name_plural}"
                 f"{' and departures' if model == Trip else ''}..."
             )
             model.objects.filter(feed=feed).delete()
+
+    def _import_shapes(self, feed, gtfs_feed):
+        gtfs_data = gtfs_feed.shapes
+        num_of_rows = len(gtfs_data) if gtfs_data is not None else 0
+
+        if num_of_rows:
+            self.logger.info(f"Importing {num_of_rows} shape points...")
+        else:
+            self.logger.info("No shapes.")
+            return
+
+        grouped = gtfs_data.sort_values(by="shape_pt_sequence").groupby("shape_id")
+        num_of_shapes = len(grouped)
+
+        for num_of_processed, gtfs_row in enumerate(
+            grouped[["shape_pt_lat", "shape_pt_lon"]], 1
+        ):
+            coordinates = gtfs_row[1][["shape_pt_lat", "shape_pt_lon"]]
+            geometry = LineString(
+                [(c.shape_pt_lon, c.shape_pt_lat) for c in coordinates.itertuples()]
+            )
+            shape = Shape.objects.create(
+                feed=feed, source_id=gtfs_row[0], geometry=geometry
+            )
+            self.id_cache[Shape].update({shape.source_id: shape.id})
+            if (
+                num_of_processed % self.object_creation_batch_size == 0
+                or num_of_processed >= num_of_shapes
+            ):
+                self.logger.debug(
+                    f"Processed {num_of_processed}/{num_of_shapes} shapes"
+                )
 
     def _import_model(self, feed, model, gtfs_data):
         num_of_rows = len(gtfs_data) if gtfs_data is not None else 0
@@ -259,12 +295,6 @@ class GTFSFeedImporter:
         total_num_of_created = 0
 
         for index, trip_activity in trip_activities.iterrows():
-            num_of_processed = int(index) + 1
-            if (num_of_processed % self.object_creation_batch_size) == 0:
-                self.logger.debug(
-                    f"Processed {num_of_processed}/{num_of_activities} trips"
-                )
-
             for date_str in trip_activity[trip_activity == 1].index:
                 trip = self.id_cache[Trip][trip_activity["trip_id"]]
                 trip_date = gtfs_kit.datestr_to_date(date_str)
@@ -277,6 +307,14 @@ class GTFSFeedImporter:
                     Departure.objects.bulk_create(objs_to_create)
                     total_num_of_created += len(objs_to_create)
                     objs_to_create = []
+
+            num_of_processed = int(index) + 1
+            if (
+                num_of_processed % self.object_creation_batch_size
+            ) == 0 or num_of_processed >= num_of_activities:
+                self.logger.debug(
+                    f"Processed {num_of_processed}/{num_of_activities} trips"
+                )
 
         total_num_of_created += len(objs_to_create)
         Departure.objects.bulk_create(objs_to_create)

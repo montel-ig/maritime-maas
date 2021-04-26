@@ -3,6 +3,7 @@ from django.utils.translation import gettext_lazy as _
 
 from .base import GTFSModelWithSourceID
 from .route import Route
+from .shape import Shape
 
 
 class Trip(GTFSModelWithSourceID):
@@ -43,6 +44,9 @@ class Trip(GTFSModelWithSourceID):
         verbose_name=_("capacity sales"),
         choices=CapacitySales.choices,
         default=CapacitySales.DISABLED,
+    )
+    shape = models.ForeignKey(
+        Shape, verbose_name=_("shape"), blank=True, null=True, on_delete=models.SET_NULL
     )
 
     class Meta:
