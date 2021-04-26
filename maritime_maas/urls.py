@@ -9,6 +9,7 @@ from bookings.api import BookingViewSet
 from gtfs.api.routes import RoutesViewSet
 from gtfs.api.shapes import ShapeViewSet
 from gtfs.api.stops import StopViewSet
+from mock_ticket_api.api import MockTicketViewSet
 
 router = routers.DefaultRouter()
 router.register(r"routes", RoutesViewSet, basename="routes")
@@ -16,6 +17,8 @@ router.register(r"stops", StopViewSet, basename="stops")
 router.register(r"bookings", BookingViewSet, basename="bookings")
 router.register(r"shapes", ShapeViewSet, basename="shapes")
 
+if settings.MOCK_TICKETING_API:
+    router.register(r"mock_ticket", MockTicketViewSet, basename="mockapi")
 
 urlpatterns = [path("admin/", admin.site.urls), path("v1/", include(router.urls))]
 
