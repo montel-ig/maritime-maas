@@ -45,6 +45,7 @@ snapshots["test_routes 1"] = [
             "name": "test agency",
             "url": "www.testagency.com",
         },
+        "capacity_sales": 0,
         "id": "00000000-0000-0000-0000-000000000000",
         "name": "",
         "stops": [
@@ -69,7 +70,7 @@ snapshots["test_routes_departures[filters2] 1"] = [
     {
         "arrival_time": "2021-02-18T13:00:00Z",
         "bikes_allowed": 0,
-        "capacity_sales": 0,
+        "block_id": "block_id of test trip 1",
         "departure_headsign": "headsign of test trip 1",
         "departure_time": "2021-02-18T13:00:00Z",
         "direction_id": 0,
@@ -83,7 +84,7 @@ snapshots["test_routes_departures[filters2] 1"] = [
     {
         "arrival_time": "2021-02-18T13:15:00Z",
         "bikes_allowed": 0,
-        "capacity_sales": 0,
+        "block_id": "block_id of test trip 2",
         "departure_headsign": "headsign of test trip 2",
         "departure_time": "2021-02-18T13:15:00Z",
         "direction_id": 1,
@@ -100,7 +101,7 @@ snapshots["test_routes_departures[filters2] 2"] = [
     {
         "arrival_time": "2021-02-18T14:00:00Z",
         "bikes_allowed": 0,
-        "capacity_sales": 0,
+        "block_id": "block_id of test trip 1",
         "departure_headsign": "headsign of test trip 1",
         "departure_time": "2021-02-18T14:00:00Z",
         "direction_id": 0,
@@ -114,7 +115,7 @@ snapshots["test_routes_departures[filters2] 2"] = [
     {
         "arrival_time": "2021-02-18T14:15:00Z",
         "bikes_allowed": 0,
-        "capacity_sales": 0,
+        "block_id": "block_id of test trip 2",
         "departure_headsign": "headsign of test trip 2",
         "departure_time": "2021-02-18T14:15:00Z",
         "direction_id": 1,
@@ -131,7 +132,7 @@ snapshots["test_routes_departures[filters3] 1"] = [
     {
         "arrival_time": "2021-02-19T13:00:00Z",
         "bikes_allowed": 0,
-        "capacity_sales": 0,
+        "block_id": "block_id of test trip 1",
         "departure_headsign": "headsign of test trip 1",
         "departure_time": "2021-02-19T13:00:00Z",
         "direction_id": 0,
@@ -148,7 +149,7 @@ snapshots["test_routes_departures[filters3] 2"] = [
     {
         "arrival_time": "2021-02-19T14:00:00Z",
         "bikes_allowed": 0,
-        "capacity_sales": 0,
+        "block_id": "block_id of test trip 1",
         "departure_headsign": "headsign of test trip 1",
         "departure_time": "2021-02-19T14:00:00Z",
         "direction_id": 0,
@@ -165,7 +166,7 @@ snapshots["test_routes_departures[filters4] 1"] = [
     {
         "arrival_time": "2021-02-18T13:00:00Z",
         "bikes_allowed": 0,
-        "capacity_sales": 0,
+        "block_id": "block_id of test trip 1",
         "departure_headsign": "headsign of test trip 1",
         "departure_time": "2021-02-18T13:00:00Z",
         "direction_id": 0,
@@ -182,7 +183,7 @@ snapshots["test_routes_departures[filters4] 2"] = [
     {
         "arrival_time": "2021-02-18T14:00:00Z",
         "bikes_allowed": 0,
-        "capacity_sales": 0,
+        "block_id": "block_id of test trip 1",
         "departure_headsign": "headsign of test trip 1",
         "departure_time": "2021-02-18T14:00:00Z",
         "direction_id": 0,
@@ -199,7 +200,7 @@ snapshots["test_routes_departures[filters5] 1"] = [
     {
         "arrival_time": "2021-02-18T13:15:00Z",
         "bikes_allowed": 0,
-        "capacity_sales": 0,
+        "block_id": "block_id of test trip 2",
         "departure_headsign": "headsign of test trip 2",
         "departure_time": "2021-02-18T13:15:00Z",
         "direction_id": 1,
@@ -216,7 +217,7 @@ snapshots["test_routes_departures[filters5] 2"] = [
     {
         "arrival_time": "2021-02-18T14:15:00Z",
         "bikes_allowed": 0,
-        "capacity_sales": 0,
+        "block_id": "block_id of test trip 2",
         "departure_headsign": "headsign of test trip 2",
         "departure_time": "2021-02-18T14:15:00Z",
         "direction_id": 1,

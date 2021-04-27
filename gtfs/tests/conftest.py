@@ -56,6 +56,7 @@ def route_with_departures(maas_operator, api_id_generator):
         short_name=seq("short_name of test trip "),
         headsign=seq("headsign of test trip "),
         direction_id=itertools.cycle([0, 1]),
+        block_id=seq("block_id of test trip "),
         _quantity=2,
     )
 

@@ -23,11 +23,11 @@ class DepartureSerializer(serializers.ModelSerializer):
         source="trip.wheelchair_accessible"
     )
     bikes_allowed = serializers.IntegerField(source="trip.bikes_allowed")
-    capacity_sales = serializers.IntegerField(source="trip.capacity_sales")
     stop_timepoint = serializers.SerializerMethodField()
     route_id = serializers.SlugRelatedField(
         source="trip.route", slug_field="api_id", read_only=True
     )
+    block_id = serializers.CharField(source="trip.block_id")
 
     class Meta:
         model = Departure
@@ -42,9 +42,9 @@ class DepartureSerializer(serializers.ModelSerializer):
             "stop_sequence",
             "wheelchair_accessible",
             "bikes_allowed",
-            "capacity_sales",
             "stop_timepoint",
             "route_id",
+            "block_id",
         )
 
     def get_fields(self):

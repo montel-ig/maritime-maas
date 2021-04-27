@@ -61,8 +61,8 @@ class GTFSFeedImporter:
             "direction_id": "direction_id",
             "wheelchair_accessible": "wheelchair_accessible",
             "bikes_allowed": "bikes_allowed",
-            "capacity_sales": "capacity_sales",
             "shape_id": "shape_id",
+            "block_id": "block_id",
         },
         Route: {
             "source_id": "route_id",
@@ -71,6 +71,7 @@ class GTFSFeedImporter:
             "long_name": "route_long_name",
             "type": "route_type",
             "sort_order": "route_sort_order",
+            "capacity_sales": "capacity_sales",
         },
         Stop: {
             "source_id": "stop_id",

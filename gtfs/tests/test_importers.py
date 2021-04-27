@@ -11,6 +11,7 @@ from gtfs.models import (
     Feed,
     FeedInfo,
     RiderCategory,
+    Route,
     Shape,
     Stop,
     StopTime,
@@ -44,13 +45,14 @@ def test_gtfs_feed_importer():
     assert route.source_id == "vallisaari_rengas"
     assert route.short_name == "vallisaari"
     assert route.sort_order == 1
+    assert route.capacity_sales == Route.CapacitySales.ENABLED
 
     assert route.trips.count() == 5
     trip = route.trips.first()
     assert trip.source_id == "kauppatori_vallisaari_1"
     assert trip.wheelchair_accessible == Trip.WheelchairAccessible.ACCESSIBLE
     assert trip.bikes_allowed == Trip.BikesAllowed.ALLOWED
-    assert trip.capacity_sales == Trip.CapacitySales.REQUIRED
+    assert trip.block_id == "itäblokki"
 
     assert trip.stop_times.count() == 2
     stop_time = trip.stop_times.first()
