@@ -1,5 +1,9 @@
+from datetime import datetime
+
 from django.contrib.gis.db import models
+from django.utils.timezone import make_aware
 from django.utils.translation import gettext_lazy as _
+from pytz import timezone, utc
 
 from .base import GTFSModel
 from .stop import Stop
@@ -13,12 +17,16 @@ class StopTime(GTFSModel):
 
     trip = models.ForeignKey(Trip, verbose_name=_("trip"), on_delete=models.CASCADE)
     stop = models.ForeignKey(Stop, verbose_name=_("stop"), on_delete=models.CASCADE)
-    arrival_time = models.TimeField(
+
+    # these are actually times not durations, but we cannot use TimeField because we
+    # need to support GTFS times that can go past 24h
+    arrival_time = models.DurationField(
         verbose_name=_("arrival time"), null=True, blank=True
     )
-    departure_time = models.TimeField(
+    departure_time = models.DurationField(
         verbose_name=_("departure time"), null=True, blank=True
     )
+
     stop_sequence = models.PositiveIntegerField(verbose_name=_("stop sequence"))
     stop_headsign = models.CharField(
         verbose_name=_("stop headsign"), max_length=255, blank=True
@@ -49,3 +57,15 @@ class StopTime(GTFSModel):
                 else ""
             )
         )
+
+    def get_arrival_time_datetime(self, departure):
+        return self._get_time_datetime(self.arrival_time, departure)
+
+    def get_departure_time_datetime(self, departure):
+        return self._get_time_datetime(self.departure_time, departure)
+
+    def _get_time_datetime(self, time, departure):
+        return make_aware(
+            datetime.combine(departure.date, datetime.min.time()) + time,
+            timezone=timezone(departure.trip.route.agency.timezone),
+        ).astimezone(utc)

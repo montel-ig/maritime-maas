@@ -56,10 +56,15 @@ def test_gtfs_feed_importer():
 
     assert trip.stop_times.count() == 2
     stop_time = trip.stop_times.first()
-    assert stop_time.arrival_time == datetime.time(8, 0)
-    assert stop_time.departure_time == datetime.time(8, 0)
+    assert stop_time.arrival_time == datetime.timedelta(hours=8)
+    assert stop_time.departure_time == datetime.timedelta(hours=8)
     assert stop_time.stop_sequence == 1
     assert stop_time.timepoint == StopTime.Timepoint.EXACT
+    stop_time_2 = trip.stop_times.last()
+    assert stop_time_2.arrival_time == datetime.timedelta(hours=24)
+    assert stop_time_2.departure_time == datetime.timedelta(hours=25, minutes=30)
+    assert stop_time_2.stop_sequence == 2
+    assert stop_time_2.timepoint == StopTime.Timepoint.APPROXIMATE
 
     stop = stop_time.stop
     assert stop.name == "Kauppatori - Lyypekinlaituri"

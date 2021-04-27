@@ -1,5 +1,3 @@
-from datetime import datetime, timezone
-
 from django.db.models import Prefetch
 from rest_framework import serializers
 from rest_framework_gis.filters import DistanceToPointFilter
@@ -54,14 +52,10 @@ class DepartureSerializer(serializers.ModelSerializer):
         return fields
 
     def get_arrival_time(self, obj):
-        return datetime.combine(
-            obj.date, obj.trip.stops_stop_times[0].arrival_time, tzinfo=timezone.utc
-        )
+        return obj.trip.stops_stop_times[0].get_arrival_time_datetime(obj)
 
     def get_departure_time(self, obj):
-        return datetime.combine(
-            obj.date, obj.trip.stops_stop_times[0].departure_time, tzinfo=timezone.utc
-        )
+        return obj.trip.stops_stop_times[0].get_departure_time_datetime(obj)
 
     def get_stop_headsign(self, obj):
         return obj.trip.stops_stop_times[0].stop_headsign
@@ -104,7 +98,7 @@ class StopSerializer(serializers.ModelSerializer):
             Departure.objects.filter(
                 trip__stop_times__stop=obj, date=self.context["date"]
             )
-            .select_related("trip", "trip__route")
+            .select_related("trip", "trip__route", "trip__route__agency")
             .prefetch_related(
                 Prefetch(
                     "trip__stop_times",

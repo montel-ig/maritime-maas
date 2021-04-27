@@ -1,5 +1,5 @@
 import itertools
-from datetime import date, time, timedelta
+from datetime import date, timedelta
 from uuid import UUID
 
 import pytest
@@ -45,6 +45,7 @@ def route_with_departures(maas_operator, api_id_generator):
         name="test agency",
         url="www.testagency.com",
         logo_url="www.testagency.com/logo",
+        timezone="Europe/Helsinki",
     )
 
     route = baker.make(Route, feed=feed, api_id=api_id_generator, agency=agency)
@@ -75,8 +76,20 @@ def route_with_departures(maas_operator, api_id_generator):
             trip=trip,
             stop=iter(stops),
             feed=feed,
-            arrival_time=seq(time(12, i * 15), timedelta(hours=1)),
-            departure_time=seq(time(12, i * 15), timedelta(hours=1)),
+            # 13:00, 13:15, 00:00, 00:15 in Helsinki time
+            arrival_time=iter(
+                [
+                    timedelta(hours=15, minutes=i * 15),
+                    timedelta(hours=26, minutes=i * 15),
+                ]
+            ),
+            # 13:00, 13:15, 01:00, 01:15 in Helsinki time
+            departure_time=iter(
+                [
+                    timedelta(hours=15, minutes=i * 15),
+                    timedelta(hours=27, minutes=i * 15),
+                ]
+            ),
             stop_headsign=seq("stop_headsign of test stop time ", start=i * 2),
             stop_sequence=seq(0),
             _quantity=2,
