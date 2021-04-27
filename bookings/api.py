@@ -101,6 +101,7 @@ class BookingSerializer(serializers.ModelSerializer):
         return Booking.objects.create_reservation(
             self.context["request"].user.maas_operator,
             self.validated_data["route"].feed.ticketing_system,
+            ticket_data=validated_data,
         )
 
 
@@ -119,5 +120,9 @@ class BookingViewSet(
     @action(detail=True, methods=["post"])
     def confirm(self, request, api_id=None):
         booking = self.get_object()
-        booking.confirm()
-        return Response(self.serializer_class(instance=booking).data)
+        tickets = booking.confirm()
+
+        booking_data = self.serializer_class(instance=booking).data
+        booking_data["tickets"] = tickets
+
+        return Response(booking_data)

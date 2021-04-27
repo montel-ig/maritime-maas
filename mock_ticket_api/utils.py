@@ -14,10 +14,13 @@ def get_reservation_data() -> dict:
     return {"id": str(uuid.uuid4()), "status": "RESERVED"}
 
 
-def get_confirmations_data(pk) -> dict:
-    path = PurePath(__file__).parent.joinpath("data", "ticket_qr.png")
-    with open(path.as_posix(), "rb") as f:
-        ticket = f"data:image/png;base64,{base64.b64encode(f.read()).decode()}"
+def get_confirmations_data(pk, include_qr=True) -> dict:
+    if include_qr:
+        path = PurePath(__file__).parent.joinpath("data", "ticket_qr.png")
+        with open(path.as_posix(), "rb") as f:
+            ticket = f"data:image/png;base64,{base64.b64encode(f.read()).decode()}"
+    else:
+        ticket = "QR_CODE"
     valid_from = timezone.now()
     departed_at = valid_from + datetime.timedelta(hours=1)
     valid_to = valid_from + datetime.timedelta(days=1)
