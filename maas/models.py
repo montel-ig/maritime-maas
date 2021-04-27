@@ -60,6 +60,13 @@ class Permission(models.Model):
 
 class TicketingSystem(models.Model):
     name = models.CharField(verbose_name=_("name"), max_length=64)
+    api_key = models.CharField(
+        verbose_name=_("API key"),
+        max_length=255,
+        blank=True,
+        help_text=_("API key that will be used for accessing the API"),
+    )
+    api_url = models.URLField(verbose_name=_("API URL"))
 
     class Meta:
         verbose_name = _("ticketing system")
