@@ -1,6 +1,6 @@
 trip_id,arrival_time,departure_time,stop_id,stop_sequence,stop_headsign,timepoint
 kauppatori_vallisaari_1,08:00:00,08:00:00,kauppatori,1,,
-kauppatori_vallisaari_1,08:20:00,08:20:00,vallisaari_tulo,2,,0
+kauppatori_vallisaari_1,24:00:00,25:30:00,vallisaari_tulo,2,,0
 kauppatori_vallisaari_2,09:00:00,09:00:00,kauppatori,1,,
 kauppatori_vallisaari_2,09:20:00,09:20:00,vallisaari_tulo,2,0
 vallisaari_kauppatori_1,09:25:00,09:25:00,vallisaari_lahto,1,,

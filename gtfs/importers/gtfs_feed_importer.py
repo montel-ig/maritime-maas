@@ -1,6 +1,6 @@
 import logging
 from collections import defaultdict
-from datetime import datetime, time
+from datetime import datetime
 from math import isnan
 from timeit import default_timer as timer
 
@@ -330,8 +330,6 @@ class GTFSFeedImporter:
             if gtfs_field == "agency_id" and not value:
                 value = self._get_default_agency_id()
             return value
-        elif isinstance(model_field, models.TimeField):
-            return self._convert_time(gtfs_value)
         elif isinstance(model_field, models.DateField):
             return self._convert_date(gtfs_value)
         elif isinstance(model_field, models.PointField):
@@ -361,19 +359,6 @@ class GTFSFeedImporter:
     @staticmethod
     def _convert_date(gtfs_value):
         return datetime.strptime(gtfs_value, "%Y%m%d").date() if gtfs_value else None
-
-    @staticmethod
-    def _convert_time(gtfs_time_value):
-        # TODO THIS DOES NOT ACTUALLY WORK IN ALL SITUATIONS!
-        # In GTFS it is possible for a time to go past midnight like 26:00:00.
-        # It is probably not possible to support those with Django's TimeField which we
-        # are using ATM. For now the times that go too far are just clipped.
-        hours, mins, secs = map(int, gtfs_time_value.split(":"))
-        if hours > 23:
-            hours = 23
-            mins = 59
-            secs = 59
-        return time(hours, mins, secs)
 
     @staticmethod
     def _convert_point(gtfs_value):
