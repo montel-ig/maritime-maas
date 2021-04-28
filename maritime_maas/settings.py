@@ -49,6 +49,7 @@ DATABASES = {"default": env.db()}
 DATABASES["default"]["ENGINE"] = "django.contrib.gis.db.backends.postgis"
 
 LANGUAGES = (("fi", "Finnish"), ("en", "English"), ("sv", "Swedish"))
+TICKET_LANGUAGES = tuple(lang for lang, _ in LANGUAGES)
 
 LANGUAGE_CODE = "fi"
 TIME_ZONE = "Europe/Helsinki"

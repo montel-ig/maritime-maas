@@ -6,34 +6,6 @@ from snapshottest import Snapshot
 
 snapshots = Snapshot()
 
-snapshots["test_confirm_booking 1"] = [
-    {
-        "agency": {"logo_url": "http://www.agency.com/logo.png", "name": "MaaS Line"},
-        "amount": 12,
-        "currency": "EUR",
-        "customer_type": "Aikuinen",
-        "departures": [
-            {
-                "depart_at": "2021-04-20T01:00:00.000Z",
-                "from": "Kauppatori",
-                "to": "Vallisaari",
-            }
-        ],
-        "description": "This is the description of the ticket",
-        "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-        "instructions": "These are the instructions of the ticket",
-        "locale": "fi",
-        "name": "Day in Vallisaari",
-        "qr_code": "QR_CODE",
-        "refresh_at": "2021-04-21T00:00:00.000Z",
-        "terms_of_use": "http://www.terms.and.conditions.fi",
-        "ticket_html": "<div>...</div>",
-        "ticket_type": "Päivälippu",
-        "valid_from": "2021-04-20T00:00:00.000Z",
-        "valid_to": "2021-04-21T00:00:00.000Z",
-    }
-]
-
 snapshots["test_confirm_booking[False] 1"] = [
     {
         "agency": {"logo_url": "http://www.agency.com/logo.png", "name": "MaaS Line"},
@@ -42,7 +14,7 @@ snapshots["test_confirm_booking[False] 1"] = [
         "customer_type": "Aikuinen",
         "departures": [
             {
-                "depart_at": "2021-04-20T01:00:00.000Z",
+                "depart_at": "2021-04-20T01:00:00Z",
                 "from": "Kauppatori",
                 "to": "Vallisaari",
             }
@@ -53,12 +25,12 @@ snapshots["test_confirm_booking[False] 1"] = [
         "locale": "fi",
         "name": "Day in Vallisaari",
         "qr_code": "QR_CODE",
-        "refresh_at": "2021-04-21T00:00:00.000Z",
+        "refresh_at": "2021-04-21T00:00:00Z",
         "terms_of_use": "http://www.terms.and.conditions.fi",
         "ticket_html": "<div>...</div>",
         "ticket_type": "Päivälippu",
-        "valid_from": "2021-04-20T00:00:00.000Z",
-        "valid_to": "2021-04-21T00:00:00.000Z",
+        "valid_from": "2021-04-20T00:00:00Z",
+        "valid_to": "2021-04-21T00:00:00Z",
     }
 ]
 
@@ -70,7 +42,7 @@ snapshots["test_confirm_booking[True] 1"] = [
         "customer_type": "Aikuinen",
         "departures": [
             {
-                "depart_at": "2021-04-20T01:00:00.000Z",
+                "depart_at": "2021-04-20T01:00:00Z",
                 "from": "Kauppatori",
                 "to": "Vallisaari",
             }
@@ -81,12 +53,12 @@ snapshots["test_confirm_booking[True] 1"] = [
         "locale": "fi",
         "name": "Day in Vallisaari",
         "qr_code": "QR_CODE",
-        "refresh_at": "2021-04-21T00:00:00.000Z",
+        "refresh_at": "2021-04-21T00:00:00Z",
         "terms_of_use": "http://www.terms.and.conditions.fi",
         "ticket_html": "<div>...</div>",
         "ticket_type": "Päivälippu",
-        "valid_from": "2021-04-20T00:00:00.000Z",
-        "valid_to": "2021-04-21T00:00:00.000Z",
+        "valid_from": "2021-04-20T00:00:00Z",
+        "valid_to": "2021-04-21T00:00:00Z",
     }
 ]
 

@@ -1,3 +1,4 @@
+from django.conf import settings
 from rest_framework import permissions, serializers, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -6,8 +7,8 @@ from mock_ticket_api.utils import get_confirmations_data, get_reservation_data
 
 
 class MockTicketParamsSerializer(serializers.Serializer):
-    maas_operator_id = serializers.UUIDField()
-    locale = serializers.ChoiceField(choices=("fi", "sv", "en"), required=False)
+    maas_operator_id = serializers.CharField()
+    locale = serializers.ChoiceField(choices=settings.TICKET_LANGUAGES, required=False)
 
 
 class MockTicketViewSet(viewsets.ViewSet):

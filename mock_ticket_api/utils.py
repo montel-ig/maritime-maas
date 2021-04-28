@@ -7,7 +7,7 @@ from django.utils import timezone
 
 
 def format_timestamp(d: datetime.datetime):
-    return f"{d.replace(tzinfo=None).isoformat(sep='T', timespec='milliseconds')}Z"
+    return f"{d.replace(tzinfo=None).isoformat()}Z"
 
 
 def get_reservation_data() -> dict:

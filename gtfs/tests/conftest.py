@@ -14,7 +14,10 @@ from maas.tests.utils import token_authenticate
 
 @pytest.fixture
 def maas_operator():
-    return baker.make(MaasOperator)
+    return baker.make(
+        MaasOperator,
+        name=seq("name of maas operator "),
+    )
 
 
 @pytest.fixture
