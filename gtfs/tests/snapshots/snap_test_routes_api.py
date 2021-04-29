@@ -41,21 +41,26 @@ snapshots["test_rider_categories_with_prices 1"] = [
 snapshots["test_routes 1"] = [
     {
         "agency": {
+            "email": "test-agency@example.com",
             "logo_url": "www.testagency.com/logo",
             "name": "test agency",
+            "phone": "777777",
             "url": "www.testagency.com",
         },
         "capacity_sales": 0,
+        "description": "desc of test route ",
         "id": "00000000-0000-0000-0000-000000000000",
         "name": "",
         "stops": [
             {
+                "description": "desc of test stop ",
                 "id": "00000000-0000-0000-0000-000000000001",
                 "name": "stop ",
                 "tts_name": "tts_name of stop ",
                 "wheelchair_boarding": 0,
             },
             {
+                "description": "desc of test stop ",
                 "id": "00000000-0000-0000-0000-000000000002",
                 "name": "stop ",
                 "tts_name": "tts_name of stop ",
@@ -63,6 +68,7 @@ snapshots["test_routes 1"] = [
             },
         ],
         "ticket_types": [],
+        "url": "url of test route ",
     }
 ]
 
@@ -78,7 +84,7 @@ snapshots["test_routes_departures[filters2] 1"] = [
         "short_name": "short_name of test trip ",
         "stop_headsign": "stop_headsign of test stop time ",
         "stop_sequence": 1,
-        "stop_timepoint": 1,
+        "timepoint": 1,
         "wheelchair_accessible": 0,
     },
     {
@@ -92,7 +98,7 @@ snapshots["test_routes_departures[filters2] 1"] = [
         "short_name": "short_name of test trip ",
         "stop_headsign": "stop_headsign of test stop time ",
         "stop_sequence": 1,
-        "stop_timepoint": 1,
+        "timepoint": 1,
         "wheelchair_accessible": 0,
     },
 ]
@@ -109,7 +115,7 @@ snapshots["test_routes_departures[filters2] 2"] = [
         "short_name": "short_name of test trip ",
         "stop_headsign": "stop_headsign of test stop time ",
         "stop_sequence": 2,
-        "stop_timepoint": 1,
+        "timepoint": 1,
         "wheelchair_accessible": 0,
     },
     {
@@ -123,7 +129,7 @@ snapshots["test_routes_departures[filters2] 2"] = [
         "short_name": "short_name of test trip ",
         "stop_headsign": "stop_headsign of test stop time ",
         "stop_sequence": 2,
-        "stop_timepoint": 1,
+        "timepoint": 1,
         "wheelchair_accessible": 0,
     },
 ]
@@ -140,7 +146,7 @@ snapshots["test_routes_departures[filters3] 1"] = [
         "short_name": "short_name of test trip ",
         "stop_headsign": "stop_headsign of test stop time ",
         "stop_sequence": 1,
-        "stop_timepoint": 1,
+        "timepoint": 1,
         "wheelchair_accessible": 0,
     }
 ]
@@ -157,7 +163,7 @@ snapshots["test_routes_departures[filters3] 2"] = [
         "short_name": "short_name of test trip ",
         "stop_headsign": "stop_headsign of test stop time ",
         "stop_sequence": 2,
-        "stop_timepoint": 1,
+        "timepoint": 1,
         "wheelchair_accessible": 0,
     }
 ]
@@ -174,7 +180,7 @@ snapshots["test_routes_departures[filters4] 1"] = [
         "short_name": "short_name of test trip ",
         "stop_headsign": "stop_headsign of test stop time ",
         "stop_sequence": 1,
-        "stop_timepoint": 1,
+        "timepoint": 1,
         "wheelchair_accessible": 0,
     }
 ]
@@ -191,7 +197,7 @@ snapshots["test_routes_departures[filters4] 2"] = [
         "short_name": "short_name of test trip ",
         "stop_headsign": "stop_headsign of test stop time ",
         "stop_sequence": 2,
-        "stop_timepoint": 1,
+        "timepoint": 1,
         "wheelchair_accessible": 0,
     }
 ]
@@ -208,7 +214,7 @@ snapshots["test_routes_departures[filters5] 1"] = [
         "short_name": "short_name of test trip ",
         "stop_headsign": "stop_headsign of test stop time ",
         "stop_sequence": 1,
-        "stop_timepoint": 1,
+        "timepoint": 1,
         "wheelchair_accessible": 0,
     }
 ]
@@ -225,7 +231,7 @@ snapshots["test_routes_departures[filters5] 2"] = [
         "short_name": "short_name of test trip ",
         "stop_headsign": "stop_headsign of test stop time ",
         "stop_sequence": 2,
-        "stop_timepoint": 1,
+        "timepoint": 1,
         "wheelchair_accessible": 0,
     }
 ]

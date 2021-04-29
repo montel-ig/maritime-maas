@@ -8,12 +8,14 @@ snapshots = Snapshot()
 
 snapshots["test_stops 1"] = [
     {
+        "description": "desc of test stop ",
         "id": "00000000-0000-0000-0000-000000000001",
         "name": "stop ",
         "tts_name": "tts_name of stop ",
         "wheelchair_boarding": 0,
     },
     {
+        "description": "desc of test stop ",
         "id": "00000000-0000-0000-0000-000000000002",
         "name": "stop ",
         "tts_name": "tts_name of stop ",
@@ -34,7 +36,7 @@ snapshots["test_stops_departures[filters2] 1"] = [
         "short_name": "short_name of test trip ",
         "stop_headsign": "stop_headsign of test stop time ",
         "stop_sequence": 1,
-        "stop_timepoint": 1,
+        "timepoint": 1,
         "wheelchair_accessible": 0,
     },
     {
@@ -49,7 +51,7 @@ snapshots["test_stops_departures[filters2] 1"] = [
         "short_name": "short_name of test trip ",
         "stop_headsign": "stop_headsign of test stop time ",
         "stop_sequence": 1,
-        "stop_timepoint": 1,
+        "timepoint": 1,
         "wheelchair_accessible": 0,
     },
 ]
@@ -67,7 +69,7 @@ snapshots["test_stops_departures[filters3] 1"] = [
         "short_name": "short_name of test trip ",
         "stop_headsign": "stop_headsign of test stop time ",
         "stop_sequence": 1,
-        "stop_timepoint": 1,
+        "timepoint": 1,
         "wheelchair_accessible": 0,
     }
 ]
@@ -85,7 +87,7 @@ snapshots["test_stops_departures[filters4] 1"] = [
         "short_name": "short_name of test trip ",
         "stop_headsign": "stop_headsign of test stop time ",
         "stop_sequence": 1,
-        "stop_timepoint": 1,
+        "timepoint": 1,
         "wheelchair_accessible": 0,
     }
 ]
@@ -103,7 +105,7 @@ snapshots["test_stops_departures[filters5] 1"] = [
         "short_name": "short_name of test trip ",
         "stop_headsign": "stop_headsign of test stop time ",
         "stop_sequence": 1,
-        "stop_timepoint": 1,
+        "timepoint": 1,
         "wheelchair_accessible": 0,
     }
 ]
