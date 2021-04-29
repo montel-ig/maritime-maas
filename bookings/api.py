@@ -107,7 +107,6 @@ class BookingSerializer(serializers.ModelSerializer):
 class BookingViewSet(
     mixins.CreateModelMixin,
     mixins.RetrieveModelMixin,
-    mixins.ListModelMixin,
     GenericViewSet,
 ):
     serializer_class = BookingSerializer
