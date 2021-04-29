@@ -36,6 +36,12 @@ class FeedInfoInline(admin.StackedInline):
     model = FeedInfo
     extra = 0
 
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
 
 @admin.register(Feed)
 class FeedAdmin(admin.ModelAdmin):
@@ -45,6 +51,10 @@ class FeedAdmin(admin.ModelAdmin):
         "imported_at",
         "import_attempted_at",
         "last_import_successful",
+        "routes",
+        "stops",
+        "trips",
+        "departures",
     )
     list_display_links = ("name", "url_or_path")
     inlines = [FeedInfoInline]
@@ -55,6 +65,10 @@ class FeedAdmin(admin.ModelAdmin):
         "import_attempted_at",
         "last_import_successful",
         "last_import_error_message",
+        "routes",
+        "stops",
+        "trips",
+        "departures",
     )
 
     def last_import_successful(self, obj):
@@ -93,7 +107,16 @@ class FeedAdmin(admin.ModelAdmin):
                     "fields": import_fields,
                 },
             ),
+            (
+                _("Statistics"),
+                {"fields": (("routes", "stops", "trips", "departures"),)},
+            ),
         )
+
+    def get_inline_instances(self, request, obj=None):
+        if not obj:
+            return []
+        return super().get_inline_instances(request, obj)
 
     def update_feed(self, request, queryset):
         feed_updater = GTFSFeedUpdater()
