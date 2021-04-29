@@ -21,12 +21,12 @@ from gtfs.models import (
 
 @pytest.mark.django_db
 def test_gtfs_feed_importer():
+    feed = Feed.objects.create(
+        name="Test feed", url_or_path="gtfs/tests/data/gtfs_test_feed"
+    )
     importer = GTFSFeedImporter()
-    importer.run("gtfs/tests/data/gtfs_test_feed")
+    importer.run(feed)
 
-    assert Feed.objects.count() == 1
-    feed = Feed.objects.first()
-    assert feed.name == "gtfs/tests/data/gtfs_test_feed"
     assert feed.fingerprint == datetime.date.today().isoformat()
 
     assert Agency.objects.count() == 1
@@ -118,10 +118,34 @@ def test_gtfs_feed_importer():
 
 @pytest.mark.django_db
 def test_feed_updater():
-    feed = Feed.objects.create(name="gtfs/tests/data/gtfs_test_feed")
+    feed = Feed.objects.create(url_or_path="gtfs/tests/data/gtfs_test_feed")
+    assert feed.last_import_successful is None
     importer = GTFSFeedUpdater()
     importer.update_feeds()
 
     feed.refresh_from_db()
     assert feed.fingerprint == localdate().isoformat()
     assert Agency.objects.count() == 1
+    # success so imported_at should be the same as import_attempted_at
+    assert feed.imported_at and feed.imported_at == feed.import_attempted_at
+    assert feed.last_import_successful
+
+    feed.url_or_path = "failure-path"
+    feed.fingerprint = ""
+    feed.save()
+    importer.update_feeds()
+
+    feed.refresh_from_db()
+    # failure, so import_attempted_at should be after imported_at
+    assert feed.import_attempted_at > feed.imported_at
+    assert feed.last_import_successful is False
+
+    # test one more success to verify functioning after a failure
+    feed.url_or_path = "gtfs/tests/data/gtfs_test_feed"
+    feed.fingerprint = ""
+    feed.save()
+    importer.update_feeds()
+
+    feed.refresh_from_db()
+    assert feed.imported_at and feed.imported_at == feed.import_attempted_at
+    assert feed.last_import_successful

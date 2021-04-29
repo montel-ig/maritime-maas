@@ -8,6 +8,7 @@ import gtfs_kit
 from django.contrib.gis.db import models
 from django.contrib.gis.geos import LineString, Point
 from django.db import transaction
+from django.utils import timezone
 
 from gtfs.importers.gtfs_feed_reader import GTFSFeedReader
 from gtfs.models import (
@@ -16,7 +17,6 @@ from gtfs.models import (
     Fare,
     FareRiderCategory,
     FareRule,
-    Feed,
     FeedInfo,
     RiderCategory,
     Route,
@@ -154,13 +154,20 @@ class GTFSFeedImporter:
         # Save feed_lang, when looping through models we need access to this value
         self.feed_lang = ""
 
-    def run(self, url_or_filename, skip_validation=False):
-        self.logger.info(f'Importing a GTFS feed from "{url_or_filename}"...')
+    def run(self, feed, skip_validation=False):
+        feed_name = feed.name or "<no name>"
+        self.logger.info(
+            f'Importing GTFS feed "{feed_name}" from "{feed.url_or_path}"...'
+        )
+
         self.id_cache.clear()
         start_time = timer()
 
         self.logger.info("Reading data...")
-        gtfs_feed = self.feed_reader.read_feed(url_or_filename)
+        try:
+            gtfs_feed = self.feed_reader.read_feed(feed.url_or_path)
+        except ValueError as e:
+            raise GTFSFeedImporterError(f"Error reading GTFS feed: {str(e)}") from e
 
         if not skip_validation:
             self.logger.debug("Validating data...")
@@ -173,9 +180,6 @@ class GTFSFeedImporter:
                     self.logger.debug(f"Validation warnings: {results}")
 
         with transaction.atomic():
-            # TODO just some temporary feed handling to get things rolling
-            feed, _ = Feed.objects.get_or_create(name=url_or_filename)
-
             self._delete_existing_gtfs_objects(feed)
 
             self._import_shapes(feed, gtfs_feed)
@@ -193,14 +197,15 @@ class GTFSFeedImporter:
             for model, _gtfs_attribute in self.MODELS_AND_GTFS_KIT_ATTRIBUTES:
                 self._add_translations(model, translation_list)
 
-            # Update the feed's updated_at. We might want to do something else here.
+            feed.imported_at = timezone.now()
+            # the feed's name will also get autopopulated here if feed info is available
             feed.save()
 
-            self.logger.debug("Committing...")
-
         end_time = timer()
+        feed_name = feed.name or "<no name>"
         self.logger.info(
-            f'Successfully imported a GTFS feed from "{url_or_filename}" in {end_time - start_time:.2f} secs!'
+            f'Successfully imported GTFS feed "{feed_name}" from "{feed.url_or_path}" '
+            f"in {end_time - start_time:.2f} secs!"
         )
 
     def _delete_existing_gtfs_objects(self, feed):
