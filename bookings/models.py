@@ -1,22 +1,67 @@
+from urllib.parse import urljoin
 from uuid import uuid4
 
+import requests
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+from bookings.utils import TokenAuth
 from gtfs.models.base import TimestampedModel
 from maas.models import MaasOperator, TicketingSystem
+
+
+class TicketingSystemAPI:
+    TIMEOUT = 10
+
+    def __init__(self, ticketing_system: TicketingSystem, maas_operator: MaasOperator):
+        self.ticketing_system = ticketing_system
+        self.maas_operator = maas_operator
+
+    def reserve(self, ticket_data: dict):
+        url = self.ticketing_system.api_url
+        return self._post(url, ticket_data)
+
+    def confirm(self, identifier: str):
+        url = urljoin(self.ticketing_system.api_url, f"{identifier}/confirm/")
+
+        return self._post(url, {})
+
+    def _post(self, url: str, data):
+        from bookings.serializers import ApiBookingSerializer
+
+        payload = ApiBookingSerializer(
+            {"maas_operator": self.maas_operator, **data}
+        ).data
+
+        if not self.ticketing_system.api_key:
+            raise Exception("Ticketing system doesn't define an API key.")
+
+        response = requests.post(
+            url,
+            json=payload,
+            timeout=self.TIMEOUT,
+            auth=TokenAuth(self.ticketing_system.api_key),
+        )
+
+        response.raise_for_status()
+        return response.json()
 
 
 class BookingQueryset(models.QuerySet):
     def for_maas_operator(self, maas_operator: MaasOperator):
         return self.filter(maas_operator=maas_operator)
 
-    def create_reservation(self, maas_operator, ticketing_system, *args, **kwargs):
-        # TODO call ticketing system
-        response = {"id": str(uuid4())}
+    def create_reservation(
+        self,
+        maas_operator: MaasOperator,
+        ticketing_system: TicketingSystem,
+        ticket_data: dict,
+    ):
+        api = TicketingSystemAPI(ticketing_system, maas_operator)
+        response_data = api.reserve(ticket_data)
 
         return Booking.objects.create(
-            source_id=response["id"],
+            source_id=response_data["id"],
             maas_operator=maas_operator,
             ticketing_system=ticketing_system,
         )
@@ -59,6 +104,12 @@ class Booking(TimestampedModel):
         return f"Booking {self.api_id} ({self.status})"
 
     def confirm(self):
-        # TODO call ticketing system
+        """Confirm the booking and return ticket information."""
         self.status = Booking.Status.CONFIRMED
+
+        api = TicketingSystemAPI(self.ticketing_system, self.maas_operator)
+        response_data = api.confirm(self.source_id)
+
+        self.source_id = response_data["id"]
         self.save()
+        return response_data.get("tickets", [])

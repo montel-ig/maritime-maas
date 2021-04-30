@@ -7,7 +7,7 @@ from maas.models import TicketingSystem, TransportServiceProvider
 
 
 def get_feed_for_maas_operator(maas_operator, has_permission):
-    ticketing_system = baker.make(TicketingSystem)
+    ticketing_system = baker.make(TicketingSystem, api_key="APIKEY")
     feed = baker.make(Feed, ticketing_system=ticketing_system)
     transport_service_provider = baker.make(
         TransportServiceProvider, ticketing_system=ticketing_system
