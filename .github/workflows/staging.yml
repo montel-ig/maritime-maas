@@ -51,6 +51,7 @@ jobs:
           K8S_SECRET_SENTRY_DSN: ${{ secrets.GH_SENTRY_DSN }}
           K8S_SECRET_SENTRY_ENVIRONMENT: "test"
           K8S_SECRET_DATABASE_URL: ${{ secrets.K8S_SECRET_DATABASE_URL_STAGING }}
+          K8S_SECRET_MOCK_TICKETING_API: 1
 
       - name: Update GTFS feeds
         uses: City-of-Helsinki/setup-cronjob-action@main

@@ -1,12 +1,12 @@
 import logging
 from collections import defaultdict
-from datetime import datetime, time
+from datetime import datetime
 from math import isnan
 from timeit import default_timer as timer
 
 import gtfs_kit
 from django.contrib.gis.db import models
-from django.contrib.gis.geos import Point
+from django.contrib.gis.geos import LineString, Point
 from django.db import transaction
 
 from gtfs.importers.gtfs_feed_reader import GTFSFeedReader
@@ -20,6 +20,7 @@ from gtfs.models import (
     FeedInfo,
     RiderCategory,
     Route,
+    Shape,
     Stop,
     StopTime,
     Trip,
@@ -80,7 +81,8 @@ class GTFSFeedImporter:
             "direction_id": "direction_id",
             "wheelchair_accessible": "wheelchair_accessible",
             "bikes_allowed": "bikes_allowed",
-            "capacity_sales": "capacity_sales",
+            "shape_id": "shape_id",
+            "block_id": "block_id",
         },
         Route: {
             "source_id": "route_id",
@@ -89,6 +91,7 @@ class GTFSFeedImporter:
             "long_name": "route_long_name",
             "type": "route_type",
             "sort_order": "route_sort_order",
+            "capacity_sales": "capacity_sales",
         },
         Stop: {
             "source_id": "stop_id",
@@ -135,9 +138,9 @@ class GTFSFeedImporter:
     }
 
     def __init__(
-            self,
-            object_creation_batch_size=2000,  # Stetson-Harrison method
-            logger=None,
+        self,
+        object_creation_batch_size=2000,  # Stetson-Harrison method
+        logger=None,
     ):
         self.object_creation_batch_size = object_creation_batch_size
         self.logger = logger or logging.getLogger(__name__)
@@ -173,6 +176,7 @@ class GTFSFeedImporter:
 
             self._delete_existing_gtfs_objects(feed)
 
+            self._import_shapes(feed, gtfs_feed)
             for model, gtfs_attribute in self.MODELS_AND_GTFS_KIT_ATTRIBUTES:
                 self._import_model(feed, model, getattr(gtfs_feed, gtfs_attribute))
 
@@ -198,12 +202,45 @@ class GTFSFeedImporter:
         )
 
     def _delete_existing_gtfs_objects(self, feed):
-        for model, _ in self.MODELS_AND_GTFS_KIT_ATTRIBUTES:
+        models_to_delete = [Shape] + [m[0] for m in self.MODELS_AND_GTFS_KIT_ATTRIBUTES]
+        for model in models_to_delete:
             self.logger.debug(
                 f"Deleting existing {model._meta.verbose_name_plural}"
                 f"{' and departures' if model == Trip else ''}..."
             )
             model.objects.filter(feed=feed).delete()
+
+    def _import_shapes(self, feed, gtfs_feed):
+        gtfs_data = gtfs_feed.shapes
+        num_of_rows = len(gtfs_data) if gtfs_data is not None else 0
+
+        if num_of_rows:
+            self.logger.info(f"Importing {num_of_rows} shape points...")
+        else:
+            self.logger.info("No shapes.")
+            return
+
+        grouped = gtfs_data.sort_values(by="shape_pt_sequence").groupby("shape_id")
+        num_of_shapes = len(grouped)
+
+        for num_of_processed, gtfs_row in enumerate(
+            grouped[["shape_pt_lat", "shape_pt_lon"]], 1
+        ):
+            coordinates = gtfs_row[1][["shape_pt_lat", "shape_pt_lon"]]
+            geometry = LineString(
+                [(c.shape_pt_lon, c.shape_pt_lat) for c in coordinates.itertuples()]
+            )
+            shape = Shape.objects.create(
+                feed=feed, source_id=gtfs_row[0], geometry=geometry
+            )
+            self.id_cache[Shape].update({shape.source_id: shape.id})
+            if (
+                num_of_processed % self.object_creation_batch_size == 0
+                or num_of_processed >= num_of_shapes
+            ):
+                self.logger.debug(
+                    f"Processed {num_of_processed}/{num_of_shapes} shapes"
+                )
 
     def _import_model(self, feed, model, gtfs_data):  # noqa: C901
         num_of_rows = len(gtfs_data) if gtfs_data is not None else 0
@@ -255,9 +292,9 @@ class GTFSFeedImporter:
                 else:
                     model_field = model._meta.get_field(model_field_name)
                     if (
-                            converted_value := self._convert_value(
-                                gtfs_value, model_field, gtfs_field
-                            )
+                        converted_value := self._convert_value(
+                            gtfs_value, model_field, gtfs_field
+                        )
                     ) is not None:
                         creation_attributes[model_field_name] = converted_value
 
@@ -278,8 +315,8 @@ class GTFSFeedImporter:
                 objs_to_create.append(new_obj)
 
             if (
-                    num_of_processed % self.object_creation_batch_size == 0
-                    or num_of_processed >= num_of_rows  # yes this should never be GT
+                num_of_processed % self.object_creation_batch_size == 0
+                or num_of_processed >= num_of_rows  # yes this should never be GT
             ):
                 created_objs = model.objects.bulk_create(objs_to_create)
 
@@ -309,12 +346,6 @@ class GTFSFeedImporter:
         total_num_of_created = 0
 
         for index, trip_activity in trip_activities.iterrows():
-            num_of_processed = int(index) + 1
-            if (num_of_processed % self.object_creation_batch_size) == 0:
-                self.logger.debug(
-                    f"Processed {num_of_processed}/{num_of_activities} trips"
-                )
-
             for date_str in trip_activity[trip_activity == 1].index:
                 trip = self.id_cache[Trip][trip_activity["trip_id"]]
                 trip_date = gtfs_kit.datestr_to_date(date_str)
@@ -327,6 +358,14 @@ class GTFSFeedImporter:
                     Departure.objects.bulk_create(objs_to_create)
                     total_num_of_created += len(objs_to_create)
                     objs_to_create = []
+
+            num_of_processed = int(index) + 1
+            if (
+                num_of_processed % self.object_creation_batch_size
+            ) == 0 or num_of_processed >= num_of_activities:
+                self.logger.debug(
+                    f"Processed {num_of_processed}/{num_of_activities} trips"
+                )
 
         total_num_of_created += len(objs_to_create)
         Departure.objects.bulk_create(objs_to_create)
@@ -341,8 +380,6 @@ class GTFSFeedImporter:
             if gtfs_field == "agency_id" and not value:
                 value = self._get_default_agency_id()
             return value
-        elif isinstance(model_field, models.TimeField):
-            return self._convert_time(gtfs_value)
         elif isinstance(model_field, models.DateField):
             return self._convert_date(gtfs_value)
         elif isinstance(model_field, models.PointField):
@@ -350,7 +387,7 @@ class GTFSFeedImporter:
         elif isinstance(model_field, models.IntegerField):
             return self._convert_int(gtfs_value)
         elif isinstance(model_field, models.CharField) or isinstance(
-                model_field, models.TextField
+            model_field, models.TextField
         ):
             return self._convert_str(gtfs_value)
         else:
@@ -414,19 +451,6 @@ class GTFSFeedImporter:
     @staticmethod
     def _convert_date(gtfs_value):
         return datetime.strptime(gtfs_value, "%Y%m%d").date() if gtfs_value else None
-
-    @staticmethod
-    def _convert_time(gtfs_time_value):
-        # TODO THIS DOES NOT ACTUALLY WORK IN ALL SITUATIONS!
-        # In GTFS it is possible for a time to go past midnight like 26:00:00.
-        # It is probably not possible to support those with Django's TimeField which we
-        # are using ATM. For now the times that go too far are just clipped.
-        hours, mins, secs = map(int, gtfs_time_value.split(":"))
-        if hours > 23:
-            hours = 23
-            mins = 59
-            secs = 59
-        return time(hours, mins, secs)
 
     @staticmethod
     def _convert_point(gtfs_value):

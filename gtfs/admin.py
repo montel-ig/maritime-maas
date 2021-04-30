@@ -1,6 +1,7 @@
 import logging
 
 from django.contrib import admin, messages
+from django.contrib.gis.admin import OSMGeoAdmin
 from django.utils.translation import gettext_lazy as _
 from parler.admin import TranslatableAdmin
 from requests import RequestException
@@ -17,6 +18,7 @@ from .models import (
     FeedInfo,
     RiderCategory,
     Route,
+    Shape,
     Stop,
     StopTime,
     Trip,
@@ -60,6 +62,11 @@ class FeedAdmin(admin.ModelAdmin):
             self.message_user(request, _("Selected feeds updated."), messages.SUCCESS)
 
     update_feed.short_description = _("Update selected feeds")
+
+
+@admin.register(Shape)
+class ShapeAdmin(OSMGeoAdmin):
+    pass
 
 
 admin.site.register(Agency, TranslatableAdmin)

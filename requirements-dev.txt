@@ -39,6 +39,8 @@ flake8==3.8.4
     #   -r requirements-dev.in
     #   flake8-bugbear
     #   flake8-polyfill
+freezegun==1.1.0
+    # via -r requirements-dev.in
 iniconfig==1.1.1
     # via pytest
 ipython-genutils==0.2.0
@@ -94,12 +96,16 @@ pytest==6.2.2
     #   -r requirements-dev.in
     #   pytest-cov
     #   pytest-django
+python-dateutil==2.8.1
+    # via freezegun
 pytz==2021.1
     # via django
 regex==2020.11.13
     # via black
 six==1.15.0
-    # via snapshottest
+    # via
+    #   python-dateutil
+    #   snapshottest
 snapshottest==0.6.0
     # via -r requirements-dev.in
 sqlparse==0.4.1

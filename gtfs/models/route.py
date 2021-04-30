@@ -29,6 +29,11 @@ class Route(TranslatableModel, GTFSModelWithSourceID):
         TROLLEYBUS = 11, _("Trolleybus")
         MONORAIL = 12, _("Monorail")
 
+    class CapacitySales(models.IntegerChoices):
+        DISABLED = 0, _("Disabled")
+        ENABLED = 1, _("Enabled")
+        REQUIRED = 2, _("Required")
+
     translations = TranslatedFields(
         long_name=models.CharField(
             verbose_name=_("long name"), max_length=255, blank=True
@@ -49,6 +54,11 @@ class Route(TranslatableModel, GTFSModelWithSourceID):
     )
     sort_order = models.PositiveSmallIntegerField(
         verbose_name=_("sort order"), null=True, blank=True
+    )
+    capacity_sales = models.PositiveSmallIntegerField(
+        verbose_name=_("capacity sales"),
+        choices=CapacitySales.choices,
+        default=CapacitySales.DISABLED,
     )
 
     objects = RouteQueryset.as_manager()

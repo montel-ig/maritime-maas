@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 from model_bakery import baker
 
 from gtfs.models import Feed
@@ -24,3 +26,16 @@ def clean_stop_for_snapshot(stop):
 
 def clean_stops_for_snapshot(stops):
     return [clean_stop_for_snapshot(s) for s in stops]
+
+
+def clean_shape_for_snapshot(shape):
+    if not shape:
+        return shape
+    shape = deepcopy(shape)
+    # we don't want no floats in our snapshots
+    shape["geometry"].pop("coordinates")
+    return shape
+
+
+def clean_shapes_for_snapshot(shapes):
+    return [clean_shape_for_snapshot(s) for s in shapes]

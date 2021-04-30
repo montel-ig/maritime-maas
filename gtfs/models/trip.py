@@ -4,6 +4,7 @@ from parler.models import TranslatableModel, TranslatedFields
 
 from .base import GTFSModelWithSourceID
 from .route import Route
+from .shape import Shape
 
 
 class Trip(TranslatableModel, GTFSModelWithSourceID):
@@ -17,11 +18,6 @@ class Trip(TranslatableModel, GTFSModelWithSourceID):
         ALLOWED = 1, _("Allowed")
         NOT_ALLOWED = 2, _("Not allowed")
 
-    class CapacitySales(models.IntegerChoices):
-        DISABLED = 0, _("Disabled")
-        ENABLED = 1, _("Enabled")
-        REQUIRED = 2, _("Required")
-
     translations = TranslatedFields(
         headsign=models.CharField(
             verbose_name=_("headsign"), max_length=255, blank=True
@@ -31,6 +27,7 @@ class Trip(TranslatableModel, GTFSModelWithSourceID):
         ),
     )
     route = models.ForeignKey(Route, verbose_name=_("route"), on_delete=models.CASCADE)
+
     direction_id = models.PositiveSmallIntegerField(
         verbose_name=_("direction ID"), blank=True, null=True
     )
@@ -44,11 +41,10 @@ class Trip(TranslatableModel, GTFSModelWithSourceID):
         choices=BikesAllowed.choices,
         default=BikesAllowed.UNKNOWN,
     )
-    capacity_sales = models.PositiveSmallIntegerField(
-        verbose_name=_("capacity sales"),
-        choices=CapacitySales.choices,
-        default=CapacitySales.DISABLED,
+    shape = models.ForeignKey(
+        Shape, verbose_name=_("shape"), blank=True, null=True, on_delete=models.SET_NULL
     )
+    block_id = models.CharField(verbose_name=_("block ID"), max_length=255, blank=True)
 
     class Meta:
         verbose_name = _("trip")

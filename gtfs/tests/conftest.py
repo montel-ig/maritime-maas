@@ -1,5 +1,5 @@
 import itertools
-from datetime import date, time, timedelta
+from datetime import date, timedelta
 from uuid import UUID
 
 import pytest
@@ -49,7 +49,6 @@ def route_with_departures(maas_operator, api_id_generator):
     )
 
     route = baker.make(Route, feed=feed, api_id=api_id_generator, agency=agency)
-
     trips = baker.make(
         Trip,
         route=route,
@@ -58,6 +57,7 @@ def route_with_departures(maas_operator, api_id_generator):
         short_name="short_name of test trip ",
         headsign="headsign of test trip ",
         direction_id=itertools.cycle([0, 1]),
+        block_id=seq("block_id of test trip "),
         _quantity=2,
     )
 
@@ -65,19 +65,31 @@ def route_with_departures(maas_operator, api_id_generator):
         Stop,
         feed=feed,
         api_id=api_id_generator,
+        name="stop ",
+        tts_name="tts_name of stop ",
+        code=seq("code of stop"),
         _quantity=2,
-        name="Stop",
-        tts_name="tts_name for stop",
     )
-
     for i, trip in enumerate(trips):
         baker.make(
             StopTime,
             trip=trip,
             stop=iter(stops),
             feed=feed,
-            arrival_time=seq(time(12, i * 15), timedelta(hours=1)),
-            departure_time=seq(time(12, i * 15), timedelta(hours=1)),
+            # 13:00, 13:15, 00:00, 00:15 in Helsinki time
+            arrival_time=iter(
+                [
+                    timedelta(hours=15, minutes=i * 15),
+                    timedelta(hours=26, minutes=i * 15),
+                ]
+            ),
+            # 13:00, 13:15, 01:00, 01:15 in Helsinki time
+            departure_time=iter(
+                [
+                    timedelta(hours=15, minutes=i * 15),
+                    timedelta(hours=27, minutes=i * 15),
+                ]
+            ),
             stop_headsign="stop_headsign of test stop time ",
             stop_sequence=seq(0),
             _quantity=2,

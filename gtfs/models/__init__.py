@@ -7,6 +7,7 @@ from .fare_rule import FareRule
 from .feed import Feed, FeedInfo
 from .rider_category import RiderCategory
 from .route import Route
+from .shape import Shape
 from .stop import Stop
 from .stop_time import StopTime
 from .trip import Trip
@@ -23,6 +24,7 @@ __all__ = [
     "GTFSModelWithSourceID",
     "RiderCategory",
     "Route",
+    "Shape",
     "Stop",
     "StopTime",
     "Trip",

@@ -32,6 +32,7 @@ env = environ.Env(
     SENTRY_ENVIRONMENT=(str, ""),
     CORS_ORIGIN_WHITELIST=(list, ["http://localhost:3000"]),
     CORS_ORIGIN_ALLOW_ALL=(bool, False),
+    MOCK_TICKETING_API=(bool, False),
 )
 if os.path.exists(env_file):
     env.read_env(env_file)
@@ -82,6 +83,8 @@ STATIC_URL = env("STATIC_URL")
 
 ROOT_URLCONF = "maritime_maas.urls"
 WSGI_APPLICATION = "maritime_maas.wsgi.application"
+
+MOCK_TICKETING_API = env("MOCK_TICKETING_API")
 
 try:
     REVISION = (

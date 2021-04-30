@@ -84,6 +84,10 @@ def test_routes_departures(maas_api_client, snapshot, filters, route_with_depart
 
     for stop_content in json.loads(response.content)["stops"]:
         if "date" in filters:
+            # REMARK: even when there is a single date filter, snapshots of a single
+            # test can still include arrival_time and departure_time datetimes of
+            # multiple days, because we want GTFS times that go past midnight
+            # (like 26:00) to be still tied to the date of their departure
             snapshot.assert_match(stop_content["departures"])
         else:
             assert "departures" not in stop_content

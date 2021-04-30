@@ -11,6 +11,8 @@ from gtfs.models import (
     Feed,
     FeedInfo,
     RiderCategory,
+    Route,
+    Shape,
     Stop,
     StopTime,
     Trip,
@@ -48,20 +50,26 @@ def test_gtfs_feed_importer():
     route.set_current_language("sv")
     assert route.long_name == "Skanslandet rutt"
     assert route.sort_order == 1
+    assert route.capacity_sales == Route.CapacitySales.ENABLED
 
     assert route.trips.count() == 5
     trip = route.trips.first()
     assert trip.source_id == "kauppatori_vallisaari_1"
     assert trip.wheelchair_accessible == Trip.WheelchairAccessible.ACCESSIBLE
     assert trip.bikes_allowed == Trip.BikesAllowed.ALLOWED
-    assert trip.capacity_sales == Trip.CapacitySales.REQUIRED
+    assert trip.block_id == "itäblokki"
 
     assert trip.stop_times.count() == 2
     stop_time = trip.stop_times.first()
-    assert stop_time.arrival_time == datetime.time(8, 0)
-    assert stop_time.departure_time == datetime.time(8, 0)
+    assert stop_time.arrival_time == datetime.timedelta(hours=8)
+    assert stop_time.departure_time == datetime.timedelta(hours=8)
     assert stop_time.stop_sequence == 1
     assert stop_time.timepoint == StopTime.Timepoint.EXACT
+    stop_time_2 = trip.stop_times.last()
+    assert stop_time_2.arrival_time == datetime.timedelta(hours=24)
+    assert stop_time_2.departure_time == datetime.timedelta(hours=25, minutes=30)
+    assert stop_time_2.stop_sequence == 2
+    assert stop_time_2.timepoint == StopTime.Timepoint.APPROXIMATE
 
     stop = stop_time.stop
     assert stop.name == "Kauppatori - Lyypekinlaituri"
@@ -103,6 +111,9 @@ def test_gtfs_feed_importer():
     assert feed_info.end_date == datetime.date(2021, 12, 31)
     assert feed_info.version == "1"
     assert feed_info.contact_email == "feed_contact@example.com"
+
+    assert Shape.objects.count() == 3
+    assert len(trip.shape.geometry) == 9
 
 
 @pytest.mark.django_db

@@ -9,14 +9,14 @@ snapshots = Snapshot()
 snapshots["test_stops 1"] = [
     {
         "id": "00000000-0000-0000-0000-000000000001",
-        "name": "Stop",
-        "tts_name": "tts_name for stop",
+        "name": "stop ",
+        "tts_name": "tts_name of stop ",
         "wheelchair_boarding": 0,
     },
     {
         "id": "00000000-0000-0000-0000-000000000002",
-        "name": "Stop",
-        "tts_name": "tts_name for stop",
+        "name": "stop ",
+        "tts_name": "tts_name of stop ",
         "wheelchair_boarding": 0,
     },
 ]
@@ -25,7 +25,7 @@ snapshots["test_stops_departures[filters2] 1"] = [
     {
         "arrival_time": "2021-02-18T13:00:00Z",
         "bikes_allowed": 0,
-        "capacity_sales": 0,
+        "block_id": "block_id of test trip 1",
         "departure_headsign": "headsign of test trip ",
         "departure_time": "2021-02-18T13:00:00Z",
         "direction_id": 0,
@@ -40,7 +40,7 @@ snapshots["test_stops_departures[filters2] 1"] = [
     {
         "arrival_time": "2021-02-18T13:15:00Z",
         "bikes_allowed": 0,
-        "capacity_sales": 0,
+        "block_id": "block_id of test trip 2",
         "departure_headsign": "headsign of test trip ",
         "departure_time": "2021-02-18T13:15:00Z",
         "direction_id": 1,
@@ -58,7 +58,7 @@ snapshots["test_stops_departures[filters3] 1"] = [
     {
         "arrival_time": "2021-02-19T13:00:00Z",
         "bikes_allowed": 0,
-        "capacity_sales": 0,
+        "block_id": "block_id of test trip 1",
         "departure_headsign": "headsign of test trip ",
         "departure_time": "2021-02-19T13:00:00Z",
         "direction_id": 0,
@@ -76,7 +76,7 @@ snapshots["test_stops_departures[filters4] 1"] = [
     {
         "arrival_time": "2021-02-18T13:00:00Z",
         "bikes_allowed": 0,
-        "capacity_sales": 0,
+        "block_id": "block_id of test trip 1",
         "departure_headsign": "headsign of test trip ",
         "departure_time": "2021-02-18T13:00:00Z",
         "direction_id": 0,
@@ -94,7 +94,7 @@ snapshots["test_stops_departures[filters5] 1"] = [
     {
         "arrival_time": "2021-02-18T13:15:00Z",
         "bikes_allowed": 0,
-        "capacity_sales": 0,
+        "block_id": "block_id of test trip 2",
         "departure_headsign": "headsign of test trip ",
         "departure_time": "2021-02-18T13:15:00Z",
         "direction_id": 1,
