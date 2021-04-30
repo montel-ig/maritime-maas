@@ -44,13 +44,13 @@ class GTFSFeedImporter:
         (FeedInfo, "feed_info"),
     )
 
-    TRANSLATION_MAPPING = {
-        "table_name": "table_name",
-        "field_name": "field_name",
-        "language": "language",
-        "translation": "translation",
-        "record_id": "record_id",
-    }
+    TRANSLATION_MAPPING = [
+        "table_name",
+        "field_name",
+        "language",
+        "translation",
+        "record_id",
+    ]
 
     TRANSLATIONS = "translations"
 
@@ -135,9 +135,9 @@ class GTFSFeedImporter:
     }
 
     def __init__(
-        self,
-        object_creation_batch_size=2000,  # Stetson-Harrison method
-        logger=None,
+            self,
+            object_creation_batch_size=2000,  # Stetson-Harrison method
+            logger=None,
     ):
         self.object_creation_batch_size = object_creation_batch_size
         self.logger = logger or logging.getLogger(__name__)
@@ -179,7 +179,7 @@ class GTFSFeedImporter:
             self._create_departures(gtfs_feed)
 
             feed.fingerprint = self.feed_reader.get_feed_fingerprint(feed)
-            feed.save()  # Update the feed's updated_at.
+
             translation_list = self._form_translation_list(
                 getattr(gtfs_feed, self.TRANSLATIONS)
             )
@@ -205,7 +205,7 @@ class GTFSFeedImporter:
             )
             model.objects.filter(feed=feed).delete()
 
-    def _import_model(self, feed, model, gtfs_data):
+    def _import_model(self, feed, model, gtfs_data):  # noqa: C901
         num_of_rows = len(gtfs_data) if gtfs_data is not None else 0
         plural_name = model._meta.verbose_name_plural
 
@@ -245,7 +245,7 @@ class GTFSFeedImporter:
                     else [getattr(gtfs_row, f, None) for f in gtfs_field]
                 )
 
-                if translation_model is not None and model_field_name in [
+                if translation_model and model_field_name in [
                     f.name for f in translation_model._meta.get_fields()
                 ]:
                     model_field = translation_model._meta.get_field(model_field_name)
@@ -255,9 +255,9 @@ class GTFSFeedImporter:
                 else:
                     model_field = model._meta.get_field(model_field_name)
                     if (
-                        converted_value := self._convert_value(
-                            gtfs_value, model_field, gtfs_field
-                        )
+                            converted_value := self._convert_value(
+                                gtfs_value, model_field, gtfs_field
+                            )
                     ) is not None:
                         creation_attributes[model_field_name] = converted_value
 
@@ -265,7 +265,7 @@ class GTFSFeedImporter:
             if hasattr(model, "populate_api_id"):
                 new_obj.populate_api_id()
 
-            if plural_name == "feed info":
+            if model == FeedInfo:
                 self.feed_lang = creation_attributes.get("lang")
 
             if translation_model is not None:
@@ -278,16 +278,14 @@ class GTFSFeedImporter:
                 objs_to_create.append(new_obj)
 
             if (
-                num_of_processed % self.object_creation_batch_size == 0
-                or num_of_processed >= num_of_rows  # yes this should never be GT
+                    num_of_processed % self.object_creation_batch_size == 0
+                    or num_of_processed >= num_of_rows  # yes this should never be GT
             ):
                 created_objs = model.objects.bulk_create(objs_to_create)
 
                 # update ID cache
                 if "source_id" in creation_attributes:
-                    obj_list = (
-                        created_objs if len(created_objs) > 0 else manually_created
-                    )
+                    obj_list = created_objs or manually_created
                     self.id_cache[model].update({o.source_id: o.id for o in obj_list})
 
                 objs_to_create = []
@@ -352,7 +350,7 @@ class GTFSFeedImporter:
         elif isinstance(model_field, models.IntegerField):
             return self._convert_int(gtfs_value)
         elif isinstance(model_field, models.CharField) or isinstance(
-            model_field, models.TextField
+                model_field, models.TextField
         ):
             return self._convert_str(gtfs_value)
         else:
@@ -379,9 +377,9 @@ class GTFSFeedImporter:
         for _num_of_processed, gtfs_row in enumerate(iterable_data, 1):
             translation_fields = {}
 
-            for model_field_name, gtfs_field in self.TRANSLATION_MAPPING.items():
+            for gtfs_field in self.TRANSLATION_MAPPING:
                 gtfs_value = getattr(gtfs_row, gtfs_field, None)
-                translation_fields[model_field_name] = self._convert_str(gtfs_value)
+                translation_fields[gtfs_field] = self._convert_str(gtfs_value)
             translations_list.append(translation_fields)
 
         return translations_list
@@ -395,22 +393,22 @@ class GTFSFeedImporter:
 
         if num_of_translations == 0:
             return
-        else:
-            self.logger.info(
-                f"Adding {num_of_translations} translations for {plural_name}..."
-            )
 
-        for trans in translations_for_model:
-            for model_field_name, gtfs_field in self.FIELD_MAPPING[model].items():
-                if trans.get("field_name") == gtfs_field:
-                    trans["field_name"] = model_field_name
+        self.logger.info(
+            f"Adding {num_of_translations} translations for {plural_name}..."
+        )
 
         obj_list = model.objects.all()
-        for obj in obj_list:
-            for trans in translations_for_model:
-                if trans.get("record_id") == obj.source_id:
-                    obj.set_current_language(trans.get("language"))
-                    setattr(obj, trans.get("field_name"), trans.get("translation"))
+
+        model_fields = [*self.FIELD_MAPPING[model]]
+        gtfs_fields = [*self.FIELD_MAPPING[model].values()]
+
+        for trans in translations_for_model:
+            obj = obj_list.get(source_id=trans.get("record_id"))
+            index = gtfs_fields.index(trans.get("field_name"))
+            model_field = model_fields[index]
+            obj.set_current_language(trans.get("language"))
+            setattr(obj, model_field, trans.get("translation"))
             obj.save()
 
     @staticmethod

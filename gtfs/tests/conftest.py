@@ -45,16 +45,18 @@ def route_with_departures(maas_operator, api_id_generator):
         name="test agency",
         url="www.testagency.com",
         logo_url="www.testagency.com/logo",
+        timezone="Europe/Helsinki",
     )
 
     route = baker.make(Route, feed=feed, api_id=api_id_generator, agency=agency)
+
     trips = baker.make(
         Trip,
         route=route,
         feed=feed,
-        source_id=seq("source_id of test trip "),
-        short_name=seq("short_name of test trip "),
-        headsign=seq("headsign of test trip "),
+        source_id="source_id of test trip ",
+        short_name="short_name of test trip ",
+        headsign="headsign of test trip ",
         direction_id=itertools.cycle([0, 1]),
         _quantity=2,
     )
@@ -63,11 +65,11 @@ def route_with_departures(maas_operator, api_id_generator):
         Stop,
         feed=feed,
         api_id=api_id_generator,
-        name=seq("stop "),
-        tts_name=seq("tts_name of stop "),
-        code=seq("code of stop"),
         _quantity=2,
+        name="Stop",
+        tts_name="tts_name for stop",
     )
+
     for i, trip in enumerate(trips):
         baker.make(
             StopTime,
@@ -76,7 +78,7 @@ def route_with_departures(maas_operator, api_id_generator):
             feed=feed,
             arrival_time=seq(time(12, i * 15), timedelta(hours=1)),
             departure_time=seq(time(12, i * 15), timedelta(hours=1)),
-            stop_headsign=seq("stop_headsign of test stop time ", start=i * 2),
+            stop_headsign="stop_headsign of test stop time ",
             stop_sequence=seq(0),
             _quantity=2,
         )
