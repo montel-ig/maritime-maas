@@ -1,5 +1,7 @@
 from django.contrib.gis.db import models
 from django.utils.translation import gettext_lazy as _
+from parler.managers import TranslatableQuerySet
+from parler.models import TranslatableModel, TranslatedFields, TranslationDoesNotExist
 
 from maas.models import MaasOperator
 
@@ -8,13 +10,13 @@ from .base import GTFSModelWithSourceID
 from .feed import Feed
 
 
-class RouteQueryset(models.QuerySet):
+class RouteQueryset(TranslatableQuerySet):
     def for_maas_operator(self, maas_operator: MaasOperator):
         feeds = Feed.objects.for_maas_operator(maas_operator)
         return self.filter(feed__in=feeds)
 
 
-class Route(GTFSModelWithSourceID):
+class Route(TranslatableModel, GTFSModelWithSourceID):
     class Type(models.IntegerChoices):
         TRAM = 0, _("Tram")
         SUBWAY = 1, _("Subway")
@@ -32,6 +34,13 @@ class Route(GTFSModelWithSourceID):
         ENABLED = 1, _("Enabled")
         REQUIRED = 2, _("Required")
 
+    translations = TranslatedFields(
+        long_name=models.CharField(
+            verbose_name=_("long name"), max_length=255, blank=True
+        ),
+        desc=models.TextField(verbose_name=_("description"), blank=True),
+        url=models.URLField(verbose_name=_("URL"), blank=True),
+    )
     agency = models.ForeignKey(
         Agency,
         verbose_name=_("agency"),
@@ -40,14 +49,9 @@ class Route(GTFSModelWithSourceID):
     short_name = models.CharField(
         verbose_name=_("short name"), max_length=32, blank=True
     )
-    long_name = models.CharField(
-        verbose_name=_("long name"), max_length=255, blank=True
-    )
-    desc = models.TextField(verbose_name=_("description"), blank=True)
     type = models.PositiveSmallIntegerField(
         verbose_name=_("type"), choices=Type.choices
     )
-    url = models.URLField(verbose_name=_("URL"), blank=True)
     sort_order = models.PositiveSmallIntegerField(
         verbose_name=_("sort order"), null=True, blank=True
     )
@@ -65,4 +69,9 @@ class Route(GTFSModelWithSourceID):
         default_related_name = "routes"
 
     def __str__(self):
-        return self.short_name or self.long_name
+        try:
+            return self.short_name or self.safe_translation_getter(
+                "long_name", any_language=True
+            )
+        except TranslationDoesNotExist:
+            return self.super().__str__()

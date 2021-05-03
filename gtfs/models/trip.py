@@ -1,12 +1,13 @@
 from django.contrib.gis.db import models
 from django.utils.translation import gettext_lazy as _
+from parler.models import TranslatableModel, TranslatedFields
 
 from .base import GTFSModelWithSourceID
 from .route import Route
 from .shape import Shape
 
 
-class Trip(GTFSModelWithSourceID):
+class Trip(TranslatableModel, GTFSModelWithSourceID):
     class WheelchairAccessible(models.IntegerChoices):
         UNKNOWN = 0, _("Unknown")
         ACCESSIBLE = 1, _("Accessible")
@@ -17,11 +18,16 @@ class Trip(GTFSModelWithSourceID):
         ALLOWED = 1, _("Allowed")
         NOT_ALLOWED = 2, _("Not allowed")
 
-    route = models.ForeignKey(Route, verbose_name=_("route"), on_delete=models.CASCADE)
-    headsign = models.CharField(verbose_name=_("headsign"), max_length=255, blank=True)
-    short_name = models.CharField(
-        verbose_name=_("short name"), max_length=64, blank=True
+    translations = TranslatedFields(
+        headsign=models.CharField(
+            verbose_name=_("headsign"), max_length=255, blank=True
+        ),
+        short_name=models.CharField(
+            verbose_name=_("short name"), max_length=64, blank=True
+        ),
     )
+    route = models.ForeignKey(Route, verbose_name=_("route"), on_delete=models.CASCADE)
+
     direction_id = models.PositiveSmallIntegerField(
         verbose_name=_("direction ID"), blank=True, null=True
     )

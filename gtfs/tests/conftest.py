@@ -56,9 +56,9 @@ def route_with_departures(maas_operator, api_id_generator):
         Trip,
         route=route,
         feed=feed,
-        source_id=seq("source_id of test trip "),
-        short_name=seq("short_name of test trip "),
-        headsign=seq("headsign of test trip "),
+        source_id="source_id of test trip ",
+        short_name="short_name of test trip ",
+        headsign="headsign of test trip ",
         direction_id=itertools.cycle([0, 1]),
         block_id=seq("block_id of test trip "),
         _quantity=2,
@@ -68,8 +68,8 @@ def route_with_departures(maas_operator, api_id_generator):
         Stop,
         feed=feed,
         api_id=api_id_generator,
-        name=seq("stop "),
-        tts_name=seq("tts_name of stop "),
+        name="stop ",
+        tts_name="tts_name of stop ",
         code=seq("code of stop"),
         _quantity=2,
     )
@@ -93,7 +93,7 @@ def route_with_departures(maas_operator, api_id_generator):
                     timedelta(hours=27, minutes=i * 15),
                 ]
             ),
-            stop_headsign=seq("stop_headsign of test stop time ", start=i * 2),
+            stop_headsign="stop_headsign of test stop time ",
             stop_sequence=seq(0),
             _quantity=2,
         )

@@ -3,6 +3,7 @@ from datetime import datetime
 from django.contrib.gis.db import models
 from django.utils.timezone import make_aware
 from django.utils.translation import gettext_lazy as _
+from parler.models import TranslatableModel, TranslatedFields
 from pytz import timezone, utc
 
 from .base import GTFSModel
@@ -10,11 +11,16 @@ from .stop import Stop
 from .trip import Trip
 
 
-class StopTime(GTFSModel):
+class StopTime(TranslatableModel, GTFSModel):
     class Timepoint(models.IntegerChoices):
         APPROXIMATE = 0, _("Times are considered approximate")
         EXACT = 1, _("Times are considered exact")
 
+    translations = TranslatedFields(
+        stop_headsign=models.CharField(
+            verbose_name=_("stop headsign"), max_length=255, blank=True
+        )
+    )
     trip = models.ForeignKey(Trip, verbose_name=_("trip"), on_delete=models.CASCADE)
     stop = models.ForeignKey(Stop, verbose_name=_("stop"), on_delete=models.CASCADE)
 
@@ -28,9 +34,6 @@ class StopTime(GTFSModel):
     )
 
     stop_sequence = models.PositiveIntegerField(verbose_name=_("stop sequence"))
-    stop_headsign = models.CharField(
-        verbose_name=_("stop headsign"), max_length=255, blank=True
-    )
     timepoint = models.PositiveSmallIntegerField(
         verbose_name=_("timepoint"),
         choices=Timepoint.choices,

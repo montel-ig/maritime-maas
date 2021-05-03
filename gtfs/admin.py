@@ -3,6 +3,7 @@ import logging
 from django.contrib import admin, messages
 from django.contrib.gis.admin import OSMGeoAdmin
 from django.utils.translation import gettext_lazy as _
+from parler.admin import TranslatableAdmin
 from requests import RequestException
 
 from .importers import GTFSFeedUpdater
@@ -68,13 +69,13 @@ class ShapeAdmin(OSMGeoAdmin):
     pass
 
 
-admin.site.register(Agency)
+admin.site.register(Agency, TranslatableAdmin)
 admin.site.register(Departure)
 admin.site.register(Fare)
 admin.site.register(FareRiderCategory)
 admin.site.register(FareRule)
 admin.site.register(RiderCategory)
-admin.site.register(Route)
-admin.site.register(Stop)
-admin.site.register(StopTime)
-admin.site.register(Trip)
+admin.site.register(Route, TranslatableAdmin)
+admin.site.register(Stop, TranslatableAdmin)
+admin.site.register(StopTime, TranslatableAdmin)
+admin.site.register(Trip, TranslatableAdmin)

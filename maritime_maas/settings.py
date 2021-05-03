@@ -30,7 +30,7 @@ env = environ.Env(
     ),
     SENTRY_DSN=(str, ""),
     SENTRY_ENVIRONMENT=(str, ""),
-    CORS_ORIGIN_WHITELIST=(list, []),
+    CORS_ORIGIN_WHITELIST=(list, ["http://localhost:3000"]),
     CORS_ORIGIN_ALLOW_ALL=(bool, False),
     MOCK_TICKETING_API=(bool, False),
 )
@@ -50,6 +50,25 @@ DATABASES["default"]["ENGINE"] = "django.contrib.gis.db.backends.postgis"
 
 LANGUAGES = (("fi", "Finnish"), ("en", "English"), ("sv", "Swedish"))
 TICKET_LANGUAGES = tuple(lang for lang, _ in LANGUAGES)
+
+PARLER_DEFAULT_LANGUAGE_CODE = "fi"
+PARLER_LANGUAGES = {
+    None: (
+        {
+            "code": "fi",
+        },
+        {
+            "code": "en",
+        },
+        {
+            "code": "sv",
+        },
+    ),
+    "default": {
+        "fallback": "fi",  # defaults to PARLER_DEFAULT_LANGUAGE_CODE
+        "hide_untranslated": False,  # the default; let .active_translations() return fallbacks too.
+    },
+}
 
 LANGUAGE_CODE = "fi"
 TIME_ZONE = "Europe/Helsinki"
@@ -98,6 +117,7 @@ INSTALLED_APPS = [
     "rest_framework_gis",
     "rest_framework.authtoken",
     "corsheaders",
+    "parler",
     # local apps
     "utils",
     "gtfs",
@@ -114,6 +134,7 @@ MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "django.middleware.locale.LocaleMiddleware",
 ]
 
 TEMPLATES = [

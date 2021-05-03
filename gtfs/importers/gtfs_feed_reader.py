@@ -28,11 +28,20 @@ class FareRiderCategorySerializer(serializers.Serializer):
     currency_type = serializers.CharField(max_length=3)
 
 
+class TranslationSerializer(serializers.Serializer):
+    table_name = serializers.CharField()
+    field_name = serializers.CharField()
+    language = serializers.CharField()
+    translation = serializers.CharField()
+    record_id = serializers.CharField()
+
+
 class GTFSFeedReader:
 
     EXTRA_FILES = {
         "rider_categories": RiderCategorySerializer,
         "fare_rider_categories": FareRiderCategorySerializer,
+        "translations": TranslationSerializer,
     }
 
     def read_feed(self, url_or_filename):

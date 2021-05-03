@@ -44,6 +44,11 @@ def test_gtfs_feed_importer():
     route = agency.routes.first()
     assert route.source_id == "vallisaari_rengas"
     assert route.short_name == "vallisaari"
+    assert route.long_name == "Vallisaaren reitti"
+    route.set_current_language("en")
+    assert route.long_name == "Vallisaari Route"
+    route.set_current_language("sv")
+    assert route.long_name == "Skanslandet rutt"
     assert route.sort_order == 1
     assert route.capacity_sales == Route.CapacitySales.ENABLED
 
