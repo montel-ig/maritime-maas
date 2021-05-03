@@ -89,6 +89,7 @@ class GTFSFeedImporter:
             "agency_id": "agency_id",
             "short_name": "route_short_name",
             "long_name": "route_long_name",
+            "desc": "route_desc",
             "type": "route_type",
             "sort_order": "route_sort_order",
             "capacity_sales": "capacity_sales",
@@ -96,6 +97,7 @@ class GTFSFeedImporter:
         Stop: {
             "source_id": "stop_id",
             "name": "stop_name",
+            "desc": "stop_desc",
             "tts_name": "tts_stop_name",
             "point": ("stop_lat", "stop_lon"),
             "wheelchair_boarding": "wheelchair_boarding",
@@ -442,11 +444,13 @@ class GTFSFeedImporter:
 
         for trans in translations_for_model:
             obj = obj_list.get(source_id=trans.get("record_id"))
-            index = gtfs_fields.index(trans.get("field_name"))
-            model_field = model_fields[index]
-            obj.set_current_language(trans.get("language"))
-            setattr(obj, model_field, trans.get("translation"))
-            obj.save()
+            field_name = trans.get("field_name", "")
+            if field_name in gtfs_fields:
+                index = gtfs_fields.index(field_name)
+                model_field = model_fields[index]
+                obj.set_current_language(trans.get("language"))
+                setattr(obj, model_field, trans.get("translation"))
+                obj.save()
 
     @staticmethod
     def _convert_date(gtfs_value):

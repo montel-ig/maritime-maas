@@ -1,7 +1,7 @@
 from django.contrib.gis.db import models
 from django.utils.translation import gettext_lazy as _
 from parler.managers import TranslatableQuerySet
-from parler.models import TranslatableModel, TranslatedFields
+from parler.models import TranslatableModel, TranslatedFields, TranslationDoesNotExist
 
 from maas.models import MaasOperator
 
@@ -48,4 +48,7 @@ class Stop(TranslatableModel, GTFSModelWithSourceID):
         default_related_name = "stops"
 
     def __str__(self):
-        return self.name or super().__str__()
+        try:
+            return self.safe_translation_getter("name", any_language=True)
+        except TranslationDoesNotExist:
+            return self.super().__str__()
