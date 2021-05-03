@@ -47,7 +47,6 @@ class Permission(models.Model):
     transport_service_provider = models.ForeignKey(
         TransportServiceProvider, on_delete=models.CASCADE
     )
-    expires_at = models.DateField(null=True, blank=True)
 
     class Meta:
         verbose_name = _("permission")
