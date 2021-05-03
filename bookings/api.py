@@ -10,7 +10,6 @@ from bookings.serializers import BookingSerializer
 class BookingViewSet(
     mixins.CreateModelMixin,
     mixins.RetrieveModelMixin,
-    mixins.ListModelMixin,
     GenericViewSet,
 ):
     serializer_class = BookingSerializer
