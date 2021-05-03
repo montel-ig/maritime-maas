@@ -74,4 +74,4 @@ class Route(TranslatableModel, GTFSModelWithSourceID):
                 "long_name", any_language=True
             )
         except TranslationDoesNotExist:
-            return self.super().__str__()
+            return super().__str__()
