@@ -36,4 +36,4 @@ class Agency(TranslatableModel, GTFSModelWithSourceID):
         try:
             return self.safe_translation_getter("name", any_language=True)
         except TranslationDoesNotExist:
-            return self.super().__str__()
+            return super().__str__()
