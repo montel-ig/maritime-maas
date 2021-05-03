@@ -144,7 +144,7 @@ def test_rider_categories_with_prices(
         _quantity=len(rider_categories),
     )
 
-    with django_assert_max_num_queries(8):
+    with django_assert_max_num_queries(9):
         response = maas_api_client.get(ENDPOINT)
     response_content = json.loads(response.content)
 

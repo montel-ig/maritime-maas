@@ -9,7 +9,7 @@ from gtfs.models import Agency, Fare, FareRiderCategory, Route, Stop
 class AgencySerializer(serializers.ModelSerializer):
     class Meta:
         model = Agency
-        fields = ("name", "url", "logo_url")
+        fields = ("name", "url", "logo_url", "phone", "email")
 
 
 class FareRiderCategorySerializer(serializers.ModelSerializer):
@@ -36,13 +36,23 @@ class FareSerializer(serializers.ModelSerializer):
 class RouteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Route
-        fields = ("id", "name", "stops", "agency", "ticket_types", "capacity_sales")
+        fields = (
+            "id",
+            "name",
+            "stops",
+            "agency",
+            "ticket_types",
+            "capacity_sales",
+            "url",
+            "description",
+        )
 
     id = serializers.UUIDField(source="api_id")
     name = serializers.CharField(source="short_name")
     stops = serializers.SerializerMethodField()
     agency = AgencySerializer(read_only=True)
     ticket_types = serializers.SerializerMethodField()
+    description = serializers.CharField(source="desc")
 
     def get_stops(self, obj):
         stops = (
