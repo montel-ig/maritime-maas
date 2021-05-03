@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
 from bookings.models import Booking
-from bookings.serializers import BookingSerializer
+from bookings.serializers import BookingSerializer, PassthroughParametersSerializer
 
 
 class BookingViewSet(
@@ -21,7 +21,10 @@ class BookingViewSet(
     @action(detail=True, methods=["post"])
     def confirm(self, request, api_id=None):
         booking = self.get_object()
-        tickets = booking.confirm()
+
+        passthrough_parameters = PassthroughParametersSerializer(data=request.data)
+        passthrough_parameters.is_valid(raise_exception=True)
+        tickets = booking.confirm(passthrough_parameters.validated_data)
 
         booking_data = self.serializer_class(instance=booking).data
         booking_data["tickets"] = tickets

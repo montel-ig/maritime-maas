@@ -29,6 +29,8 @@ def test_api_call_for_reservation(
             }
         ],
         "locale": "fi",
+        "request_id": "requestID",
+        "transaction_id": "transactionID",
     }
 
     Booking.objects.create_reservation(maas_operator, ticketing_system, ticket_data)
@@ -40,6 +42,11 @@ def test_api_call_for_reservation(
 @pytest.mark.django_db
 def test_api_call_for_confirmation(maas_operator, requests_mock, snapshot):
     feed = get_feed_for_maas_operator(maas_operator, True)
+    extra_params = {
+        "locale": "fi",
+        "request_id": "requestID",
+        "transaction_id": "transactionID",
+    }
     reserved_booking = baker.make(
         Booking,
         maas_operator=maas_operator,
@@ -53,7 +60,7 @@ def test_api_call_for_confirmation(maas_operator, requests_mock, snapshot):
         status_code=status.HTTP_200_OK,
     )
 
-    reserved_booking.confirm()
+    reserved_booking.confirm(passed_parameters=extra_params)
 
     assert requests_mock.call_count == 1
     snapshot.assert_match(requests_mock.request_history[0].json())

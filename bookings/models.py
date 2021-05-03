@@ -1,3 +1,4 @@
+from typing import Optional
 from urllib.parse import urljoin
 from uuid import uuid4
 
@@ -21,10 +22,10 @@ class TicketingSystemAPI:
         url = self.ticketing_system.api_url
         return self._post(url, ticket_data)
 
-    def confirm(self, identifier: str):
+    def confirm(self, identifier: str, passed_parameters: Optional[dict] = None):
         url = urljoin(self.ticketing_system.api_url, f"{identifier}/confirm/")
 
-        return self._post(url, {})
+        return self._post(url, passed_parameters or {})
 
     def _post(self, url: str, data):
         from bookings.serializers import ApiBookingSerializer
@@ -103,12 +104,12 @@ class Booking(TimestampedModel):
     def __str__(self):
         return f"Booking {self.api_id} ({self.status})"
 
-    def confirm(self):
+    def confirm(self, passed_parameters=None):
         """Confirm the booking and return ticket information."""
         self.status = Booking.Status.CONFIRMED
 
         api = TicketingSystemAPI(self.ticketing_system, self.maas_operator)
-        response_data = api.confirm(self.source_id)
+        response_data = api.confirm(self.source_id, passed_parameters=passed_parameters)
 
         self.source_id = response_data["id"]
         self.save()
