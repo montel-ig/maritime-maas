@@ -48,6 +48,7 @@ class FeedAdmin(admin.ModelAdmin):
     list_display = (
         "name",
         "url_or_path",
+        "ticketing_system",
         "imported_at",
         "import_attempted_at",
         "last_import_successful",
@@ -90,7 +91,7 @@ class FeedAdmin(admin.ModelAdmin):
 
     def get_fieldsets(self, request, obj=None):
         if not obj:
-            return ((None, {"fields": ("name", "url_or_path")}),)
+            return ((None, {"fields": ("name", "url_or_path", "ticketing_system")}),)
 
         import_fields = ("imported_at", "import_attempted_at", "last_import_successful")
         if obj.last_import_successful is False:
@@ -99,7 +100,7 @@ class FeedAdmin(admin.ModelAdmin):
         return (
             (
                 None,
-                {"fields": ("name", "url_or_path", "created_at")},
+                {"fields": ("name", "url_or_path", "ticketing_system", "created_at")},
             ),
             (
                 _("Import"),
