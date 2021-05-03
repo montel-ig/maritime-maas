@@ -7,13 +7,13 @@ from snapshottest import Snapshot
 snapshots = Snapshot()
 
 snapshots["test_api_call_for_confirmation 1"] = {
-    "maas_operator_id": "name of maas operator 1"
+    "maas_operator_id": "identifier of maas operator 1"
 }
 
 snapshots["test_api_call_for_reservation 1"] = {
     "departures": [{"date": "2021-04-28", "trip_id": "source_id of trip 1"}],
     "locale": "fi",
-    "maas_operator_id": "name of maas operator 1",
+    "maas_operator_id": "identifier of maas operator 1",
     "route_id": "source_id of route 1",
     "tickets": [
         {

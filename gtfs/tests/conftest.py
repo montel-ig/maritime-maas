@@ -17,6 +17,7 @@ def maas_operator():
     return baker.make(
         MaasOperator,
         name=seq("name of maas operator "),
+        identifier=seq("identifier of maas operator "),
     )
 
 

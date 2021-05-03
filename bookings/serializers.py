@@ -126,7 +126,7 @@ class ApiDepartureSerializer(serializers.Serializer):
 class ApiBookingSerializer(serializers.Serializer):
     """Serializes BookingSerializer data to ticketing system API format."""
 
-    maas_operator_id = serializers.CharField(source="maas_operator.name")
+    maas_operator_id = serializers.CharField(source="maas_operator.identifier")
     route_id = serializers.CharField(required=False, source="route.source_id")
     departures = ApiDepartureSerializer(required=False, many=True)
     tickets = ApiTicketSerializer(required=False, many=True)
