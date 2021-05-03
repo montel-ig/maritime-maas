@@ -5,6 +5,15 @@ from django.utils.translation import gettext_lazy as _
 
 class MaasOperator(models.Model):
     name = models.CharField(verbose_name=_("name"), max_length=64)
+    identifier = models.CharField(
+        verbose_name=_("identifier"),
+        max_length=64,
+        unique=True,
+        help_text=_(
+            "Value is sent in an API call to a ticketing system. Identifies the MaaS "
+            "operator in a ticketing system."
+        ),
+    )
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
