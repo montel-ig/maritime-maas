@@ -3,7 +3,7 @@ from django.utils.translation import gettext_lazy as _
 
 from maas.models import MaasOperator
 
-from .base import GTFSModel, TimestampedModel
+from .base import GTFSModel
 
 
 class FeedQueryset(models.QuerySet):
@@ -13,8 +13,27 @@ class FeedQueryset(models.QuerySet):
         )
 
 
-class Feed(TimestampedModel):
-    name = models.CharField(verbose_name=_("name"), max_length=255)
+class Feed(models.Model):
+    created_at = models.DateTimeField(verbose_name=_("created at"), auto_now_add=True)
+    name = models.CharField(
+        verbose_name=_("name"),
+        max_length=255,
+        blank=True,
+        help_text=_(
+            "If left empty, will be autopopulated with the feed info's publisher name when one is available."
+        ),
+    )
+    url_or_path = models.CharField(verbose_name=_("URL"), max_length=255)
+    imported_at = models.DateTimeField(
+        verbose_name=_("imported at"), null=True, blank=True
+    )
+    import_attempted_at = models.DateTimeField(
+        verbose_name=_("import attempted at"), null=True, blank=True
+    )
+    last_import_error_message = models.TextField(
+        verbose_name=_("error message"), blank=True
+    )
+
     ticketing_system = models.ForeignKey(
         "maas.TicketingSystem",
         on_delete=models.CASCADE,
@@ -38,8 +57,21 @@ class Feed(TimestampedModel):
         verbose_name_plural = _("feeds")
         default_related_name = "feeds"
 
+    def save(self, *args, **kwargs):
+        if not self.name and hasattr(self, "feed_info"):
+            self.name = self.feed_info.publisher_name
+        super().save(*args, **kwargs)
+
     def __str__(self):
-        return self.name
+        return self.name or self.url_or_path
+
+    @property
+    def last_import_successful(self):
+        return (
+            not bool(self.last_import_error_message)
+            if self.import_attempted_at
+            else None
+        )
 
 
 class FeedInfo(GTFSModel):
