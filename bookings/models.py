@@ -30,7 +30,7 @@ class TicketingSystemAPI:
         from bookings.serializers import ApiBookingSerializer
 
         payload = ApiBookingSerializer(
-            {"maas_operator": self.maas_operator, **data}
+            {**data, "maas_operator": self.maas_operator}
         ).data
 
         if not self.ticketing_system.api_key:
