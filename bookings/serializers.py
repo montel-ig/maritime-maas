@@ -42,7 +42,13 @@ class TicketSerializer(serializers.Serializer):
         return data
 
 
-class BookingSerializer(serializers.ModelSerializer):
+class PassthroughParametersSerializer(serializers.Serializer):
+    request_id = serializers.CharField(required=False)
+    transaction_id = serializers.CharField(required=False)
+    locale = serializers.ChoiceField(choices=settings.TICKET_LANGUAGES, required=False)
+
+
+class BookingSerializer(PassthroughParametersSerializer, serializers.ModelSerializer):
     route_id = serializers.UUIDField(required=False, write_only=True)
     departure_ids = serializers.ListField(
         child=serializers.UUIDField(),
@@ -58,7 +64,16 @@ class BookingSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Booking
-        fields = ("route_id", "departure_ids", "tickets", "locale", "id", "status")
+        fields = (
+            "route_id",
+            "departure_ids",
+            "tickets",
+            "locale",
+            "id",
+            "status",
+            "request_id",
+            "transaction_id",
+        )
         read_only_fields = ("id", "status")
 
     def validate_route_id(self, value):
@@ -123,11 +138,10 @@ class ApiDepartureSerializer(serializers.Serializer):
     date = serializers.DateField()
 
 
-class ApiBookingSerializer(serializers.Serializer):
+class ApiBookingSerializer(PassthroughParametersSerializer):
     """Serializes BookingSerializer data to ticketing system API format."""
 
     maas_operator_id = serializers.CharField(source="maas_operator.identifier")
     route_id = serializers.CharField(required=False, source="route.source_id")
     departures = ApiDepartureSerializer(required=False, many=True)
     tickets = ApiTicketSerializer(required=False, many=True)
-    locale = serializers.ChoiceField(choices=settings.TICKET_LANGUAGES, required=False)
