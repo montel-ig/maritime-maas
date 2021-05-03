@@ -42,9 +42,7 @@ class Route(TranslatableModel, GTFSModelWithSourceID):
         url=models.URLField(verbose_name=_("URL"), blank=True),
     )
     agency = models.ForeignKey(
-        Agency,
-        verbose_name=_("agency"),
-        on_delete=models.CASCADE,
+        Agency, verbose_name=_("agency"), on_delete=models.CASCADE
     )
     short_name = models.CharField(
         verbose_name=_("short name"), max_length=32, blank=True
@@ -70,8 +68,6 @@ class Route(TranslatableModel, GTFSModelWithSourceID):
 
     def __str__(self):
         try:
-            return self.short_name or self.safe_translation_getter(
-                "long_name", any_language=True
-            )
+            return self.safe_translation_getter("long_name", any_language=True)
         except TranslationDoesNotExist:
             return super().__str__()

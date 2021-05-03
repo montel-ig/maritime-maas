@@ -48,7 +48,7 @@ class RouteSerializer(serializers.ModelSerializer):
         )
 
     id = serializers.UUIDField(source="api_id")
-    name = serializers.CharField(source="short_name")
+    name = serializers.CharField(source="long_name")
     stops = serializers.SerializerMethodField()
     agency = AgencySerializer(read_only=True)
     ticket_types = serializers.SerializerMethodField()
@@ -61,9 +61,7 @@ class RouteSerializer(serializers.ModelSerializer):
             .order_by("id")
         )
         return StopSerializer(
-            stops,
-            many=True,
-            context=dict(**self.context, route_id=obj.id),
+            stops, many=True, context=dict(**self.context, route_id=obj.id)
         ).data
 
     def get_ticket_types(self, obj):

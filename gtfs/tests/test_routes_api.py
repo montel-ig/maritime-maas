@@ -96,13 +96,9 @@ def test_routes_departures(maas_api_client, snapshot, filters, route_with_depart
 @pytest.mark.django_db
 def test_route_ordering(maas_api_client):
     feed = get_feed_for_maas_operator(maas_api_client.maas_operator, True)
-    baker.make(
-        Route,
-        feed=feed,
-        short_name=iter(["third", "first", "second"]),
-        sort_order=iter([3, 1, 2]),
-        _quantity=3,
-    )
+    baker.make(Route, feed=feed, long_name="third", sort_order=3)
+    baker.make(Route, feed=feed, long_name="first", sort_order=1)
+    baker.make(Route, feed=feed, long_name="second", sort_order=2)
 
     response = maas_api_client.get(ENDPOINT)
     assert response.status_code == 200
