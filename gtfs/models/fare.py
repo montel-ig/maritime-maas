@@ -1,6 +1,6 @@
 from django.contrib.gis.db import models
 from django.utils.translation import gettext_lazy as _
-from parler.models import TranslatableModel, TranslatedFields, TranslationDoesNotExist
+from parler.models import TranslatableModel, TranslatedFields
 
 from .agency import Agency
 from .base import GTFSModelWithSourceID, PriceModel
