@@ -130,6 +130,12 @@ def test_feed_updater():
     assert feed.imported_at and feed.imported_at == feed.import_attempted_at
     assert feed.last_import_successful
 
+    importer.update_feeds()
+    feed.refresh_from_db()
+    # success but not actually updated
+    assert feed.import_attempted_at > feed.imported_at
+    assert feed.last_import_successful
+
     feed.url_or_path = "failure-path"
     feed.fingerprint = ""
     feed.save()
