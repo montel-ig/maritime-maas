@@ -39,9 +39,9 @@ def fare_test_data(maas_operator, api_id_generator):
         feed=feed,
         source_id=seq("source_id of test fare "),
         api_id=api_id_generator,
-        name=seq("Name of test fare "),
-        description=seq("Description of test fare "),
-        instructions=seq("Instructions of test fare "),
+        name="Name of test fare",
+        description="Description of test fare",
+        instructions="Instructions of test fare",
         _quantity=2,
     )
 
@@ -51,8 +51,8 @@ def fare_test_data(maas_operator, api_id_generator):
         feed=feed,
         source_id=seq("source_id of test rider category "),
         api_id=api_id_generator,
-        name=seq("name of test rider category "),
-        description=seq("description of test rider category "),
+        name="name of test rider category",
+        description="description of test rider category",
         _quantity=2,
     )
     baker.make(

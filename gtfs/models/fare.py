@@ -1,11 +1,12 @@
 from django.contrib.gis.db import models
 from django.utils.translation import gettext_lazy as _
+from parler.models import TranslatableModel, TranslatedFields, TranslationDoesNotExist
 
 from .agency import Agency
 from .base import GTFSModelWithSourceID, PriceModel
 
 
-class Fare(GTFSModelWithSourceID, PriceModel):
+class Fare(TranslatableModel, GTFSModelWithSourceID, PriceModel):
     class PaymentMethod(models.IntegerChoices):
         ON_BOARD = 0, _("Fare is paid on board")
         BEFORE_BOARDING = 1, _("Fare must be paid before boarding")
@@ -16,6 +17,13 @@ class Fare(GTFSModelWithSourceID, PriceModel):
         TWO_TRANSFERS = 2, _("Passenger may transfer twice")
         __empty__ = _("Unlimited transfers are permitted")
 
+    translations = TranslatedFields(
+        name=models.CharField(verbose_name=_("name"), max_length=255, blank=True),
+        description=models.CharField(
+            verbose_name=_("description"), max_length=255, blank=True
+        ),
+        instructions=models.TextField(verbose_name=_("instructions"), blank=True),
+    )
     agency = models.ForeignKey(
         Agency,
         verbose_name=_("agency"),
@@ -27,11 +35,6 @@ class Fare(GTFSModelWithSourceID, PriceModel):
     transfers = models.PositiveSmallIntegerField(
         verbose_name=_("transfers"), choices=Transfers.choices, null=True
     )
-    name = models.CharField(verbose_name=_("name"), max_length=255, blank=True)
-    description = models.CharField(
-        verbose_name=_("description"), max_length=255, blank=True
-    )
-    instructions = models.TextField(verbose_name=_("instructions"), blank=True)
     routes = models.ManyToManyField(
         "Route", verbose_name=_("routes"), through="FareRule", blank=True
     )
