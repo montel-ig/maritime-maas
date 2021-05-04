@@ -34,27 +34,50 @@ def fare_test_data(maas_operator, api_id_generator):
     routes = baker.make(
         Route, feed=feed, source_id=seq("source_id of route "), _quantity=2
     )
-    fares = baker.make(
-        Fare,
-        feed=feed,
-        source_id=seq("source_id of test fare "),
-        api_id=api_id_generator,
-        name="Name of test fare",
-        description="Description of test fare",
-        instructions="Instructions of test fare",
-        _quantity=2,
-    )
+
+    # Fares
+    fares = [
+        baker.make(
+            Fare,
+            feed=feed,
+            source_id="source_id of test fare 1",
+            api_id=api_id_generator,
+            name="Name of test fare 1",
+            description="Description of test fare 1",
+            instructions="Instructions of test fare 1",
+        ),
+        baker.make(
+            Fare,
+            feed=feed,
+            source_id="source_id of test fare 2",
+            api_id=api_id_generator,
+            name="Name of test fare 2",
+            description="Description of test fare 2",
+            instructions="Instructions of test fare 2",
+        ),
+    ]
 
     baker.make(FareRule, feed=feed, fare=iter(fares), route=iter(routes))
-    rider_categories = baker.make(
-        RiderCategory,
-        feed=feed,
-        source_id=seq("source_id of test rider category "),
-        api_id=api_id_generator,
-        name="name of test rider category",
-        description="description of test rider category",
-        _quantity=2,
-    )
+    # Rider categories
+    rider_categories = [
+        baker.make(
+            RiderCategory,
+            feed=feed,
+            source_id="source_id of test rider category 1",
+            api_id=api_id_generator,
+            name="name of test rider category 1",
+            description="description of test rider category 1",
+        ),
+        baker.make(
+            RiderCategory,
+            feed=feed,
+            source_id="source_id of test rider category 2",
+            api_id=api_id_generator,
+            name="name of test rider category 2",
+            description="description of test rider category 2",
+        ),
+    ]
+
     baker.make(
         FareRiderCategory,
         feed=feed,
