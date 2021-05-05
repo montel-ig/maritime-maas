@@ -37,6 +37,7 @@ def test_api_call_for_reservation(
 
     assert requests_mock.call_count == 1
     snapshot.assert_match(requests_mock.request_history[0].json())
+    assert requests_mock.request_history[0].headers["Authorization"] == "Bearer APIKEY"
 
 
 @pytest.mark.django_db
@@ -64,3 +65,4 @@ def test_api_call_for_confirmation(maas_operator, requests_mock, snapshot):
 
     assert requests_mock.call_count == 1
     snapshot.assert_match(requests_mock.request_history[0].json())
+    assert requests_mock.request_history[0].headers["Authorization"] == "Bearer APIKEY"

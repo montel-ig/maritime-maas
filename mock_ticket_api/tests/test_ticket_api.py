@@ -11,7 +11,7 @@ from rest_framework.test import APIClient
 @pytest.fixture
 def ticket_api_client():
     api_client = APIClient()
-    api_client.credentials(HTTP_AUTHORIZATION="Token 70k3n")
+    api_client.credentials(HTTP_AUTHORIZATION="Bearer 70k3n")
     return api_client
 
 
