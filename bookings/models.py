@@ -65,6 +65,7 @@ class BookingQueryset(models.QuerySet):
             source_id=response_data["id"],
             maas_operator=maas_operator,
             ticketing_system=ticketing_system,
+            transaction_id=ticket_data.get("transaction_id", ""),
         )
 
 
@@ -87,6 +88,9 @@ class Booking(TimestampedModel):
         choices=Status.choices,
         default=Status.RESERVED,
     )
+    transaction_id = models.CharField(
+        verbose_name=_("transaction ID"), max_length=255, blank=True
+    )
 
     objects = BookingQueryset.as_manager()
 
@@ -106,11 +110,14 @@ class Booking(TimestampedModel):
 
     def confirm(self, passed_parameters=None):
         """Confirm the booking and return ticket information."""
+        passed_parameters = passed_parameters or {}
         self.status = Booking.Status.CONFIRMED
 
         api = TicketingSystemAPI(self.ticketing_system, self.maas_operator)
         response_data = api.confirm(self.source_id, passed_parameters=passed_parameters)
 
         self.source_id = response_data["id"]
+        if transaction_id := passed_parameters.get("transaction_id"):
+            self.transaction_id = transaction_id
         self.save()
         return response_data.get("tickets", [])
