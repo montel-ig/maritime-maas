@@ -26,11 +26,14 @@ class GTFSFeedUpdater:
     def update_single_feed(
         self, feed: Feed, force: bool = False, skip_validation: bool = False
     ):
+        imported = False
+
         with transaction.atomic():
             try:
                 fingerprint = self.reader.get_feed_fingerprint(feed)
                 if fingerprint != feed.fingerprint or force:
                     self.importer.run(feed, skip_validation)
+                    imported = True
                 else:
                     self.logger.info(
                         f'No need to update feed "{feed.name}", same fingerprint: "{feed.fingerprint}"'
@@ -43,9 +46,12 @@ class GTFSFeedUpdater:
                 exception = e
             else:
                 feed.last_import_error_message = ""
-                # a successful import has been run here, make import_attempted_at match
-                # its time exactly
-                feed.import_attempted_at = feed.imported_at
+                if imported:
+                    # after an actual successful import make import_attempted_at match
+                    # its time exactly
+                    feed.import_attempted_at = feed.imported_at
+                else:
+                    feed.import_attempted_at = timezone.now()
                 exception = None
             finally:
                 feed.save()
