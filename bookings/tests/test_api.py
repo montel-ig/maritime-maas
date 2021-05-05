@@ -45,6 +45,7 @@ def test_create_booking(maas_api_client, has_route, fare_test_data, requests_moc
     booking = Booking.objects.first()
     assert booking.status == Booking.Status.RESERVED
     assert booking.transaction_id == "transactionID"
+    assert booking.ticket_count == 1
 
 
 @pytest.mark.django_db

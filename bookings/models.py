@@ -65,6 +65,7 @@ class BookingQueryset(models.QuerySet):
             source_id=response_data["id"],
             maas_operator=maas_operator,
             ticketing_system=ticketing_system,
+            ticket_count=len(ticket_data["tickets"]),
             transaction_id=ticket_data.get("transaction_id", ""),
         )
 
@@ -90,6 +91,13 @@ class Booking(TimestampedModel):
     )
     transaction_id = models.CharField(
         verbose_name=_("transaction ID"), max_length=255, blank=True
+    )
+    ticket_count = models.PositiveSmallIntegerField(
+        _("ticket count"),
+        default=0,
+        help_text=_(
+            "The amount of tickets that were requested from the ticketing system."
+        ),
     )
 
     objects = BookingQueryset.as_manager()
