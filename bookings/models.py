@@ -5,6 +5,7 @@ from uuid import uuid4
 import requests
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from parler.utils.context import switch_language
 
 from bookings.utils import TokenAuth
 from gtfs.models.base import TimestampedModel
@@ -58,6 +59,11 @@ class BookingQueryset(models.QuerySet):
         ticketing_system: TicketingSystem,
         ticket_data: dict,
     ):
+        with switch_language(ticket_data["route"], "fi"):
+            route_name = ticket_data["route"].long_name
+        ticket_count = len(ticket_data["tickets"])
+        transaction_id = ticket_data.get("transaction_id", "")
+
         api = TicketingSystemAPI(ticketing_system, maas_operator)
         response_data = api.reserve(ticket_data)
 
@@ -65,8 +71,9 @@ class BookingQueryset(models.QuerySet):
             source_id=response_data["id"],
             maas_operator=maas_operator,
             ticketing_system=ticketing_system,
-            ticket_count=len(ticket_data["tickets"]),
-            transaction_id=ticket_data.get("transaction_id", ""),
+            route_name=route_name,
+            ticket_count=ticket_count,
+            transaction_id=transaction_id,
         )
 
 
@@ -88,6 +95,12 @@ class Booking(TimestampedModel):
         max_length=16,
         choices=Status.choices,
         default=Status.RESERVED,
+    )
+    route_name = models.CharField(
+        verbose_name=_("route name"),
+        max_length=255,
+        blank=True,
+        help_text=_("Name of the route for which the booking was made."),
     )
     transaction_id = models.CharField(
         verbose_name=_("transaction ID"), max_length=255, blank=True

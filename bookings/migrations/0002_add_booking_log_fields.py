@@ -26,4 +26,14 @@ class Migration(migrations.Migration):
                 blank=True, max_length=255, verbose_name="transaction ID"
             ),
         ),
+        migrations.AddField(
+            model_name="booking",
+            name="route_name",
+            field=models.CharField(
+                blank=True,
+                help_text="Name of the route for which the booking was made.",
+                max_length=255,
+                verbose_name="route name",
+            ),
+        ),
     ]
