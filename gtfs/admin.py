@@ -148,10 +148,10 @@ class ShapeAdmin(OSMGeoAdmin):
 
 admin.site.register(Agency, TranslatableAdmin)
 admin.site.register(Departure)
-admin.site.register(Fare)
+admin.site.register(Fare, TranslatableAdmin)
 admin.site.register(FareRiderCategory)
 admin.site.register(FareRule)
-admin.site.register(RiderCategory)
+admin.site.register(RiderCategory, TranslatableAdmin)
 admin.site.register(Route, TranslatableAdmin)
 admin.site.register(Stop, TranslatableAdmin)
 admin.site.register(StopTime, TranslatableAdmin)

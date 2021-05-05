@@ -126,8 +126,8 @@ def test_rider_categories_with_prices(
         feed=feed,
         api_id=api_id_generator,
         source_id=seq("source_id of test rider category "),
-        name=seq("name of test rider category "),
-        description=seq("description of test rider category "),
+        name="name of test rider category",
+        description="description of test rider category",
         _quantity=3,
     )
     baker.make(

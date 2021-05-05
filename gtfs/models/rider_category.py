@@ -10,13 +10,16 @@ This file is needed because standard GTFS does not include these fields.
 """
 from django.contrib.gis.db import models
 from django.utils.translation import gettext_lazy as _
+from parler.models import TranslatableModel, TranslatedFields, TranslationDoesNotExist
 
 from .base import GTFSModelWithSourceID
 
 
-class RiderCategory(GTFSModelWithSourceID):
-    name = models.CharField(verbose_name=_("name"), max_length=255)
-    description = models.CharField(verbose_name=_("description"), max_length=255)
+class RiderCategory(TranslatableModel, GTFSModelWithSourceID):
+    translations = TranslatedFields(
+        name=models.CharField(verbose_name=_("name"), max_length=255),
+        description=models.CharField(verbose_name=_("description"), max_length=255),
+    )
     fares = models.ManyToManyField(
         "gtfs.Fare",
         verbose_name=_("fares"),
@@ -30,4 +33,7 @@ class RiderCategory(GTFSModelWithSourceID):
         verbose_name_plural = _("rider categories")
 
     def __str__(self):
-        return f"{self.name}"
+        try:
+            return self.safe_translation_getter("name", any_language=True)
+        except TranslationDoesNotExist:
+            return super().__str__()
