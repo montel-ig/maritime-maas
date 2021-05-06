@@ -25,6 +25,7 @@ def test_create_booking(maas_api_client, has_route, fare_test_data, requests_moc
         status_code=status.HTTP_201_CREATED,
     )
     post_data = {
+        "transaction_id": "transactionID",
         "departure_ids": [fare_test_data.departures[0].api_id],
         "tickets": [
             {
@@ -39,9 +40,13 @@ def test_create_booking(maas_api_client, has_route, fare_test_data, requests_moc
     response = maas_api_client.post(ENDPOINT, post_data)
 
     assert response.status_code == 201
-    assert {"id", "status"} == set(response.data.keys())
+    assert set(response.data.keys()) == {"id", "status"}
     assert Booking.objects.count() == 1
-    assert Booking.objects.first().status == Booking.Status.RESERVED
+    booking = Booking.objects.first()
+    assert booking.status == Booking.Status.RESERVED
+    assert booking.transaction_id == "transactionID"
+    assert booking.ticket_count == 1
+    assert booking.route_name == fare_test_data.routes[0].long_name
 
 
 @pytest.mark.django_db
@@ -177,15 +182,21 @@ def test_confirm_booking(maas_api_client, requests_mock, snapshot, source_id_cha
         status_code=status.HTTP_200_OK,
     )
 
-    response = maas_api_client.post(f"{ENDPOINT}{reserved_booking.api_id}/confirm/")
+    response = maas_api_client.post(
+        f"{ENDPOINT}{reserved_booking.api_id}/confirm/",
+        {
+            "transaction_id": "transactionID",
+        },
+    )
 
     assert response.status_code == 200
-    assert {"id", "status", "tickets"} == set(response.data.keys())
+    assert set(response.data.keys()) == {"id", "status", "tickets"}
     snapshot.assert_match(response.data["tickets"])
     assert Booking.objects.count() == 1
-    booking = Booking.objects.get(pk=reserved_booking.pk)
-    assert booking.status == Booking.Status.CONFIRMED
-    assert booking.source_id == expected_source_id
+    reserved_booking.refresh_from_db()
+    assert reserved_booking.status == Booking.Status.CONFIRMED
+    assert reserved_booking.source_id == expected_source_id
+    assert reserved_booking.transaction_id == "transactionID"
 
 
 @pytest.mark.django_db

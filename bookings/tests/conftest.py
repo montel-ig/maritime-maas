@@ -32,7 +32,11 @@ def fare_test_data(maas_operator, api_id_generator):
     """Basically two routes, two fares, two rider_categories and two departures."""
     feed = get_feed_for_maas_operator(maas_operator, True)
     routes = baker.make(
-        Route, feed=feed, source_id=seq("source_id of route "), _quantity=2
+        Route,
+        feed=feed,
+        source_id=seq("source_id of route "),
+        long_name="Name of route",
+        _quantity=2,
     )
 
     # Fares
