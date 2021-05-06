@@ -15,16 +15,9 @@ from mock_ticket_api.utils import get_confirmations_data, get_reservation_data
 ENDPOINT = "/v1/bookings/"
 
 
-@pytest.mark.django_db
-@pytest.mark.parametrize("has_route", [True, False])
-def test_create_booking(maas_api_client, has_route, fare_test_data, requests_mock):
-    ticketing_system = fare_test_data.feed.ticketing_system
-    requests_mock.post(
-        ticketing_system.api_url,
-        json=get_reservation_data(),
-        status_code=status.HTTP_201_CREATED,
-    )
-    post_data = {
+@pytest.fixture
+def booking_post_data(fare_test_data):
+    return {
         "transaction_id": "transactionID",
         "departure_ids": [fare_test_data.departures[0].api_id],
         "tickets": [
@@ -34,10 +27,23 @@ def test_create_booking(maas_api_client, has_route, fare_test_data, requests_moc
             }
         ],
     }
-    if has_route:
-        post_data["route_id"] = fare_test_data.routes[0].api_id
 
-    response = maas_api_client.post(ENDPOINT, post_data)
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("has_route", [True, False])
+def test_create_booking(
+    maas_api_client, has_route, booking_post_data, fare_test_data, requests_mock
+):
+    ticketing_system = fare_test_data.feed.ticketing_system
+    requests_mock.post(
+        ticketing_system.api_url,
+        json=get_reservation_data(),
+        status_code=status.HTTP_201_CREATED,
+    )
+    if has_route:
+        booking_post_data["route_id"] = fare_test_data.routes[0].api_id
+
+    response = maas_api_client.post(ENDPOINT, booking_post_data)
 
     assert response.status_code == 201
     assert set(response.data.keys()) == {"id", "status"}
@@ -242,3 +248,106 @@ def test_confirm_booking_not_own(maas_api_client):
     assert response.status_code == 404
     assert Booking.objects.count() == 1
     assert Booking.objects.first().status == Booking.Status.RESERVED
+
+
+@pytest.mark.parametrize("endpoint", ("reservation", "confirmation"))
+@pytest.mark.parametrize(
+    "ticketing_api_response, ticketing_api_status_code",
+    [
+        (
+            {
+                "code": "MAX_CAPACITY_EXCEEDED",
+            },
+            422,
+        ),
+        (
+            {
+                "code": "MAX_NUMBER_OF_TICKETS_REQUESTED_EXCEEDED",
+                "message": "Maximum number of tickets requested exceeded.",
+            },
+            400,
+        ),
+        (
+            {
+                "code": "BOOKING_EXPIRED",
+                "message": "Booking expired.",
+                "details": "Your booking has been totally expired.",
+            },
+            400,
+        ),
+        (
+            {
+                "code": "BOOKING_ALREADY_CONFIRMED",
+            },
+            422,
+        ),
+        (
+            {
+                "code": "BOGUS_CODE",
+            },
+            400,
+        ),
+        ({"no_code": "at_all"}, 400),
+        (
+            {"code": "BOOKING_EXPIRED"},
+            500,
+        ),
+        (
+            None,
+            400,
+        ),
+        (
+            None,
+            200,
+        ),
+    ],
+)
+@pytest.mark.django_db
+def test_ticketing_system_confirm_errors(
+    maas_operator,
+    requests_mock,
+    maas_api_client,
+    booking_post_data,
+    fare_test_data,
+    endpoint,
+    ticketing_api_response,
+    ticketing_api_status_code,
+    snapshot,
+):
+    ticketing_system = fare_test_data.feed.ticketing_system
+
+    data_params = (
+        {"json": {"error": ticketing_api_response}}
+        if ticketing_api_response
+        else {"text": "no json"}
+    )
+
+    if endpoint == "reservation":
+        mock_url = ticketing_system.api_url
+        api_url = ENDPOINT
+        post_data = booking_post_data
+    else:
+        reserved_booking = baker.make(
+            Booking,
+            maas_operator=maas_operator,
+            source_id="test_confirmation_id",
+            ticketing_system=ticketing_system,
+        )
+        mock_url = urljoin(
+            ticketing_system.api_url, f"{reserved_booking.source_id}/confirm/"
+        )
+        api_url = f"{ENDPOINT}{reserved_booking.api_id}/confirm/"
+        post_data = {}
+
+    requests_mock.post(
+        mock_url,
+        status_code=ticketing_api_status_code,
+        **data_params,
+    )
+
+    response = maas_api_client.post(api_url, post_data)
+
+    assert requests_mock.call_count == 1
+    assert response.status_code == 422
+
+    snapshot.assert_match(response.json())

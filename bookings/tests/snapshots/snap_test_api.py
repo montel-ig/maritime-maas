@@ -109,3 +109,87 @@ snapshots["test_create_booking_no_permission 1"] = {
         'Invalid ID "00000000-0000-0000-0000-000000000004" - object does not exist.'
     ]
 }
+
+snapshots["test_ticketing_system_confirm_errors[None-200-confirmation] 1"] = {
+    "error": {"code": "TICKET_SYSTEM_ERROR", "details": "", "message": ""}
+}
+
+snapshots["test_ticketing_system_confirm_errors[None-200-reservation] 1"] = {
+    "error": {"code": "TICKET_SYSTEM_ERROR", "details": "", "message": ""}
+}
+
+snapshots["test_ticketing_system_confirm_errors[None-400-confirmation] 1"] = {
+    "error": {"code": "TICKET_SYSTEM_ERROR", "details": "", "message": ""}
+}
+
+snapshots["test_ticketing_system_confirm_errors[None-400-reservation] 1"] = {
+    "error": {"code": "TICKET_SYSTEM_ERROR", "details": "", "message": ""}
+}
+
+snapshots[
+    "test_ticketing_system_confirm_errors[ticketing_api_response0-422-confirmation] 1"
+] = {"error": {"code": "TICKET_SYSTEM_ERROR", "details": "", "message": ""}}
+
+snapshots[
+    "test_ticketing_system_confirm_errors[ticketing_api_response0-422-reservation] 1"
+] = {"error": {"code": "MAX_CAPACITY_EXCEEDED", "details": "", "message": ""}}
+
+snapshots[
+    "test_ticketing_system_confirm_errors[ticketing_api_response1-400-confirmation] 1"
+] = {"error": {"code": "TICKET_SYSTEM_ERROR", "details": "", "message": ""}}
+
+snapshots[
+    "test_ticketing_system_confirm_errors[ticketing_api_response1-400-reservation] 1"
+] = {
+    "error": {
+        "code": "MAX_NUMBER_OF_TICKETS_REQUESTED_EXCEEDED",
+        "details": "",
+        "message": "Maximum number of tickets requested exceeded.",
+    }
+}
+
+snapshots[
+    "test_ticketing_system_confirm_errors[ticketing_api_response2-400-confirmation] 1"
+] = {
+    "error": {
+        "code": "BOOKING_EXPIRED",
+        "details": "Your booking has been totally expired.",
+        "message": "Booking expired.",
+    }
+}
+
+snapshots[
+    "test_ticketing_system_confirm_errors[ticketing_api_response2-400-reservation] 1"
+] = {"error": {"code": "TICKET_SYSTEM_ERROR", "details": "", "message": ""}}
+
+snapshots[
+    "test_ticketing_system_confirm_errors[ticketing_api_response3-422-confirmation] 1"
+] = {"error": {"code": "BOOKING_ALREADY_CONFIRMED", "details": "", "message": ""}}
+
+snapshots[
+    "test_ticketing_system_confirm_errors[ticketing_api_response3-422-reservation] 1"
+] = {"error": {"code": "TICKET_SYSTEM_ERROR", "details": "", "message": ""}}
+
+snapshots[
+    "test_ticketing_system_confirm_errors[ticketing_api_response4-400-confirmation] 1"
+] = {"error": {"code": "TICKET_SYSTEM_ERROR", "details": "", "message": ""}}
+
+snapshots[
+    "test_ticketing_system_confirm_errors[ticketing_api_response4-400-reservation] 1"
+] = {"error": {"code": "TICKET_SYSTEM_ERROR", "details": "", "message": ""}}
+
+snapshots[
+    "test_ticketing_system_confirm_errors[ticketing_api_response5-400-confirmation] 1"
+] = {"error": {"code": "TICKET_SYSTEM_ERROR", "details": "", "message": ""}}
+
+snapshots[
+    "test_ticketing_system_confirm_errors[ticketing_api_response5-400-reservation] 1"
+] = {"error": {"code": "TICKET_SYSTEM_ERROR", "details": "", "message": ""}}
+
+snapshots[
+    "test_ticketing_system_confirm_errors[ticketing_api_response6-500-confirmation] 1"
+] = {"error": {"code": "TICKET_SYSTEM_ERROR", "details": "", "message": ""}}
+
+snapshots[
+    "test_ticketing_system_confirm_errors[ticketing_api_response6-500-reservation] 1"
+] = {"error": {"code": "TICKET_SYSTEM_ERROR", "details": "", "message": ""}}
