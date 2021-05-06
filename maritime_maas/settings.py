@@ -48,6 +48,8 @@ ALLOWED_HOSTS = env("ALLOWED_HOSTS")
 DATABASES = {"default": env.db()}
 DATABASES["default"]["ENGINE"] = "django.contrib.gis.db.backends.postgis"
 
+DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
+
 LANGUAGES = (("fi", "Finnish"), ("en", "English"), ("sv", "Swedish"))
 TICKET_LANGUAGES = tuple(lang for lang, _ in LANGUAGES)
 
