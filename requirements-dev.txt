@@ -6,13 +6,11 @@
 #
 appdirs==1.4.4
     # via black
-appnope==0.1.2
-    # via ipython
 asgiref==3.3.4
     # via
     #   -c requirements.txt
     #   django
-attrs==20.3.0
+attrs==21.1.0
     # via
     #   -c requirements.txt
     #   flake8-bugbear
@@ -39,7 +37,7 @@ coverage==5.5
     # via pytest-cov
 decorator==5.0.7
     # via ipython
-django==3.2.1
+django==3.2.2
     # via
     #   -c requirements.txt
     #   model-bakery
