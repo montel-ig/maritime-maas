@@ -195,7 +195,7 @@ class GTFSFeedImporter:
             )
 
             for model, _gtfs_attribute in self.MODELS_AND_GTFS_KIT_ATTRIBUTES:
-                self._add_translations(model, translation_list)
+                self._add_translations(model, translation_list, feed)
 
             feed.imported_at = timezone.now()
             # the feed's name will also get autopopulated here if feed info is available
@@ -428,7 +428,7 @@ class GTFSFeedImporter:
 
         return translations_list
 
-    def _add_translations(self, model, translations_list):
+    def _add_translations(self, model, translations_list, feed):
         plural_name = model._meta.verbose_name_plural
         translations_for_model = [
             t for t in translations_list if t.get("table_name") == plural_name
@@ -442,7 +442,7 @@ class GTFSFeedImporter:
             f"Adding {num_of_translations} translations for {plural_name}..."
         )
 
-        obj_list = model.objects.all()
+        obj_list = model.objects.filter(feed=feed)
 
         model_fields = [*self.FIELD_MAPPING[model]]
         gtfs_fields = [*self.FIELD_MAPPING[model].values()]
