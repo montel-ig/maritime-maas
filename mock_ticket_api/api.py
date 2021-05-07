@@ -14,6 +14,7 @@ class MockTicketParamsSerializer(serializers.Serializer):
 class MockTicketViewSet(viewsets.ViewSet):
 
     permission_classes = [permissions.AllowAny]
+    authentication_classes = []
     serializer_class = MockTicketParamsSerializer
 
     def create(self, request):

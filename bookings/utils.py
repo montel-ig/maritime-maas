@@ -8,5 +8,5 @@ class TokenAuth(AuthBase):
         self.token = token
 
     def __call__(self, r):
-        r.headers["authorization"] = "Token " + self.token
+        r.headers["authorization"] = "Bearer " + self.token
         return r
