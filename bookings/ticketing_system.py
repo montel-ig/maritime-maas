@@ -8,6 +8,7 @@ from rest_framework import serializers
 
 from maas.models import MaasOperator, TicketingSystem
 
+from .choices import BookingStatus
 from .utils import TokenAuth
 
 reservation_error_codes = (
@@ -43,6 +44,17 @@ class TicketingSystemNotBehavingError(Exception):
         )
 
 
+class ReservationSuccessSerializer(serializers.Serializer):
+    id = serializers.CharField(max_length=255)
+    status = serializers.ChoiceField(choices=[BookingStatus.RESERVED])
+
+
+class ConfirmationSuccessSerializer(serializers.Serializer):
+    id = serializers.CharField(max_length=255)
+    status = serializers.ChoiceField(choices=[BookingStatus.CONFIRMED])
+    tickets = serializers.ListField(allow_empty=False)
+
+
 class InnerReservationErrorSerializer(serializers.Serializer):
     code = serializers.ChoiceField(choices=reservation_error_codes)
     message = serializers.CharField(required=False)
@@ -72,13 +84,20 @@ class TicketingSystemAPI:
 
     def reserve(self, ticket_data: dict):
         url = self.ticketing_system.api_url
-        return self._post(url, ticket_data, ReservationErrorSerializer)
+        return self._post(
+            url, ticket_data, ReservationSuccessSerializer, ReservationErrorSerializer
+        )
 
     def confirm(self, identifier: str, passed_parameters: Optional[dict] = None):
         url = urljoin(self.ticketing_system.api_url, f"{identifier}/confirm/")
-        return self._post(url, passed_parameters or {}, ConfirmationErrorSerializer)
+        return self._post(
+            url,
+            passed_parameters or {},
+            ConfirmationSuccessSerializer,
+            ConfirmationErrorSerializer,
+        )
 
-    def _post(self, url: str, data, error_serializer):
+    def _post(self, url: str, data, success_serializer, error_serializer):
         from bookings.serializers import ApiBookingSerializer
 
         payload = ApiBookingSerializer(
@@ -102,7 +121,11 @@ class TicketingSystemAPI:
                 serializer.is_valid(raise_exception=True)
                 raise TicketingSystemRequestError(**serializer.data["error"])
             response.raise_for_status()
+
+            serializer = success_serializer(data=data)
+            serializer.is_valid(raise_exception=True)
+
         except (JSONDecodeError, serializers.ValidationError, RequestException) as e:
             raise TicketingSystemNotBehavingError(response=response) from e
 
-        return data
+        return serializer.validated_data

@@ -4,6 +4,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from parler.utils.context import switch_language
 
+from bookings.choices import BookingStatus
 from bookings.ticketing_system import TicketingSystemAPI
 from gtfs.models.base import TimestampedModel
 from maas.models import MaasOperator, TicketingSystem
@@ -38,10 +39,7 @@ class BookingQueryset(models.QuerySet):
 
 
 class Booking(TimestampedModel):
-    class Status(models.TextChoices):
-        RESERVED = "RESERVED", _("Reserved")
-        CONFIRMED = "CONFIRMED", _("Confirmed")
-
+    Status = BookingStatus  # solving circular importing issues beautifully here
     source_id = models.CharField(verbose_name=_("source ID"), max_length=255)
     api_id = models.UUIDField(verbose_name=_("API ID"), unique=True, default=uuid4)
     maas_operator = models.ForeignKey(

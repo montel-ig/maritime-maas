@@ -256,40 +256,50 @@ def test_confirm_booking_not_own(maas_api_client):
     [
         (
             {
-                "code": "MAX_CAPACITY_EXCEEDED",
+                "error": {
+                    "code": "MAX_CAPACITY_EXCEEDED",
+                }
             },
             422,
         ),
         (
             {
-                "code": "MAX_NUMBER_OF_TICKETS_REQUESTED_EXCEEDED",
-                "message": "Maximum number of tickets requested exceeded.",
+                "error": {
+                    "code": "MAX_NUMBER_OF_TICKETS_REQUESTED_EXCEEDED",
+                    "message": "Maximum number of tickets requested exceeded.",
+                }
             },
             400,
         ),
         (
             {
-                "code": "BOOKING_EXPIRED",
-                "message": "Booking expired.",
-                "details": "Your booking has been totally expired.",
+                "error": {
+                    "code": "BOOKING_EXPIRED",
+                    "message": "Booking expired.",
+                    "details": "Your booking has been totally expired.",
+                }
             },
             400,
         ),
         (
             {
-                "code": "BOOKING_ALREADY_CONFIRMED",
+                "error": {
+                    "code": "BOOKING_ALREADY_CONFIRMED",
+                }
             },
             422,
         ),
         (
             {
-                "code": "BOGUS_CODE",
+                "error": {
+                    "code": "BOGUS_CODE",
+                }
             },
             400,
         ),
-        ({"no_code": "at_all"}, 400),
+        ({"error": {"no_code": "at_all"}}, 400),
         (
-            {"code": "BOOKING_EXPIRED"},
+            {"error": {"code": "BOOKING_EXPIRED"}},
             500,
         ),
         (
@@ -300,10 +310,26 @@ def test_confirm_booking_not_own(maas_api_client):
             None,
             200,
         ),
+        (
+            {},
+            200,
+        ),
+        (
+            {"id": "xyz"},
+            201,
+        ),
+        (
+            {"ID": "id_field_should_be_lowercase", "status": "RESERVED"},
+            201,
+        ),
+        (
+            {"id": "xyz", "status": "BOGUS_STATUS"},
+            201,
+        ),
     ],
 )
 @pytest.mark.django_db
-def test_ticketing_system_confirm_errors(
+def test_ticketing_system_errors(
     maas_operator,
     requests_mock,
     maas_api_client,
@@ -317,8 +343,8 @@ def test_ticketing_system_confirm_errors(
     ticketing_system = fare_test_data.feed.ticketing_system
 
     data_params = (
-        {"json": {"error": ticketing_api_response}}
-        if ticketing_api_response
+        {"json": ticketing_api_response}
+        if ticketing_api_response is not None
         else {"text": "no json"}
     )
 
