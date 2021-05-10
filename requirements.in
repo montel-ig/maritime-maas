@@ -3,6 +3,7 @@ django-environ
 psycopg2
 sentry_sdk
 djangorestframework
+drf-spectacular
 gtfs_kit
 django-filter
 djangorestframework-gis

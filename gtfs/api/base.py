@@ -1,3 +1,4 @@
+from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers, viewsets
 from rest_framework.exceptions import ParseError
 
@@ -31,8 +32,17 @@ class BaseGTFSViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class NestedDepartureQueryParamsSerializer(serializers.Serializer):
-    date = serializers.DateField(required=False)
-    direction_id = serializers.IntegerField(min_value=0, max_value=1, required=False)
+    date = serializers.DateField(
+        required=False, help_text=_("Sets the datetime to filter the departures.")
+    )
+    direction_id = serializers.IntegerField(
+        min_value=0,
+        max_value=1,
+        required=False,
+        help_text=_(
+            "Filters departures of a stop by direction (0=outbound, 1=inbound)"
+        ),
+    )
 
     class Meta:
         fields = ("date", "direction_id")

@@ -1,4 +1,6 @@
 from django.conf import settings
+from django.utils.translation import gettext_lazy as _
+from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import permissions, serializers, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -11,6 +13,10 @@ class MockTicketParamsSerializer(serializers.Serializer):
     locale = serializers.ChoiceField(choices=settings.TICKET_LANGUAGES, required=False)
 
 
+@extend_schema_view(
+    create=extend_schema(summary=_("Create a mock booking")),
+    confirm=extend_schema(summary=_("Confirm a previously created mock booking")),
+)
 class MockTicketViewSet(viewsets.ViewSet):
 
     permission_classes = [permissions.AllowAny]

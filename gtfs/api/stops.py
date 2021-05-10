@@ -1,4 +1,7 @@
 from django.db.models import Prefetch
+from django.utils.translation import gettext_lazy as _
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import extend_schema, extend_schema_field, extend_schema_view
 from rest_framework import serializers
 from rest_framework_gis.filters import DistanceToPointFilter
 
@@ -6,6 +9,11 @@ from gtfs.models import Stop, StopTime
 from gtfs.models.departure import Departure
 
 from .base import BaseGTFSViewSet, NestedDepartureQueryParamsSerializer
+
+
+class CoordinateSerializer(serializers.Serializer):
+    latitude = serializers.FloatField(source="point.y", read_only=True)
+    longitude = serializers.FloatField(source="point.x", read_only=True)
 
 
 class DepartureSerializer(serializers.ModelSerializer):
@@ -51,18 +59,23 @@ class DepartureSerializer(serializers.ModelSerializer):
             del fields["route_id"]
         return fields
 
+    @extend_schema_field(OpenApiTypes.DATETIME)
     def get_arrival_time(self, obj):
         return obj.trip.stops_stop_times[0].get_arrival_time_datetime(obj)
 
+    @extend_schema_field(OpenApiTypes.DATETIME)
     def get_departure_time(self, obj):
         return obj.trip.stops_stop_times[0].get_departure_time_datetime(obj)
 
+    @extend_schema_field(OpenApiTypes.STR)
     def get_stop_headsign(self, obj):
         return obj.trip.stops_stop_times[0].stop_headsign
 
+    @extend_schema_field(OpenApiTypes.INT)
     def get_stop_sequence(self, obj):
         return obj.trip.stops_stop_times[0].stop_sequence
 
+    @extend_schema_field(OpenApiTypes.INT)
     def get_timepoint(self, obj):
         return obj.trip.stops_stop_times[0].timepoint
 
@@ -91,10 +104,12 @@ class StopSerializer(serializers.ModelSerializer):
             del fields["departures"]
         return fields
 
+    @extend_schema_field(CoordinateSerializer)
     def get_coordinates(self, obj):
         if obj.point:
-            return {"latitude": obj.point.y, "longitude": obj.point.x}
+            return CoordinateSerializer(obj).data
 
+    @extend_schema_field(DepartureSerializer)
     def get_departures(self, obj):
         queryset = (
             Departure.objects.filter(
@@ -123,6 +138,13 @@ class RadiusToLocationFilter(DistanceToPointFilter):
     point_param = "location"
 
 
+@extend_schema_view(
+    list=extend_schema(summary=_("List all stops")),
+    retrieve=extend_schema(
+        summary=_("Retrieve a single stop"),
+        parameters=[NestedDepartureQueryParamsSerializer],
+    ),
+)
 class StopViewSet(BaseGTFSViewSet):
     queryset = Stop.objects.order_by("id")
 
