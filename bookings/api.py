@@ -9,7 +9,6 @@ from bookings.serializers import BookingSerializer, PassthroughParametersSeriali
 
 class BookingViewSet(
     mixins.CreateModelMixin,
-    mixins.RetrieveModelMixin,
     GenericViewSet,
 ):
     serializer_class = BookingSerializer
