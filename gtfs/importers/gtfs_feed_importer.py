@@ -431,7 +431,9 @@ class GTFSFeedImporter:
     def _add_translations(self, model, translations_list, feed):
         plural_name = model._meta.verbose_name_plural
         translations_for_model = [
-            t for t in translations_list if t.get("table_name") == plural_name
+            t
+            for t in translations_list
+            if t.get("table_name") == plural_name.replace(" ", "_")
         ]
         num_of_translations = len(translations_for_model)
 
