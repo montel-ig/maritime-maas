@@ -1,4 +1,6 @@
+from django.utils.translation import gettext_lazy as _
 from django_filters import rest_framework as filters
+from drf_spectacular.utils import extend_schema, extend_schema_field, extend_schema_view
 from rest_framework import serializers
 
 from gtfs.api.base import BaseGTFSViewSet, NestedDepartureQueryParamsSerializer
@@ -54,6 +56,7 @@ class RouteSerializer(serializers.ModelSerializer):
     ticket_types = serializers.SerializerMethodField()
     description = serializers.CharField(source="desc")
 
+    @extend_schema_field(StopSerializer)
     def get_stops(self, obj):
         stops = (
             Stop.objects.filter(stop_times__trip__route_id=obj.id)
@@ -64,6 +67,7 @@ class RouteSerializer(serializers.ModelSerializer):
             stops, many=True, context=dict(**self.context, route_id=obj.id)
         ).data
 
+    @extend_schema_field(FareSerializer)
     def get_ticket_types(self, obj):
         ticket_types = (
             Fare.objects.filter(fare_rules__route_id=obj.id)
@@ -85,6 +89,13 @@ class RouteFilter(filters.FilterSet):
         fields = "stop_id"
 
 
+@extend_schema_view(
+    list=extend_schema(summary=_("List all routes")),
+    retrieve=extend_schema(
+        summary=_("Retrieve a single route"),
+        parameters=[NestedDepartureQueryParamsSerializer],
+    ),
+)
 class RoutesViewSet(BaseGTFSViewSet):
     queryset = Route.objects.select_related("agency").order_by("sort_order", "id")
     serializer_class = RouteSerializer

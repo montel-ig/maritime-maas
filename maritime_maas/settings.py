@@ -3,6 +3,7 @@ import subprocess
 
 import environ
 import sentry_sdk
+from django.utils.translation import gettext_lazy as _
 from sentry_sdk.integrations.django import DjangoIntegration
 
 checkout_dir = environ.Path(__file__) - 2
@@ -120,6 +121,7 @@ INSTALLED_APPS = [
     "rest_framework.authtoken",
     "corsheaders",
     "parler",
+    "drf_spectacular",
     # local apps
     "utils",
     "gtfs",
@@ -162,7 +164,20 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.BasicAuthentication",
         "rest_framework.authentication.SessionAuthentication",
     ],
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "TEST_REQUEST_DEFAULT_FORMAT": "json",
+}
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": _("Maritime MaaS API"),
+    "DESCRIPTION": _(
+        "Integration layer that mediates the connection between ticket sales platforms and MaaS providers."
+    ),
+    "VERSION": "1.0.0",
+    "EXTERNAL_DOCS": {
+        "url": "https://github.com/City-of-Helsinki/maritime-maas/",
+        "description": _("Source code"),
+    },
 }
 
 CORS_ORIGIN_WHITELIST = env.list("CORS_ORIGIN_WHITELIST")
