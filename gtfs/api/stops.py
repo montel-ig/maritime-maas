@@ -98,11 +98,11 @@ class StopSerializer(serializers.ModelSerializer):
     departures = serializers.SerializerMethodField()
     description = serializers.CharField(source="desc")
 
-    def get_fields(self):
-        fields = super().get_fields()
-        if "date" not in self.context:
-            del fields["departures"]
-        return fields
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        if ret["departures"] is None:
+            del ret["departures"]
+        return ret
 
     @extend_schema_field(CoordinateSerializer)
     def get_coordinates(self, obj):
@@ -111,6 +111,8 @@ class StopSerializer(serializers.ModelSerializer):
 
     @extend_schema_field(DepartureSerializer)
     def get_departures(self, obj):
+        if "date" not in self.context:
+            return None
         queryset = (
             Departure.objects.filter(
                 trip__stop_times__stop=obj, date=self.context["date"]
