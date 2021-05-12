@@ -161,8 +161,6 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": ["maas.permissions.IsMaasOperator"],
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "maas.authentication.BearerTokenAuthentication",
-        "rest_framework.authentication.BasicAuthentication",
-        "rest_framework.authentication.SessionAuthentication",
     ],
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "TEST_REQUEST_DEFAULT_FORMAT": "json",
