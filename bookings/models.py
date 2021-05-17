@@ -1,52 +1,13 @@
-from typing import Optional
-from urllib.parse import urljoin
 from uuid import uuid4
 
-import requests
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from parler.utils.context import switch_language
 
-from bookings.utils import TokenAuth
+from bookings.choices import BookingStatus
+from bookings.ticketing_system import TicketingSystemAPI
 from gtfs.models.base import TimestampedModel
 from maas.models import MaasOperator, TicketingSystem
-
-
-class TicketingSystemAPI:
-    TIMEOUT = 10
-
-    def __init__(self, ticketing_system: TicketingSystem, maas_operator: MaasOperator):
-        self.ticketing_system = ticketing_system
-        self.maas_operator = maas_operator
-
-    def reserve(self, ticket_data: dict):
-        url = self.ticketing_system.api_url
-        return self._post(url, ticket_data)
-
-    def confirm(self, identifier: str, passed_parameters: Optional[dict] = None):
-        url = urljoin(self.ticketing_system.api_url, f"{identifier}/confirm/")
-
-        return self._post(url, passed_parameters or {})
-
-    def _post(self, url: str, data):
-        from bookings.serializers import ApiBookingSerializer
-
-        payload = ApiBookingSerializer(
-            {**data, "maas_operator": self.maas_operator}
-        ).data
-
-        if not self.ticketing_system.api_key:
-            raise Exception("Ticketing system doesn't define an API key.")
-
-        response = requests.post(
-            url,
-            json=payload,
-            timeout=self.TIMEOUT,
-            auth=TokenAuth(self.ticketing_system.api_key),
-        )
-
-        response.raise_for_status()
-        return response.json()
 
 
 class BookingQueryset(models.QuerySet):
@@ -78,10 +39,7 @@ class BookingQueryset(models.QuerySet):
 
 
 class Booking(TimestampedModel):
-    class Status(models.TextChoices):
-        RESERVED = "RESERVED", _("Reserved")
-        CONFIRMED = "CONFIRMED", _("Confirmed")
-
+    Status = BookingStatus  # solving circular importing issues beautifully here
     source_id = models.CharField(verbose_name=_("source ID"), max_length=255)
     api_id = models.UUIDField(verbose_name=_("API ID"), unique=True, default=uuid4)
     maas_operator = models.ForeignKey(

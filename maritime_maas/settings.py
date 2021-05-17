@@ -163,6 +163,7 @@ REST_FRAMEWORK = {
         "maas.authentication.BearerTokenAuthentication",
     ],
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    "EXCEPTION_HANDLER": "bookings.exception_handler.exception_handler",
     "TEST_REQUEST_DEFAULT_FORMAT": "json",
 }
 if DEBUG:

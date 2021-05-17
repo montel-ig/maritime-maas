@@ -58,3 +58,27 @@ def get_confirmations_data(pk, include_qr=True) -> dict:
             }
         ],
     }
+
+
+def get_error_data(error_code):
+    errors = {
+        "MAX_CAPACITY_EXCEEDED": {
+            "code": "MAX_CAPACITY_EXCEEDED",
+        },
+        "MAX_NUMBER_OF_TICKETS_REQUESTED_EXCEEDED": {
+            "code": "MAX_NUMBER_OF_TICKETS_REQUESTED_EXCEEDED",
+            "message": "Maximum number of tickets requested exceeded.",
+        },
+        "BOOKING_EXPIRED": {
+            "code": "BOOKING_EXPIRED",
+            "message": "Booking expired.",
+            "details": "Your booking has totally expired.",
+        },
+        "BOOKING_ALREADY_CONFIRMED": {
+            "code": "BOOKING_ALREADY_CONFIRMED",
+        },
+        "TICKET_SYSTEM_ERROR": {"code": "TICKET_SYSTEM_ERROR"},
+    }
+    if error := errors.get(error_code):
+        return {"error": error}
+    return None
