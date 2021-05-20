@@ -1,10 +1,11 @@
-from urllib.parse import urljoin
+from urllib.parse import quote, urljoin
 
 import pytest
 from model_bakery import baker
 from rest_framework import status
 
 from bookings.models import Booking
+from bookings.ticketing_system import TicketingSystemAPI
 from gtfs.tests.utils import get_feed_for_maas_operator
 from mock_ticket_api.utils import get_confirmations_data, get_reservation_data
 
@@ -66,3 +67,22 @@ def test_api_call_for_confirmation(maas_operator, requests_mock, snapshot):
     assert requests_mock.call_count == 1
     snapshot.assert_match(requests_mock.request_history[0].json())
     assert requests_mock.request_history[0].headers["Authorization"] == "Bearer APIKEY"
+
+
+@pytest.mark.django_db
+def test_ticket_system_call_use_quoted_identifiers(maas_operator, requests_mock):
+    identifier = "MAAS:5154.1621500322898.jxgTgw,11E8"
+    feed = get_feed_for_maas_operator(maas_operator, True)
+    ticketing_system = feed.ticketing_system
+    requests_mock.post(
+        urljoin(ticketing_system.api_url, f"{quote(identifier)}/confirm/"),
+        json=get_confirmations_data(identifier, include_qr=False),
+        status_code=status.HTTP_200_OK,
+    )
+
+    api = TicketingSystemAPI(
+        ticketing_system=ticketing_system, maas_operator=maas_operator
+    )
+
+    data = api.confirm(identifier)
+    assert data["status"] == "CONFIRMED"
