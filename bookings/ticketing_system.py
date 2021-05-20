@@ -1,6 +1,6 @@
 from json import JSONDecodeError
 from typing import Optional
-from urllib.parse import urljoin
+from urllib.parse import quote, urljoin
 
 import requests
 from requests import RequestException
@@ -89,7 +89,7 @@ class TicketingSystemAPI:
         )
 
     def confirm(self, identifier: str, passed_parameters: Optional[dict] = None):
-        url = urljoin(self.ticketing_system.api_url, f"{identifier}/confirm/")
+        url = urljoin(self.ticketing_system.api_url, f"{quote(identifier)}/confirm/")
         return self._post(
             url,
             passed_parameters or {},
