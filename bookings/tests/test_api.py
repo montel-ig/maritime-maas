@@ -326,6 +326,26 @@ def test_confirm_booking_not_own(maas_api_client):
             {"id": "xyz", "status": "BOGUS_STATUS"},
             201,
         ),
+        (
+            {
+                "error": {
+                    "code": "MAX_CAPACITY_EXCEEDED",
+                    "message": "",
+                    "details": "",
+                }
+            },
+            422,
+        ),
+        (
+            {
+                "error": {
+                    "code": "BOOKING_ALREADY_CONFIRMED",
+                    "message": "",
+                    "details": "",
+                }
+            },
+            422,
+        ),
     ],
 )
 @pytest.mark.django_db

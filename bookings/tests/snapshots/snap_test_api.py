@@ -171,6 +171,22 @@ snapshots[
 ] = {"error": {"code": "TICKET_SYSTEM_ERROR", "details": "", "message": ""}}
 
 snapshots[
+    "test_ticketing_system_errors[ticketing_api_response13-422-confirmation] 1"
+] = {"error": {"code": "TICKET_SYSTEM_ERROR", "details": "", "message": ""}}
+
+snapshots[
+    "test_ticketing_system_errors[ticketing_api_response13-422-reservation] 1"
+] = {"error": {"code": "MAX_CAPACITY_EXCEEDED", "details": "", "message": ""}}
+
+snapshots[
+    "test_ticketing_system_errors[ticketing_api_response14-422-confirmation] 1"
+] = {"error": {"code": "BOOKING_ALREADY_CONFIRMED", "details": "", "message": ""}}
+
+snapshots[
+    "test_ticketing_system_errors[ticketing_api_response14-422-reservation] 1"
+] = {"error": {"code": "TICKET_SYSTEM_ERROR", "details": "", "message": ""}}
+
+snapshots[
     "test_ticketing_system_errors[ticketing_api_response2-400-confirmation] 1"
 ] = {
     "error": {

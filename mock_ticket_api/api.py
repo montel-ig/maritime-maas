@@ -14,7 +14,7 @@ from mock_ticket_api.utils import (
 class MockTicketParamsSerializer(serializers.Serializer):
     maas_operator_id = serializers.CharField()
     locale = serializers.ChoiceField(choices=settings.TICKET_LANGUAGES, required=False)
-    request_id = serializers.CharField(required=False)
+    request_id = serializers.CharField(required=False, allow_blank=True)
 
 
 @extend_schema_view(
