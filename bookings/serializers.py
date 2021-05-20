@@ -43,9 +43,9 @@ class TicketSerializer(serializers.Serializer):
 
 
 class PassthroughParametersSerializer(serializers.Serializer):
-    request_id = serializers.CharField(required=False)
+    request_id = serializers.CharField(required=False, allow_blank=True)
     transaction_id = serializers.CharField(
-        required=False, max_length=255, write_only=True
+        required=False, max_length=255, write_only=True, allow_blank=True
     )
     locale = serializers.ChoiceField(choices=settings.TICKET_LANGUAGES, required=False)
 
@@ -143,7 +143,7 @@ class ApiDepartureSerializer(serializers.Serializer):
 class ApiBookingSerializer(PassthroughParametersSerializer):
     """Serializes BookingSerializer data to ticketing system API format."""
 
-    transaction_id = serializers.CharField(required=False)
+    transaction_id = serializers.CharField(required=False, allow_blank=True)
     maas_operator_id = serializers.CharField(source="maas_operator.identifier")
     route_id = serializers.CharField(required=False, source="route.source_id")
     departures = ApiDepartureSerializer(required=False, many=True)
