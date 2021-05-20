@@ -57,14 +57,14 @@ class ConfirmationSuccessSerializer(serializers.Serializer):
 
 class InnerReservationErrorSerializer(serializers.Serializer):
     code = serializers.ChoiceField(choices=reservation_error_codes)
-    message = serializers.CharField(required=False)
-    details = serializers.CharField(required=False)
+    message = serializers.CharField(required=False, allow_blank=True)
+    details = serializers.CharField(required=False, allow_blank=True)
 
 
 class InnerConfirmationErrorSerializer(serializers.Serializer):
     code = serializers.ChoiceField(choices=confirmation_error_codes)
-    message = serializers.CharField(required=False)
-    details = serializers.CharField(required=False)
+    message = serializers.CharField(required=False, allow_blank=True)
+    details = serializers.CharField(required=False, allow_blank=True)
 
 
 class ReservationErrorSerializer(serializers.Serializer):
