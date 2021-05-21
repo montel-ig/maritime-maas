@@ -56,7 +56,7 @@ class RouteSerializer(serializers.ModelSerializer):
     ticket_types = serializers.SerializerMethodField()
     description = serializers.CharField(source="desc")
 
-    @extend_schema_field(StopSerializer)
+    @extend_schema_field(StopSerializer(many=True))
     def get_stops(self, obj):
         stops = (
             Stop.objects.filter(stop_times__trip__route_id=obj.id)
@@ -67,7 +67,7 @@ class RouteSerializer(serializers.ModelSerializer):
             stops, many=True, context=dict(**self.context, route_id=obj.id)
         ).data
 
-    @extend_schema_field(FareSerializer)
+    @extend_schema_field(FareSerializer(many=True))
     def get_ticket_types(self, obj):
         ticket_types = (
             Fare.objects.filter(fare_rules__route_id=obj.id)

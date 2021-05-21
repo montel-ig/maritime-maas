@@ -109,7 +109,7 @@ class StopSerializer(serializers.ModelSerializer):
         if obj.point:
             return CoordinateSerializer(obj).data
 
-    @extend_schema_field(DepartureSerializer)
+    @extend_schema_field(DepartureSerializer(many=True))
     def get_departures(self, obj):
         if "date" not in self.context:
             return None
