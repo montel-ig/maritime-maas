@@ -111,3 +111,36 @@ snapshots["test_stops_departures[filters5] 1"] = [
 ]
 
 snapshots["test_stops_departures[filters6] 1"] = []
+
+snapshots["test_stops_departures__stop_appears_multiple_times_in_trip 1"] = [
+    {
+        "arrival_time": "2021-02-18T07:00:00Z",
+        "bikes_allowed": 0,
+        "block_id": "block_id of test trip 1",
+        "departure_headsign": "headsign of test trip ",
+        "departure_time": "2021-02-18T08:00:00Z",
+        "direction_id": 0,
+        "id": "00000000-0000-0000-0000-000000000004",
+        "route_id": "00000000-0000-0000-0000-000000000000",
+        "short_name": "short_name of test trip ",
+        "stop_headsign": "stop_headsign of test stop time ",
+        "stop_sequence": 2,
+        "timepoint": 1,
+        "wheelchair_accessible": 0,
+    },
+    {
+        "arrival_time": "2021-02-18T09:00:00Z",
+        "bikes_allowed": 0,
+        "block_id": "block_id of test trip 1",
+        "departure_headsign": "headsign of test trip ",
+        "departure_time": "2021-02-18T10:00:00Z",
+        "direction_id": 0,
+        "id": "00000000-0000-0000-0000-000000000004",
+        "route_id": "00000000-0000-0000-0000-000000000000",
+        "short_name": "short_name of test trip ",
+        "stop_headsign": "stop_headsign of test stop time ",
+        "stop_sequence": 4,
+        "timepoint": 1,
+        "wheelchair_accessible": 0,
+    },
+]
