@@ -35,12 +35,7 @@ def api_id_generator():
 
 
 @pytest.fixture
-def route_with_departures(maas_operator, api_id_generator):
-    """
-    A route with
-        * 2 trips each having 2 stops and 2 stop times
-        * 3 departures (first trip having two departures on separate days)
-    """
+def route_for_maas_operator(maas_operator, api_id_generator):
     feed = get_feed_for_maas_operator(maas_operator, True)
 
     agency = baker.make(
@@ -63,6 +58,20 @@ def route_with_departures(maas_operator, api_id_generator):
         url="url of test route ",
         capacity_sales=Route.CapacitySales.DISABLED,
     )
+
+    return route
+
+
+@pytest.fixture
+def route_with_departures(api_id_generator, route_for_maas_operator):
+    """
+    A route with
+        * 2 trips each having 2 stops and 2 stop times
+        * 3 departures (first trip having two departures on separate days)
+    """
+    route = route_for_maas_operator
+    feed = route_for_maas_operator.feed
+
     trips = baker.make(
         Trip,
         route=route,

@@ -16,15 +16,15 @@ class CoordinateSerializer(serializers.Serializer):
     longitude = serializers.FloatField(source="point.x", read_only=True)
 
 
-class DepartureSerializer(serializers.ModelSerializer):
-    id = serializers.UUIDField(source="api_id")
+class StopTimeSerializer(serializers.ModelSerializer):
+    id = serializers.SerializerMethodField()
     short_name = serializers.CharField(source="trip.short_name")
     arrival_time = serializers.SerializerMethodField()
     departure_time = serializers.SerializerMethodField()
     direction_id = serializers.IntegerField(source="trip.direction_id")
     departure_headsign = serializers.CharField(source="trip.headsign")
-    stop_headsign = serializers.SerializerMethodField()
-    stop_sequence = serializers.SerializerMethodField()
+    stop_headsign = serializers.CharField()
+    stop_sequence = serializers.IntegerField()
     wheelchair_accessible = serializers.IntegerField(
         source="trip.wheelchair_accessible"
     )
@@ -33,10 +33,10 @@ class DepartureSerializer(serializers.ModelSerializer):
         source="trip.route", slug_field="api_id", read_only=True
     )
     block_id = serializers.CharField(source="trip.block_id")
-    timepoint = serializers.SerializerMethodField()
+    timepoint = serializers.IntegerField()
 
     class Meta:
-        model = Departure
+        model = StopTime
         fields = (
             "id",
             "short_name",
@@ -59,25 +59,20 @@ class DepartureSerializer(serializers.ModelSerializer):
             del fields["route_id"]
         return fields
 
+    @extend_schema_field(OpenApiTypes.UUID)
+    def get_id(self, obj):
+        departure = obj.trip.dates_departure[0]
+        return departure.api_id
+
     @extend_schema_field(OpenApiTypes.DATETIME)
     def get_arrival_time(self, obj):
-        return obj.trip.stops_stop_times[0].get_arrival_time_datetime(obj)
+        departure = obj.trip.dates_departure[0]
+        return obj.get_arrival_time_datetime(departure)
 
     @extend_schema_field(OpenApiTypes.DATETIME)
     def get_departure_time(self, obj):
-        return obj.trip.stops_stop_times[0].get_departure_time_datetime(obj)
-
-    @extend_schema_field(OpenApiTypes.STR)
-    def get_stop_headsign(self, obj):
-        return obj.trip.stops_stop_times[0].stop_headsign
-
-    @extend_schema_field(OpenApiTypes.INT)
-    def get_stop_sequence(self, obj):
-        return obj.trip.stops_stop_times[0].stop_sequence
-
-    @extend_schema_field(OpenApiTypes.INT)
-    def get_timepoint(self, obj):
-        return obj.trip.stops_stop_times[0].timepoint
+        departure = obj.trip.dates_departure[0]
+        return obj.get_departure_time_datetime(departure)
 
 
 class StopSerializer(serializers.ModelSerializer):
@@ -109,30 +104,33 @@ class StopSerializer(serializers.ModelSerializer):
         if obj.point:
             return CoordinateSerializer(obj).data
 
-    @extend_schema_field(DepartureSerializer(many=True))
+    @extend_schema_field(StopTimeSerializer(many=True))
     def get_departures(self, obj):
         if "date" not in self.context:
             return None
+
         queryset = (
-            Departure.objects.filter(
-                trip__stop_times__stop=obj, date=self.context["date"]
+            StopTime.objects.filter(
+                stop=obj, trip__departures__date=self.context["date"]
             )
             .select_related("trip", "trip__route", "trip__route__agency")
             .prefetch_related(
                 Prefetch(
-                    "trip__stop_times",
-                    queryset=StopTime.objects.filter(stop=obj),
-                    to_attr="stops_stop_times",
-                ),
+                    "trip__departures",
+                    queryset=Departure.objects.filter(
+                        date=self.context["date"], trip__stop_times__stop=obj
+                    ),
+                    to_attr="dates_departure",
+                )
             )
-            .order_by("trip__stop_times__departure_time")
+            .order_by("departure_time")
         )
         if "direction_id" in self.context:
             queryset = queryset.filter(trip__direction_id=self.context["direction_id"])
         if "route_id" in self.context:
             queryset = queryset.filter(trip__route_id=self.context["route_id"])
 
-        return DepartureSerializer(queryset, many=True, context=self.context).data
+        return StopTimeSerializer(queryset, many=True, context=self.context).data
 
 
 class RadiusToLocationFilter(DistanceToPointFilter):
