@@ -144,13 +144,13 @@ class GTFSFeedReader:
         fingerprint = None
 
         try:
-            response = requests.head(feed.name)
+            response = requests.head(feed.url_or_path)
             response.raise_for_status()
             if timestamp := response.headers.get("last-modified"):
                 fingerprint = timestamp
 
             if not fingerprint:
-                response = requests.get(feed.name)
+                response = requests.get(feed.url_or_path)
                 response.raise_for_status()
                 sha1 = hashlib.sha1()
                 sha1.update(response.content)

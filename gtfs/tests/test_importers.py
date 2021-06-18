@@ -27,7 +27,7 @@ def test_gtfs_feed_importer():
     importer = GTFSFeedImporter()
     importer.run(feed)
 
-    assert feed.fingerprint == datetime.date.today().isoformat()
+    assert feed.fingerprint == localdate().isoformat()
 
     assert Agency.objects.count() == 1
     agency = Agency.objects.first()

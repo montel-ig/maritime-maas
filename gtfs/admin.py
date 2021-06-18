@@ -63,6 +63,7 @@ class FeedAdmin(admin.ModelAdmin):
     readonly_fields = (
         "created_at",
         "imported_at",
+        "fingerprint",
         "import_attempted_at",
         "last_import_successful",
         "last_import_error_message",
@@ -93,7 +94,12 @@ class FeedAdmin(admin.ModelAdmin):
         if not obj:
             return ((None, {"fields": ("name", "url_or_path", "ticketing_system")}),)
 
-        import_fields = ("imported_at", "import_attempted_at", "last_import_successful")
+        import_fields = (
+            "imported_at",
+            "import_attempted_at",
+            "fingerprint",
+            "last_import_successful",
+        )
         if obj.last_import_successful is False:
             import_fields += ("last_import_error_message",)
 
