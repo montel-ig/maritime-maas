@@ -1,3 +1,4 @@
+import logging
 from urllib.parse import quote, urljoin
 
 import pytest
@@ -10,11 +11,25 @@ from gtfs.tests.utils import get_feed_for_maas_operator
 from mock_ticket_api.utils import get_confirmations_data, get_reservation_data
 
 
+def get_log_records(caplog):
+    """Return api call log messages.
+
+    Format of record tuples is (logger_name, log_level, message).
+    """
+    return [
+        log[2]
+        for log in caplog.record_tuples
+        if log[0] == "bookings.ticketing_system" and log[1] == logging.INFO
+    ]
+
+
 @pytest.mark.django_db
 def test_api_call_for_reservation(
-    maas_operator, fare_test_data, requests_mock, snapshot
+    maas_operator, fare_test_data, requests_mock, snapshot, caplog
 ):
     ticketing_system = fare_test_data.feed.ticketing_system
+    ticketing_system.api_url = "https://api.example.com"
+    ticketing_system.save()
     requests_mock.post(
         ticketing_system.api_url,
         json=get_reservation_data(),
@@ -35,14 +50,17 @@ def test_api_call_for_reservation(
     }
 
     Booking.objects.create_reservation(maas_operator, ticketing_system, ticket_data)
+    log_messages = get_log_records(caplog)
 
     assert requests_mock.call_count == 1
     snapshot.assert_match(requests_mock.request_history[0].json())
     assert requests_mock.request_history[0].headers["Authorization"] == "Bearer APIKEY"
+    assert len(log_messages) == 1
+    snapshot.assert_match(log_messages[0])
 
 
 @pytest.mark.django_db
-def test_api_call_for_confirmation(maas_operator, requests_mock, snapshot):
+def test_api_call_for_confirmation(maas_operator, requests_mock, snapshot, caplog):
     feed = get_feed_for_maas_operator(maas_operator, True)
     extra_params = {
         "locale": "fi",
@@ -56,6 +74,8 @@ def test_api_call_for_confirmation(maas_operator, requests_mock, snapshot):
         ticketing_system=feed.ticketing_system,
     )
     ticketing_system = feed.ticketing_system
+    ticketing_system.api_url = "https://api.example.com"
+    ticketing_system.save()
     requests_mock.post(
         urljoin(ticketing_system.api_url, f"{reserved_booking.source_id}/confirm/"),
         json=get_confirmations_data(reserved_booking.source_id, include_qr=False),
@@ -63,10 +83,13 @@ def test_api_call_for_confirmation(maas_operator, requests_mock, snapshot):
     )
 
     reserved_booking.confirm(passed_parameters=extra_params)
+    log_messages = get_log_records(caplog)
 
     assert requests_mock.call_count == 1
     snapshot.assert_match(requests_mock.request_history[0].json())
     assert requests_mock.request_history[0].headers["Authorization"] == "Bearer APIKEY"
+    assert len(log_messages) == 1
+    snapshot.assert_match(log_messages[0])
 
 
 @pytest.mark.django_db
