@@ -1,7 +1,7 @@
 from django.contrib.gis.db import models
 from django.utils.translation import gettext_lazy as _
 from parler.managers import TranslatableQuerySet
-from parler.models import TranslatableModel, TranslatedFields, TranslationDoesNotExist
+from parler.models import TranslatableModel, TranslatedFields
 
 from maas.models import MaasOperator
 
@@ -67,7 +67,6 @@ class Route(TranslatableModel, GTFSModelWithSourceID):
         default_related_name = "routes"
 
     def __str__(self):
-        try:
-            return self.safe_translation_getter("long_name", any_language=True)
-        except TranslationDoesNotExist:
-            return super().__str__()
+        return self.safe_translation_getter(
+            "long_name", default=super().__str__, any_language=True
+        )

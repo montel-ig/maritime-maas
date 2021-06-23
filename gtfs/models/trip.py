@@ -52,4 +52,6 @@ class Trip(TranslatableModel, GTFSModelWithSourceID):
         default_related_name = "trips"
 
     def __str__(self):
-        return self.short_name or super().__str__()
+        return self.safe_translation_getter(
+            "short_name", default=super().__str__, any_language=True
+        )

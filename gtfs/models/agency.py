@@ -1,6 +1,6 @@
 from django.contrib.gis.db import models
 from django.utils.translation import gettext_lazy as _
-from parler.models import TranslatableModel, TranslatedFields, TranslationDoesNotExist
+from parler.models import TranslatableModel, TranslatedFields
 
 from gtfs.models.base import GTFSModelWithSourceID
 
@@ -33,7 +33,6 @@ class Agency(TranslatableModel, GTFSModelWithSourceID):
         default_related_name = "agencies"
 
     def __str__(self):
-        try:
-            return self.safe_translation_getter("name", any_language=True)
-        except TranslationDoesNotExist:
-            return super().__str__()
+        return self.safe_translation_getter(
+            "name", default=super().__str__, any_language=True
+        )
