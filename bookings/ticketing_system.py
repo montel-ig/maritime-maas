@@ -1,3 +1,5 @@
+import json
+import logging
 from json import JSONDecodeError
 from typing import Optional
 from urllib.parse import quote, urljoin
@@ -10,6 +12,8 @@ from maas.models import MaasOperator, TicketingSystem
 
 from .choices import BookingStatus
 from .utils import TokenAuth
+
+logger = logging.getLogger(__name__)
 
 reservation_error_codes = (
     "MAX_CAPACITY_EXCEEDED",
@@ -106,6 +110,10 @@ class TicketingSystemAPI:
 
         if not self.ticketing_system.api_key:
             raise Exception("Ticketing system doesn't define an API key.")
+
+        logger.info(
+            f"Ticketing system API call - URL: {url} data: {json.dumps(payload)}"
+        )
 
         response = requests.post(
             url,
