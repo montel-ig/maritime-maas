@@ -50,7 +50,7 @@ def test_gtfs_feed_importer():
     route.set_current_language("sv")
     assert route.long_name == "Skanslandet rutt"
     assert route.sort_order == 1
-    assert route.capacity_sales == Route.CapacitySales.ENABLED
+    assert route.capacity_sales == Route.CapacitySales.REQUIRED_FOR_INBOUND
 
     assert route.trips.count() == 5
     trip = route.trips.first()

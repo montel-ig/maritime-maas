@@ -1,13 +1,15 @@
+import datetime
 import json
 import uuid
 from urllib.parse import urljoin
 
 import pytest
 from freezegun import freeze_time
-from model_bakery import baker
+from model_bakery import baker, seq
 from rest_framework import status
 
 from bookings.models import Booking
+from gtfs.models import Departure, Route
 from gtfs.tests.utils import get_feed_for_maas_operator
 from maas.models import MaasOperator
 from mock_ticket_api.utils import get_confirmations_data, get_reservation_data
@@ -166,6 +168,70 @@ def test_create_booking_illegal_departures(
 
     assert response.status_code == 400
     snapshot.assert_match(json.loads(response.content))
+
+
+@pytest.mark.parametrize(
+    "capacity_sales,direction_ids,valid",
+    [
+        (Route.CapacitySales.REQUIRED_FOR_OUTBOUND, [0], True),
+        (Route.CapacitySales.REQUIRED_FOR_INBOUND, [1], True),
+        (Route.CapacitySales.REQUIRED_FOR_OUTBOUND, [1], False),
+        (Route.CapacitySales.REQUIRED_FOR_INBOUND, [0], False),
+        (Route.CapacitySales.REQUIRED_FOR_OUTBOUND, [0, 0], False),
+        (Route.CapacitySales.REQUIRED_FOR_OUTBOUND, [None], False),
+    ],
+)
+@pytest.mark.django_db
+def test_create_booking_capacity_sales_required_for_outbound_and_inbound(
+    maas_api_client,
+    snapshot,
+    fare_test_data,
+    capacity_sales,
+    direction_ids,
+    valid,
+    api_id_generator,
+    requests_mock,
+):
+    requests_mock.post(
+        fare_test_data.feed.ticketing_system.api_url,
+        json=get_reservation_data(),
+        status_code=status.HTTP_201_CREATED,
+    )
+    route = fare_test_data.routes[0]
+    route.capacity_sales = capacity_sales
+    route.save()
+
+    departures = [
+        baker.make(
+            Departure,
+            trip__feed=fare_test_data.feed,
+            trip__source_id=seq("source_id of trip "),
+            trip__direction_id=d_id,
+            api_id=api_id_generator,
+            date=datetime.date(2021, 4, 28),
+            trip__route=fare_test_data.routes[0],
+        )
+        for d_id in direction_ids
+    ]
+
+    post_data = {
+        "route_id": route.api_id,
+        "departure_ids": [d.api_id for d in departures],
+        "tickets": [
+            {
+                "customer_type_id": fare_test_data.rider_categories[0].api_id,
+                "ticket_type_id": fare_test_data.fares[0].api_id,
+            }
+        ],
+    }
+
+    response = maas_api_client.post(ENDPOINT, post_data)
+
+    if valid:
+        assert response.status_code == 201
+    else:
+        snapshot.assert_match(json.loads(response.content))
+        assert response.status_code == 400
 
 
 @pytest.mark.django_db

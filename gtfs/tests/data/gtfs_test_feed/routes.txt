@@ -1,2 +1,2 @@
 route_id,agency_id,route_short_name,route_long_name,route_desc,route_type,route_url,route_sort_order,capacity_sales
-vallisaari_rengas,maasline,vallisaari,Vallisaaren reitti,Menopaluu Kauppatorilta Vallisaareen. Reittiin sisältyy myös rengasreitti.,4,https://maas.line/routes/1,1,1
+vallisaari_rengas,maasline,vallisaari,Vallisaaren reitti,Menopaluu Kauppatorilta Vallisaareen. Reittiin sisältyy myös rengasreitti.,4,https://maas.line/routes/1,1,4
