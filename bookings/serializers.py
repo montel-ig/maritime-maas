@@ -105,6 +105,26 @@ class BookingSerializer(PassthroughParametersSerializer, serializers.ModelSerial
                 code="invalid_departures",
             )
 
+        if self.context["route"].capacity_sales in (
+            Route.CapacitySales.REQUIRED_FOR_OUTBOUND,
+            Route.CapacitySales.REQUIRED_FOR_INBOUND,
+        ):
+            required_direction_id = (
+                0
+                if self.context["route"].capacity_sales
+                == Route.CapacitySales.REQUIRED_FOR_OUTBOUND
+                else 1
+            )
+            if (
+                len(departures) != 1
+                or departures[0].trip.direction_id != required_direction_id
+            ):
+                raise ValidationError(
+                    f"Exactly one {'inbound' if required_direction_id else 'outbound'} "
+                    f"departure must be selected for this route.",
+                    code="invalid_departures",
+                )
+
         return departures
 
     def validate(self, data):
@@ -118,8 +138,15 @@ class BookingSerializer(PassthroughParametersSerializer, serializers.ModelSerial
             "locale": str
         }
         """
-        data["route"] = data.pop("route_id", self.context["route"])
+        data["route"] = data.pop("route_id", self.context.get("route"))
         data["departures"] = data.pop("departure_ids", [])
+
+        if not (data["route"] or data["departures"]):
+            raise ValidationError(
+                "Either a route or a departure is required.",
+                code="missing_route_and_departure",
+            )
+
         return data
 
     def create(self, validated_data):

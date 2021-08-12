@@ -33,6 +33,8 @@ class Route(TranslatableModel, GTFSModelWithSourceID):
         DISABLED = 0, _("Disabled")
         ENABLED = 1, _("Enabled")
         REQUIRED = 2, _("Required")
+        REQUIRED_FOR_OUTBOUND = 3, _("Required for outbound")
+        REQUIRED_FOR_INBOUND = 4, _("Required for inbound")
 
     translations = TranslatedFields(
         long_name=models.CharField(

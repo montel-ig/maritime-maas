@@ -62,6 +62,30 @@ snapshots["test_confirm_booking[True] 1"] = [
     }
 ]
 
+snapshots[
+    "test_create_booking_capacity_sales_required_for_outbound_and_inbound[3-direction_ids2-False] 1"
+] = {
+    "departure_ids": ["Exactly one outbound departure must be selected for this route."]
+}
+
+snapshots[
+    "test_create_booking_capacity_sales_required_for_outbound_and_inbound[3-direction_ids4-False] 1"
+] = {
+    "departure_ids": ["Exactly one outbound departure must be selected for this route."]
+}
+
+snapshots[
+    "test_create_booking_capacity_sales_required_for_outbound_and_inbound[3-direction_ids5-False] 1"
+] = {
+    "departure_ids": ["Exactly one outbound departure must be selected for this route."]
+}
+
+snapshots[
+    "test_create_booking_capacity_sales_required_for_outbound_and_inbound[4-direction_ids3-False] 1"
+] = {
+    "departure_ids": ["Exactly one inbound departure must be selected for this route."]
+}
+
 snapshots["test_create_booking_illegal_departures[False-departure_indices2] 1"] = {
     "departure_ids": ["All departures must belong to the same route."]
 }
