@@ -138,8 +138,15 @@ class BookingSerializer(PassthroughParametersSerializer, serializers.ModelSerial
             "locale": str
         }
         """
-        data["route"] = data.pop("route_id", self.context["route"])
+        data["route"] = data.pop("route_id", self.context.get("route"))
         data["departures"] = data.pop("departure_ids", [])
+
+        if not (data["route"] or data["departures"]):
+            raise ValidationError(
+                "Either a route or a departure is required.",
+                code="missing_route_and_departure",
+            )
+
         return data
 
     def create(self, validated_data):
