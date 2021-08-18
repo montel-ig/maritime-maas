@@ -158,6 +158,7 @@ TEMPLATES = [
 ]
 
 REST_FRAMEWORK = {
+    "DEFAULT_RENDERER_CLASSES": ["rest_framework.renderers.JSONRenderer"],
     "DEFAULT_PERMISSION_CLASSES": ["maas.permissions.IsMaasOperator"],
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "maas.authentication.BearerTokenAuthentication",
@@ -169,6 +170,9 @@ REST_FRAMEWORK = {
 if DEBUG:
     REST_FRAMEWORK["DEFAULT_AUTHENTICATION_CLASSES"].append(
         "rest_framework.authentication.SessionAuthentication"
+    )
+    REST_FRAMEWORK["DEFAULT_RENDERER_CLASSES"].append(
+        "rest_framework.renderers.BrowsableAPIRenderer"
     )
 
 SPECTACULAR_SETTINGS = {
