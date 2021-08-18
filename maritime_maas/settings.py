@@ -88,6 +88,8 @@ STATIC_URL = env("STATIC_URL")
 ROOT_URLCONF = "maritime_maas.urls"
 WSGI_APPLICATION = "maritime_maas.wsgi.application"
 
+SESSION_COOKIE_SECURE = False if DEBUG else True
+
 MOCK_TICKETING_API = env("MOCK_TICKETING_API")
 
 try:
