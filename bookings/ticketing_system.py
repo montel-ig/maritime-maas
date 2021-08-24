@@ -18,11 +18,13 @@ logger = logging.getLogger(__name__)
 reservation_error_codes = (
     "MAX_CAPACITY_EXCEEDED",
     "MAX_NUMBER_OF_TICKETS_REQUESTED_EXCEEDED",
+    "TICKET_SALES_ENDED",
 )
 
 confirmation_error_codes = (
     "BOOKING_EXPIRED",
     "BOOKING_ALREADY_CONFIRMED",
+    "TICKET_SALES_ENDED",
 )
 
 

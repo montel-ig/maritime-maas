@@ -211,6 +211,14 @@ snapshots[
 ] = {"error": {"code": "TICKET_SYSTEM_ERROR", "details": "", "message": ""}}
 
 snapshots[
+    "test_ticketing_system_errors[ticketing_api_response15-422-confirmation] 1"
+] = {"error": {"code": "TICKET_SALES_ENDED", "details": "", "message": ""}}
+
+snapshots[
+    "test_ticketing_system_errors[ticketing_api_response15-422-reservation] 1"
+] = {"error": {"code": "TICKET_SALES_ENDED", "details": "", "message": ""}}
+
+snapshots[
     "test_ticketing_system_errors[ticketing_api_response2-400-confirmation] 1"
 ] = {
     "error": {

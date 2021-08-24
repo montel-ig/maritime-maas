@@ -412,6 +412,14 @@ def test_confirm_booking_not_own(maas_api_client):
             },
             422,
         ),
+        (
+            {
+                "error": {
+                    "code": "TICKET_SALES_ENDED",
+                }
+            },
+            422,
+        ),
     ],
 )
 @pytest.mark.django_db
