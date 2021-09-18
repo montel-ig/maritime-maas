@@ -180,13 +180,30 @@ if DEBUG:
 SPECTACULAR_SETTINGS = {
     "TITLE": _("Maritime MaaS API"),
     "DESCRIPTION": _(
-        "Integration layer that mediates the connection between ticket sales platforms and MaaS providers."
+        "Integration API that mediates the connection between transport "
+        "service providers and MaaS operators. It exposes two different set "
+        "of API endpoints. One set consisting of endpoints to fetch transit "
+        "data and product information (`routes`, `stops` and `shapes`) and "
+        "another to perform bookings and booking related operations "
+        "(`bookings`). For more information about the service please refer "
+        "to the technical documentation: https://maritime-maas.atlassian.net/w"
+        "iki/spaces/MM/pages/12746764/Toteutus+-+Technical+Documentation"
     ),
-    "VERSION": "1.0.0",
+    "VERSION": "1.2.0",
     "EXTERNAL_DOCS": {
         "url": "https://github.com/City-of-Helsinki/maritime-maas/",
         "description": _("Source code"),
     },
+    "SERVERS": [
+        {
+            "url": "https://maritime-maas.test.kuva.hel.ninja",
+            "description": "Test Environment",
+        },
+        {
+            "url": "https://maritime-maas.api.hel.fi",
+            "description": "Production Environment",
+        },
+    ],
 }
 
 CORS_ORIGIN_WHITELIST = env.list("CORS_ORIGIN_WHITELIST")

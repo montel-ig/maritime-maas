@@ -2,7 +2,14 @@ from django.utils.translation import gettext_lazy as _
 from django_filters import rest_framework as filters
 from drf_spectacular.extensions import OpenApiSerializerFieldExtension
 from drf_spectacular.plumbing import build_array_type, build_basic_type
-from drf_spectacular.utils import extend_schema, extend_schema_view
+from drf_spectacular.utils import (
+    extend_schema,
+    extend_schema_serializer,
+    extend_schema_view,
+    OpenApiExample,
+    OpenApiParameter,
+    OpenApiTypes,
+)
 from rest_framework import serializers
 
 from gtfs.api.base import BaseGTFSViewSet, NestedDepartureQueryParamsSerializer
@@ -36,6 +43,7 @@ class LineStringFieldExtension(OpenApiSerializerFieldExtension):
         return LINESTRING_GEOMETRY
 
 
+@extend_schema_serializer()
 class ShapeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Shape
@@ -63,10 +71,44 @@ class ShapeFilter(filters.FilterSet):
 
 
 @extend_schema_view(
-    list=extend_schema(summary=_("List all shapes")),
+    list=extend_schema(
+        summary=_("List all shapes"),
+        parameters=[
+            OpenApiParameter(
+                name="departure_id",
+                description=("The UUID of the departure"),
+                type=OpenApiTypes.UUID,
+                location=OpenApiParameter.QUERY,
+                examples=[
+                    OpenApiExample(
+                        "departure_id", value="1455cf8a-127e-4ad7-b662-74de2ab316cf"
+                    )
+                ],
+            ),
+            OpenApiParameter(
+                name="route_id",
+                description=("The UUID of the route"),
+                type=OpenApiTypes.UUID,
+                location=OpenApiParameter.QUERY,
+                examples=[
+                    OpenApiExample(
+                        "route_id", value="1455cf8a-127e-4ad7-b662-74de2ab316cf"
+                    )
+                ],
+            ),
+        ],
+        tags=["Booking Options"],
+        description=[
+            "Return the path that vehicle travels along a route in a sequence "
+            "of points (latitude and longitude). Shapes can be filtered with "
+            "by departure with `departure_id` or by route with `route_id` "
+            "parameter."
+        ],
+    ),
     retrieve=extend_schema(
         summary=_("Retrieve a single shape"),
-        parameters=[NestedDepartureQueryParamsSerializer],
+        parameters=[ShapeSerializer],
+        tags=["Booking Options"],
     ),
 )
 class ShapeViewSet(BaseGTFSViewSet):

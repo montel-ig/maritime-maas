@@ -1,7 +1,13 @@
 from django.db.models import Prefetch
 from django.utils.translation import gettext_lazy as _
 from drf_spectacular.types import OpenApiTypes
-from drf_spectacular.utils import extend_schema, extend_schema_field, extend_schema_view
+from drf_spectacular.utils import (
+    extend_schema,
+    extend_schema_field,
+    extend_schema_view,
+    OpenApiExample,
+    OpenApiParameter,
+)
 from rest_framework import serializers
 from rest_framework_gis.filters import DistanceToPointFilter
 
@@ -139,10 +145,86 @@ class RadiusToLocationFilter(DistanceToPointFilter):
 
 
 @extend_schema_view(
-    list=extend_schema(summary=_("List all stops")),
+    list=extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="location",
+                description=(
+                    "The location of the user in the format of latitude and "
+                    "longitude separated by comma"
+                ),
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.QUERY,
+                examples=[
+                    OpenApiExample(
+                        "Location", value="60.16783393799385,24.952470228154326"
+                    )
+                ],
+            ),
+            OpenApiParameter(
+                name="radius",
+                description=("Distance (in meters) to search for stops"),
+                type=OpenApiTypes.INT,
+                location=OpenApiParameter.QUERY,
+                examples=[OpenApiExample("Radius", value=5000)],
+            ),
+        ],
+        summary=_("List all stops"),
+        tags=["Booking Options"],
+        description=(
+            "By default all the stops are returned. Stops can filtered with "
+            "`location` and `radius` parameters to show only stops within a "
+            "specific distance. Stops can also be filtered by route or by a "
+            "departure."
+        ),
+    ),
     retrieve=extend_schema(
         summary=_("Retrieve a single stop"),
-        parameters=[NestedDepartureQueryParamsSerializer],
+        description=(
+            "Returns the details of a single stop requested by `UUID`. By "
+            "providing the `date` parameter this endpoint will also return "
+            "the departures for the given date. It can be also used together "
+            "with `direction_id` parameter which can be used to get only "
+            "departures to certain direction (for example to filter out "
+            "arriving inbound ferries and only show departing outbound "
+            "departures"
+        ),
+        parameters=[
+            NestedDepartureQueryParamsSerializer,
+            OpenApiParameter(
+                name="api_id",
+                description=("The UUID of the stop"),
+                type=OpenApiTypes.UUID,
+                location=OpenApiParameter.PATH,
+                examples=[
+                    OpenApiExample("id", value="1455cf8a-127e-4ad7-b662-74de2ab316cf")
+                ],
+            ),
+            OpenApiParameter(
+                name="date",
+                description=(
+                    "Date to return departures for. Departures are returned "
+                    "only for the given date. If date is not provided the "
+                    "departures array won't be present in the response."
+                ),
+                type=OpenApiTypes.DATE,
+                location=OpenApiParameter.QUERY,
+                examples=[OpenApiExample("date", value="2021-01-01")],
+            ),
+            OpenApiParameter(
+                name="direction_id",
+                description=(
+                    "Filters departures of a stop by direction (0=outbound, "
+                    "1=inbound). For more information about `direction_id` "
+                    "please refer to the technical documentation."
+                ),
+                type=OpenApiTypes.INT,
+                enum=[0, 1],
+                location=OpenApiParameter.QUERY,
+                examples=[OpenApiExample("direction_id", value=1)],
+            ),
+        ],
+        tags=["Booking Options"],
     ),
 )
 class StopViewSet(BaseGTFSViewSet):

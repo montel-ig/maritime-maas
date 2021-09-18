@@ -1,6 +1,13 @@
 from django.utils.translation import gettext_lazy as _
 from django_filters import rest_framework as filters
-from drf_spectacular.utils import extend_schema, extend_schema_field, extend_schema_view
+from drf_spectacular.utils import (
+    extend_schema,
+    extend_schema_field,
+    extend_schema_view,
+    OpenApiExample,
+    OpenApiParameter,
+    OpenApiTypes,
+)
 from rest_framework import serializers
 
 from gtfs.api.base import BaseGTFSViewSet, NestedDepartureQueryParamsSerializer
@@ -90,10 +97,77 @@ class RouteFilter(filters.FilterSet):
 
 
 @extend_schema_view(
-    list=extend_schema(summary=_("List all routes")),
+    list=extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="stop_id",
+                description=("The UUID of the stop"),
+                type=OpenApiTypes.UUID,
+                location=OpenApiParameter.QUERY,
+                examples=[
+                    OpenApiExample(
+                        "stop_id", value="1455cf8a-127e-4ad7-b662-74de2ab316cf"
+                    )
+                ],
+            ),
+        ],
+        summary=_("List all routes"),
+        tags=["Booking Options"],
+        description=[
+            "By default all the routes are returned. Routes can be filtered with"
+            " `stop_id` to get only the routes that are including a specific stop."
+            "In addition to basic information of the route also available ticket "
+            "types and stops are returned by this endpoint."
+        ],
+    ),
     retrieve=extend_schema(
         summary=_("Retrieve a single route"),
-        parameters=[NestedDepartureQueryParamsSerializer],
+        parameters=[
+            NestedDepartureQueryParamsSerializer,
+            OpenApiParameter(
+                name="api_id",
+                description=("The UUID of the route"),
+                type=OpenApiTypes.UUID,
+                location=OpenApiParameter.PATH,
+                examples=[
+                    OpenApiExample("id", value="1455cf8a-127e-4ad7-b662-74de2ab316cf")
+                ],
+            ),
+            OpenApiParameter(
+                name="date",
+                description=(
+                    "Date to return departures for. Departures are returned "
+                    "only for the given date. If date is not provided the "
+                    "departures array won't be present in the response."
+                ),
+                type=OpenApiTypes.DATE,
+                location=OpenApiParameter.QUERY,
+                examples=[OpenApiExample("date", value="2021-01-01")],
+            ),
+            OpenApiParameter(
+                name="direction_id",
+                description=(
+                    "Filters departures of a route by direction (0=outbound, "
+                    "1=inbound). For more information about `direction_id` "
+                    "please refer to the technical documentation."
+                ),
+                type=OpenApiTypes.INT,
+                enum=[0, 1],
+                location=OpenApiParameter.QUERY,
+                examples=[OpenApiExample("direction_id", value=1)],
+            ),
+        ],
+        tags=["Booking Options"],
+        description=[
+            "Returns the details of a single route requested by `UUID`. "
+            "In addition to basic information of the route also available "
+            "ticket types and stops are returned by this endpoint. By "
+            " providing the `date` parameter this endpoint will also return "
+            "the departures for the given date. It can be also used together "
+            "with `direction_id` parameter which returns departures to "
+            "certain direction (for example to filter out arriving inbound "
+            "ferries and only show departing outbound departures)."
+        ],
     ),
 )
 class RoutesViewSet(BaseGTFSViewSet):

@@ -10,8 +10,37 @@ from bookings.serializers import BookingSerializer, PassthroughParametersSeriali
 
 
 @extend_schema_view(
-    create=extend_schema(summary=_("Create a booking")),
-    confirm=extend_schema(summary=_("Confirm a previously created booking")),
+    create=extend_schema(
+        summary=_("Create a booking"),
+        tags=["Bookings"],
+        description=[
+            "Creates a new booking with given parameters. Route is defined "
+            "by `route_id`. Departures must be given as route's "
+            "`capacity_sales` field defines (for example if "
+            "`capacity_sales=2` a departure must be selected for each leg). "
+            "It's possible to make a booking with multiple tickets at a time "
+            "and those `ticket_type_id` and `customer_type_id` combinations "
+            "must be defined in the `tickets` parameter. `locale` sets the "
+            "language for the actual ticket payload. `request_id` is an "
+            "identifier for each request and `transaction_id` is an "
+            "identifier for each create booking/confirm booking transaction. "
+            "Both of the values can be used in debugging (especially when "
+            "MaaS Operator is directly in touch with Transport Service "
+            "Provider and cannot access the API logs). As a result the "
+            "booking id and the state `CONFIRMED` is returned in case of "
+            "successful booking. Otherwise error is returned (with details "
+            "if possible)."
+        ],
+    ),
+    confirm=extend_schema(
+        summary=_("Confirm a previously created booking"),
+        tags=["Bookings"],
+        description=[
+            "Confirms a previously created booking and returns the ticket "
+            "payload in the response. Otherwise error is returned with "
+            "possible details."
+        ],
+    ),
 )
 class BookingViewSet(
     mixins.CreateModelMixin,
