@@ -16,6 +16,11 @@ class MockTicketParamsSerializer(serializers.Serializer):
     locale = serializers.ChoiceField(choices=settings.TICKET_LANGUAGES, required=False)
     request_id = serializers.CharField(required=False, allow_blank=True)
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.context.get("retrieve"):
+            self.fields["maas_operator_id"].required = False
+
 
 @extend_schema_view(
     create=extend_schema(exclude=True), confirm=extend_schema(exclude=True)
@@ -38,6 +43,21 @@ class MockTicketViewSet(viewsets.ViewSet):
             )
 
         return Response(get_reservation_data(), status=status.HTTP_201_CREATED)
+
+    def retrieve(self, request, pk=None):
+        params = self.serializer_class(
+            data=request.query_params, context={"retrieve": True}
+        )
+        if not params.is_valid():
+            return Response(params.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        if error_data := get_error_data(params.data.get("request_id")):
+            return Response(
+                error_data,
+                status=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            )
+
+        return Response(get_confirmations_data(pk), status=status.HTTP_200_OK)
 
     @action(detail=True, methods=["post"])
     def confirm(self, request, pk=None):

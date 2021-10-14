@@ -78,6 +78,10 @@ def get_error_data(error_code):
             "code": "BOOKING_ALREADY_CONFIRMED",
         },
         "TICKET_SYSTEM_ERROR": {"code": "TICKET_SYSTEM_ERROR"},
+        "BOOKING_NOT_CONFIRMED": {
+            "code": "BOOKING_NOT_CONFIRMED",
+            "message": "Booking is not confirmed. Confirm the booking to get it's details.",
+        },
     }
     if error := errors.get(error_code):
         return {"error": error}
