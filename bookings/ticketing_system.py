@@ -27,6 +27,8 @@ confirmation_error_codes = (
     "TICKET_SALES_ENDED",
 )
 
+retrieve_error_codes = ("BOOKING_NOT_CONFIRMED",)
+
 
 class TicketingSystemRequestError(Exception):
     def __init__(self, code, message=None, details=None):
@@ -73,12 +75,22 @@ class InnerConfirmationErrorSerializer(serializers.Serializer):
     details = serializers.CharField(required=False, allow_blank=True)
 
 
+class InnerRetrieveErrorSerializer(serializers.Serializer):
+    code = serializers.ChoiceField(choices=retrieve_error_codes)
+    message = serializers.CharField(required=False, allow_blank=True)
+    details = serializers.CharField(required=False, allow_blank=True)
+
+
 class ReservationErrorSerializer(serializers.Serializer):
     error = InnerReservationErrorSerializer()
 
 
 class ConfirmationErrorSerializer(serializers.Serializer):
     error = InnerConfirmationErrorSerializer()
+
+
+class RetrieveErrorSerializer(serializers.Serializer):
+    error = InnerRetrieveErrorSerializer()
 
 
 class TicketingSystemAPI:
@@ -103,6 +115,31 @@ class TicketingSystemAPI:
             ConfirmationErrorSerializer,
         )
 
+    def retrieve(self, identifier: str, passed_parameters: Optional[dict] = None):
+        url = urljoin(self.ticketing_system.api_url, f"{quote(identifier)}/")
+
+        return self._get(
+            url,
+            passed_parameters or {},
+            ConfirmationSuccessSerializer,
+            RetrieveErrorSerializer,
+        )
+
+    def _get(self, url: str, passed_parameters, success_serializer, error_serializer):
+        if not self.ticketing_system.api_key:
+            raise Exception("Ticketing system doesn't define an API key.")
+
+        logger.info(f"Ticketing system API call - URL: {url}")
+
+        response = requests.get(
+            url,
+            params=passed_parameters,
+            timeout=self.TIMEOUT,
+            auth=TokenAuth(self.ticketing_system.api_key),
+        )
+
+        return self._process_response(response, success_serializer, error_serializer)
+
     def _post(self, url: str, data, success_serializer, error_serializer):
         from bookings.serializers import ApiBookingSerializer
 
@@ -124,6 +161,10 @@ class TicketingSystemAPI:
             auth=TokenAuth(self.ticketing_system.api_key),
         )
 
+        return self._process_response(response, success_serializer, error_serializer)
+
+    @staticmethod
+    def _process_response(response, success_serializer, error_serializer):
         try:
             data = response.json()
             if 400 <= response.status_code <= 499:

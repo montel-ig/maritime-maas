@@ -6,6 +6,10 @@ from snapshottest import Snapshot
 
 snapshots = Snapshot()
 
+snapshots[
+    "test_api_call_for_booking_detail 1"
+] = "Ticketing system API call - URL: https://api.example.com/test_confirmation_id/"
+
 snapshots["test_api_call_for_confirmation 1"] = {
     "locale": "fi",
     "maas_operator_id": "identifier of maas operator 1",

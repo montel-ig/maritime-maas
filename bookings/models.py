@@ -100,3 +100,13 @@ class Booking(TimestampedModel):
             self.transaction_id = transaction_id
         self.save()
         return response_data.get("tickets", [])
+
+    def retrieve(self, passed_parameters=None):
+        """Retrieve the booking and return ticket information."""
+        passed_parameters = passed_parameters or {}
+
+        api = TicketingSystemAPI(self.ticketing_system, self.maas_operator)
+        response_data = api.retrieve(
+            self.source_id, passed_parameters=passed_parameters
+        )
+        return response_data.get("tickets", [])

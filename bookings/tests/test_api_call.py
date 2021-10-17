@@ -93,6 +93,42 @@ def test_api_call_for_confirmation(maas_operator, requests_mock, snapshot, caplo
 
 
 @pytest.mark.django_db
+def test_api_call_for_booking_detail(maas_operator, requests_mock, snapshot, caplog):
+    feed = get_feed_for_maas_operator(maas_operator, True)
+    extra_params = {
+        "locale": "fi",
+        "request_id": "requestID",
+    }
+    confirmed_booking = baker.make(
+        Booking,
+        maas_operator=maas_operator,
+        source_id="test_confirmation_id",
+        ticketing_system=feed.ticketing_system,
+        status=Booking.Status.CONFIRMED,
+    )
+    ticketing_system = feed.ticketing_system
+    ticketing_system.api_url = "https://api.example.com"
+    ticketing_system.save()
+    requests_mock.get(
+        urljoin(ticketing_system.api_url, f"{confirmed_booking.source_id}/"),
+        json=get_confirmations_data(confirmed_booking.source_id, include_qr=False),
+        status_code=status.HTTP_200_OK,
+    )
+
+    confirmed_booking.retrieve(passed_parameters=extra_params)
+
+    log_messages = get_log_records(caplog)
+
+    assert requests_mock.call_count == 1
+    query = requests_mock.request_history[0].query
+    assert "locale" in query
+    assert "request_id" in query
+    assert requests_mock.request_history[0].headers["Authorization"] == "Bearer APIKEY"
+    assert len(log_messages) == 1
+    snapshot.assert_match(log_messages[0])
+
+
+@pytest.mark.django_db
 def test_ticket_system_call_use_quoted_identifiers(maas_operator, requests_mock):
     identifier = "MAAS:5154.1621500322898.jxgTgw,11E8"
     feed = get_feed_for_maas_operator(maas_operator, True)
