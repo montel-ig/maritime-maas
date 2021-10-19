@@ -8,7 +8,7 @@ snapshots = Snapshot()
 
 snapshots[
     "test_api_call_for_booking_detail 1"
-] = "Ticketing system API call - URL: https://api.example.com/test_confirmation_id/"
+] = "Ticketing system API call - GET https://api.example.com/test_confirmation_id/"
 
 snapshots["test_api_call_for_confirmation 1"] = {
     "locale": "fi",
@@ -19,7 +19,7 @@ snapshots["test_api_call_for_confirmation 1"] = {
 
 snapshots[
     "test_api_call_for_confirmation 2"
-] = 'Ticketing system API call - URL: https://api.example.com/test_confirmation_id/confirm/ data: {"request_id": "requestID", "transaction_id": "transactionID", "locale": "fi", "maas_operator_id": "identifier of maas operator 1"}'  # noqa: E501
+] = 'Ticketing system API call - POST https://api.example.com/test_confirmation_id/confirm/ data: {"request_id": "requestID", "transaction_id": "transactionID", "locale": "fi", "maas_operator_id": "identifier of maas operator 1"}'  # noqa: E501
 
 snapshots["test_api_call_for_reservation 1"] = {
     "departures": [{"date": "2021-04-28", "trip_id": "source_id of trip 1"}],
@@ -38,4 +38,4 @@ snapshots["test_api_call_for_reservation 1"] = {
 
 snapshots[
     "test_api_call_for_reservation 2"
-] = 'Ticketing system API call - URL: https://api.example.com data: {"request_id": "requestID", "transaction_id": "transactionID", "locale": "fi", "maas_operator_id": "identifier of maas operator 1", "route_id": "source_id of route 1", "departures": [{"trip_id": "source_id of trip 1", "date": "2021-04-28"}], "tickets": [{"ticket_type_id": "source_id of test fare 1", "customer_type_id": "source_id of test rider category 1"}]}'  # noqa: E501
+] = 'Ticketing system API call - POST https://api.example.com data: {"request_id": "requestID", "transaction_id": "transactionID", "locale": "fi", "maas_operator_id": "identifier of maas operator 1", "route_id": "source_id of route 1", "departures": [{"trip_id": "source_id of trip 1", "date": "2021-04-28"}], "tickets": [{"ticket_type_id": "source_id of test fare 1", "customer_type_id": "source_id of test rider category 1"}]}'  # noqa: E501
