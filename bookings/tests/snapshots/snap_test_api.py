@@ -134,11 +134,43 @@ snapshots["test_create_booking_no_permission 1"] = {
     ]
 }
 
+snapshots["test_retrieve_confirmed_booking 1"] = [
+    {
+        "agency": {"logo_url": "http://www.agency.com/logo.png", "name": "MaaS Line"},
+        "amount": 12,
+        "currency": "EUR",
+        "customer_type": "Aikuinen",
+        "departures": [
+            {
+                "depart_at": "2021-04-20T01:00:00Z",
+                "from": "Kauppatori",
+                "to": "Vallisaari",
+            }
+        ],
+        "description": "This is the description of the ticket",
+        "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+        "instructions": "These are the instructions of the ticket",
+        "locale": "fi",
+        "name": "Day in Vallisaari",
+        "qr_code": "QR_CODE",
+        "refresh_at": "2021-04-21T00:00:00Z",
+        "terms_of_use": "http://www.terms.and.conditions.fi",
+        "ticket_html": "<div>...</div>",
+        "ticket_type": "Päivälippu",
+        "valid_from": "2021-04-20T00:00:00Z",
+        "valid_to": "2021-04-21T00:00:00Z",
+    }
+]
+
 snapshots["test_ticketing_system_errors[None-200-confirmation] 1"] = {
     "error": {"code": "TICKET_SYSTEM_ERROR", "details": "", "message": ""}
 }
 
 snapshots["test_ticketing_system_errors[None-200-reservation] 1"] = {
+    "error": {"code": "TICKET_SYSTEM_ERROR", "details": "", "message": ""}
+}
+
+snapshots["test_ticketing_system_errors[None-200-retrieve] 1"] = {
     "error": {"code": "TICKET_SYSTEM_ERROR", "details": "", "message": ""}
 }
 
@@ -150,12 +182,20 @@ snapshots["test_ticketing_system_errors[None-400-reservation] 1"] = {
     "error": {"code": "TICKET_SYSTEM_ERROR", "details": "", "message": ""}
 }
 
+snapshots["test_ticketing_system_errors[None-400-retrieve] 1"] = {
+    "error": {"code": "TICKET_SYSTEM_ERROR", "details": "", "message": ""}
+}
+
 snapshots[
     "test_ticketing_system_errors[ticketing_api_response0-422-confirmation] 1"
 ] = {"error": {"code": "TICKET_SYSTEM_ERROR", "details": "", "message": ""}}
 
 snapshots["test_ticketing_system_errors[ticketing_api_response0-422-reservation] 1"] = {
     "error": {"code": "MAX_CAPACITY_EXCEEDED", "details": "", "message": ""}
+}
+
+snapshots["test_ticketing_system_errors[ticketing_api_response0-422-retrieve] 1"] = {
+    "error": {"code": "TICKET_SYSTEM_ERROR", "details": "", "message": ""}
 }
 
 snapshots[
@@ -170,6 +210,10 @@ snapshots["test_ticketing_system_errors[ticketing_api_response1-400-reservation]
     }
 }
 
+snapshots["test_ticketing_system_errors[ticketing_api_response1-400-retrieve] 1"] = {
+    "error": {"code": "TICKET_SYSTEM_ERROR", "details": "", "message": ""}
+}
+
 snapshots[
     "test_ticketing_system_errors[ticketing_api_response10-201-confirmation] 1"
 ] = {"error": {"code": "TICKET_SYSTEM_ERROR", "details": "", "message": ""}}
@@ -177,6 +221,10 @@ snapshots[
 snapshots[
     "test_ticketing_system_errors[ticketing_api_response10-201-reservation] 1"
 ] = {"error": {"code": "TICKET_SYSTEM_ERROR", "details": "", "message": ""}}
+
+snapshots["test_ticketing_system_errors[ticketing_api_response10-201-retrieve] 1"] = {
+    "error": {"code": "TICKET_SYSTEM_ERROR", "details": "", "message": ""}
+}
 
 snapshots[
     "test_ticketing_system_errors[ticketing_api_response11-201-confirmation] 1"
@@ -186,6 +234,10 @@ snapshots[
     "test_ticketing_system_errors[ticketing_api_response11-201-reservation] 1"
 ] = {"error": {"code": "TICKET_SYSTEM_ERROR", "details": "", "message": ""}}
 
+snapshots["test_ticketing_system_errors[ticketing_api_response11-201-retrieve] 1"] = {
+    "error": {"code": "TICKET_SYSTEM_ERROR", "details": "", "message": ""}
+}
+
 snapshots[
     "test_ticketing_system_errors[ticketing_api_response12-201-confirmation] 1"
 ] = {"error": {"code": "TICKET_SYSTEM_ERROR", "details": "", "message": ""}}
@@ -193,6 +245,10 @@ snapshots[
 snapshots[
     "test_ticketing_system_errors[ticketing_api_response12-201-reservation] 1"
 ] = {"error": {"code": "TICKET_SYSTEM_ERROR", "details": "", "message": ""}}
+
+snapshots["test_ticketing_system_errors[ticketing_api_response12-201-retrieve] 1"] = {
+    "error": {"code": "TICKET_SYSTEM_ERROR", "details": "", "message": ""}
+}
 
 snapshots[
     "test_ticketing_system_errors[ticketing_api_response13-422-confirmation] 1"
@@ -202,6 +258,10 @@ snapshots[
     "test_ticketing_system_errors[ticketing_api_response13-422-reservation] 1"
 ] = {"error": {"code": "MAX_CAPACITY_EXCEEDED", "details": "", "message": ""}}
 
+snapshots["test_ticketing_system_errors[ticketing_api_response13-422-retrieve] 1"] = {
+    "error": {"code": "TICKET_SYSTEM_ERROR", "details": "", "message": ""}
+}
+
 snapshots[
     "test_ticketing_system_errors[ticketing_api_response14-422-confirmation] 1"
 ] = {"error": {"code": "BOOKING_ALREADY_CONFIRMED", "details": "", "message": ""}}
@@ -210,6 +270,10 @@ snapshots[
     "test_ticketing_system_errors[ticketing_api_response14-422-reservation] 1"
 ] = {"error": {"code": "TICKET_SYSTEM_ERROR", "details": "", "message": ""}}
 
+snapshots["test_ticketing_system_errors[ticketing_api_response14-422-retrieve] 1"] = {
+    "error": {"code": "TICKET_SYSTEM_ERROR", "details": "", "message": ""}
+}
+
 snapshots[
     "test_ticketing_system_errors[ticketing_api_response15-422-confirmation] 1"
 ] = {"error": {"code": "TICKET_SALES_ENDED", "details": "", "message": ""}}
@@ -217,6 +281,26 @@ snapshots[
 snapshots[
     "test_ticketing_system_errors[ticketing_api_response15-422-reservation] 1"
 ] = {"error": {"code": "TICKET_SALES_ENDED", "details": "", "message": ""}}
+
+snapshots["test_ticketing_system_errors[ticketing_api_response15-422-retrieve] 1"] = {
+    "error": {"code": "TICKET_SYSTEM_ERROR", "details": "", "message": ""}
+}
+
+snapshots[
+    "test_ticketing_system_errors[ticketing_api_response16-422-confirmation] 1"
+] = {"error": {"code": "TICKET_SYSTEM_ERROR", "details": "", "message": ""}}
+
+snapshots[
+    "test_ticketing_system_errors[ticketing_api_response16-422-reservation] 1"
+] = {"error": {"code": "TICKET_SYSTEM_ERROR", "details": "", "message": ""}}
+
+snapshots["test_ticketing_system_errors[ticketing_api_response16-422-retrieve] 1"] = {
+    "error": {
+        "code": "BOOKING_NOT_CONFIRMED",
+        "details": "",
+        "message": "Booking is not confirmed. Confirm the booking to get it's details.",
+    }
+}
 
 snapshots[
     "test_ticketing_system_errors[ticketing_api_response2-400-confirmation] 1"
@@ -232,11 +316,19 @@ snapshots["test_ticketing_system_errors[ticketing_api_response2-400-reservation]
     "error": {"code": "TICKET_SYSTEM_ERROR", "details": "", "message": ""}
 }
 
+snapshots["test_ticketing_system_errors[ticketing_api_response2-400-retrieve] 1"] = {
+    "error": {"code": "TICKET_SYSTEM_ERROR", "details": "", "message": ""}
+}
+
 snapshots[
     "test_ticketing_system_errors[ticketing_api_response3-422-confirmation] 1"
 ] = {"error": {"code": "BOOKING_ALREADY_CONFIRMED", "details": "", "message": ""}}
 
 snapshots["test_ticketing_system_errors[ticketing_api_response3-422-reservation] 1"] = {
+    "error": {"code": "TICKET_SYSTEM_ERROR", "details": "", "message": ""}
+}
+
+snapshots["test_ticketing_system_errors[ticketing_api_response3-422-retrieve] 1"] = {
     "error": {"code": "TICKET_SYSTEM_ERROR", "details": "", "message": ""}
 }
 
@@ -248,11 +340,19 @@ snapshots["test_ticketing_system_errors[ticketing_api_response4-400-reservation]
     "error": {"code": "TICKET_SYSTEM_ERROR", "details": "", "message": ""}
 }
 
+snapshots["test_ticketing_system_errors[ticketing_api_response4-400-retrieve] 1"] = {
+    "error": {"code": "TICKET_SYSTEM_ERROR", "details": "", "message": ""}
+}
+
 snapshots[
     "test_ticketing_system_errors[ticketing_api_response5-400-confirmation] 1"
 ] = {"error": {"code": "TICKET_SYSTEM_ERROR", "details": "", "message": ""}}
 
 snapshots["test_ticketing_system_errors[ticketing_api_response5-400-reservation] 1"] = {
+    "error": {"code": "TICKET_SYSTEM_ERROR", "details": "", "message": ""}
+}
+
+snapshots["test_ticketing_system_errors[ticketing_api_response5-400-retrieve] 1"] = {
     "error": {"code": "TICKET_SYSTEM_ERROR", "details": "", "message": ""}
 }
 
@@ -264,10 +364,18 @@ snapshots["test_ticketing_system_errors[ticketing_api_response6-500-reservation]
     "error": {"code": "TICKET_SYSTEM_ERROR", "details": "", "message": ""}
 }
 
+snapshots["test_ticketing_system_errors[ticketing_api_response6-500-retrieve] 1"] = {
+    "error": {"code": "TICKET_SYSTEM_ERROR", "details": "", "message": ""}
+}
+
 snapshots[
     "test_ticketing_system_errors[ticketing_api_response9-200-confirmation] 1"
 ] = {"error": {"code": "TICKET_SYSTEM_ERROR", "details": "", "message": ""}}
 
 snapshots["test_ticketing_system_errors[ticketing_api_response9-200-reservation] 1"] = {
+    "error": {"code": "TICKET_SYSTEM_ERROR", "details": "", "message": ""}
+}
+
+snapshots["test_ticketing_system_errors[ticketing_api_response9-200-retrieve] 1"] = {
     "error": {"code": "TICKET_SYSTEM_ERROR", "details": "", "message": ""}
 }

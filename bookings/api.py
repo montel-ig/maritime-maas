@@ -11,6 +11,7 @@ from bookings.serializers import BookingSerializer, PassthroughParametersSeriali
 
 @extend_schema_view(
     create=extend_schema(summary=_("Create a booking")),
+    retrieve=extend_schema(summary=_("Retrieve information for a confirmed booking")),
     confirm=extend_schema(summary=_("Confirm a previously created booking")),
 )
 class BookingViewSet(
@@ -23,6 +24,20 @@ class BookingViewSet(
 
     def get_queryset(self):
         return Booking.objects.for_maas_operator(self.request.user.maas_operator)
+
+    def retrieve(self, request, *args, **kwargs):
+        booking = self.get_object()
+
+        passthrough_parameters = PassthroughParametersSerializer(
+            data=request.query_params
+        )
+        passthrough_parameters.is_valid(raise_exception=True)
+        tickets = booking.retrieve(passthrough_parameters.validated_data)
+
+        booking_data = self.serializer_class(instance=booking).data
+        booking_data["tickets"] = tickets
+
+        return Response(booking_data)
 
     @action(detail=True, methods=["post"])
     def confirm(self, request, api_id=None):

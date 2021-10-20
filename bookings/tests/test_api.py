@@ -316,7 +316,32 @@ def test_confirm_booking_not_own(maas_api_client):
     assert Booking.objects.first().status == Booking.Status.RESERVED
 
 
-@pytest.mark.parametrize("endpoint", ("reservation", "confirmation"))
+@pytest.mark.django_db
+@freeze_time("2021-04-20")
+def test_retrieve_confirmed_booking(maas_api_client, requests_mock, snapshot):
+    feed = get_feed_for_maas_operator(maas_api_client.maas_operator, True)
+    confirmed_booking = baker.make(
+        Booking,
+        maas_operator=maas_api_client.maas_operator,
+        ticketing_system=feed.ticketing_system,
+        status=Booking.Status.CONFIRMED,
+    )
+    ticketing_system = feed.ticketing_system
+    requests_mock.get(
+        urljoin(ticketing_system.api_url, f"{confirmed_booking.source_id}/"),
+        json=get_confirmations_data(confirmed_booking.source_id, include_qr=False),
+        status_code=status.HTTP_200_OK,
+    )
+
+    response = maas_api_client.get(f"{ENDPOINT}{confirmed_booking.api_id}/")
+
+    assert response.status_code == 200
+    assert set(response.data.keys()) == {"id", "status", "tickets"}
+    snapshot.assert_match(response.data["tickets"])
+    assert Booking.objects.count() == 1
+
+
+@pytest.mark.parametrize("endpoint", ("reservation", "confirmation", "retrieve"))
 @pytest.mark.parametrize(
     "ticketing_api_response, ticketing_api_status_code",
     [
@@ -420,6 +445,15 @@ def test_confirm_booking_not_own(maas_api_client):
             },
             422,
         ),
+        (
+            {
+                "error": {
+                    "code": "BOOKING_NOT_CONFIRMED",
+                    "message": "Booking is not confirmed. Confirm the booking to get it's details.",
+                }
+            },
+            422,
+        ),
     ],
 )
 @pytest.mark.django_db
@@ -442,30 +476,50 @@ def test_ticketing_system_errors(
         else {"text": "no json"}
     )
 
-    if endpoint == "reservation":
-        mock_url = ticketing_system.api_url
-        api_url = ENDPOINT
-        post_data = booking_post_data
+    if endpoint in ("reservation", "confirmation"):
+        if endpoint == "reservation":
+            mock_url = ticketing_system.api_url
+            api_url = ENDPOINT
+            post_data = booking_post_data
+        else:
+            reserved_booking = baker.make(
+                Booking,
+                maas_operator=maas_operator,
+                source_id="test_confirmation_id",
+                ticketing_system=ticketing_system,
+            )
+            mock_url = urljoin(
+                ticketing_system.api_url, f"{reserved_booking.source_id}/confirm/"
+            )
+            api_url = f"{ENDPOINT}{reserved_booking.api_id}/confirm/"
+            post_data = {}
+
+        requests_mock.post(
+            mock_url,
+            status_code=ticketing_api_status_code,
+            **data_params,
+        )
+
+        response = maas_api_client.post(api_url, post_data)
     else:
-        reserved_booking = baker.make(
+        confirmed_booking = baker.make(
             Booking,
             maas_operator=maas_operator,
             source_id="test_confirmation_id",
             ticketing_system=ticketing_system,
+            status=Booking.Status.CONFIRMED,
         )
-        mock_url = urljoin(
-            ticketing_system.api_url, f"{reserved_booking.source_id}/confirm/"
-        )
-        api_url = f"{ENDPOINT}{reserved_booking.api_id}/confirm/"
+        mock_url = urljoin(ticketing_system.api_url, f"{confirmed_booking.source_id}/")
+        api_url = f"{ENDPOINT}{confirmed_booking.api_id}/"
         post_data = {}
 
-    requests_mock.post(
-        mock_url,
-        status_code=ticketing_api_status_code,
-        **data_params,
-    )
+        requests_mock.get(
+            mock_url,
+            status_code=ticketing_api_status_code,
+            **data_params,
+        )
 
-    response = maas_api_client.post(api_url, post_data)
+        response = maas_api_client.get(api_url, post_data)
 
     assert requests_mock.call_count == 1
     assert response.status_code == 422
