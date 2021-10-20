@@ -74,7 +74,10 @@ class TicketingSystem(models.Model):
         blank=True,
         help_text=_("API key that will be used for accessing the API"),
     )
-    api_url = models.URLField(verbose_name=_("API URL"))
+    bookings_api_url = models.URLField(verbose_name=_("API bookings endpoint URL"))
+    availability_api_url = models.URLField(
+        verbose_name=_("API availability endpoint URL"), blank=True
+    )
 
     class Meta:
         verbose_name = _("ticketing system")

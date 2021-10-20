@@ -134,6 +134,42 @@ snapshots["test_create_booking_no_permission 1"] = {
     ]
 }
 
+snapshots["test_fetch_availability request 1 body"] = {
+    "departures": [
+        {"date": "2021-04-28", "trip_id": "source_id of trip 1"},
+        {"date": "2021-04-28", "trip_id": "source_id of trip 2"},
+    ]
+}
+
+snapshots["test_fetch_availability request 1 url"] = "http://example.com/allowed1/"
+
+snapshots["test_fetch_availability request 2 body"] = {
+    "departures": [
+        {"date": "2021-04-29", "trip_id": "source_id of trip 3"},
+        {"date": "2021-04-29", "trip_id": "source_id of trip 4"},
+    ]
+}
+
+snapshots["test_fetch_availability request 2 url"] = "http://example.com/allowed2/"
+
+snapshots["test_fetch_availability response"] = [
+    {
+        "available": 1,
+        "departure_id": "00000000-0000-0000-0000-000000000000",
+        "total": 10,
+    },
+    {
+        "available": 5,
+        "departure_id": "00000000-0000-0000-0000-000000000001",
+        "total": None,
+    },
+    {
+        "available": 0,
+        "departure_id": "00000000-0000-0000-0000-000000000003",
+        "total": 100,
+    },
+]
+
 snapshots["test_retrieve_confirmed_booking 1"] = [
     {
         "agency": {"logo_url": "http://www.agency.com/logo.png", "name": "MaaS Line"},

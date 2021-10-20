@@ -6,6 +6,11 @@ from snapshottest import Snapshot
 
 snapshots = Snapshot()
 
+snapshots["test_availability 1"] = [
+    {"available": 4, "date": "2021-04-20", "total": 44, "trip_id": "1"},
+    {"available": 2, "date": "2021-04-20", "trip_id": "4"},
+]
+
 snapshots["test_ticket_confirmation 1"] = {
     "id": "71ck37_1d",
     "status": "CONFIRMED",
