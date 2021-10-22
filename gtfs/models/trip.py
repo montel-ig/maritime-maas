@@ -1,4 +1,6 @@
 from django.contrib.gis.db import models
+from django.db.models.aggregates import Max
+from django.db.models.expressions import F
 from django.utils.translation import gettext_lazy as _
 from parler.models import TranslatableModel, TranslatedFields
 
@@ -55,3 +57,9 @@ class Trip(TranslatableModel, GTFSModelWithSourceID):
         return self.safe_translation_getter(
             "short_name", default=super().__str__, any_language=True
         )
+
+    def populate_stop_times_stops_after_this(self):
+        max_stop_sequence = self.stop_times.aggregate(
+            max_stop_sequence=Max("stop_sequence")
+        )["max_stop_sequence"]
+        self.stop_times.update(stops_after_this=max_stop_sequence - F("stop_sequence"))

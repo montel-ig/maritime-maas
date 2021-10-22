@@ -187,6 +187,7 @@ class GTFSFeedImporter:
                 self._import_model(feed, model, getattr(gtfs_feed, gtfs_attribute))
 
             self._create_departures(gtfs_feed)
+            self._populate_stop_times_last_field(feed)
 
             feed.fingerprint = self.feed_reader.get_feed_fingerprint(feed)
 
@@ -378,6 +379,12 @@ class GTFSFeedImporter:
         Departure.objects.bulk_create(objs_to_create)
 
         self.logger.debug(f"Created {total_num_of_created} departures")
+
+    def _populate_stop_times_last_field(self, feed):
+        self.logger.info("Populating stop times stops_after_this field...")
+
+        for trip in feed.trips.all():
+            trip.populate_stop_times_stops_after_this()
 
     def _convert_value(self, gtfs_value, model_field, gtfs_field):
         if isinstance(model_field, models.ForeignKey):

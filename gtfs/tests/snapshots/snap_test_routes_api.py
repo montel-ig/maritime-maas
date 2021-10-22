@@ -84,6 +84,7 @@ snapshots["test_routes_departures[filters2] 1"] = [
         "short_name": "short_name of test trip ",
         "stop_headsign": "stop_headsign of test stop time ",
         "stop_sequence": 1,
+        "stops_after_this": 1,
         "timepoint": 1,
         "wheelchair_accessible": 0,
     },
@@ -98,6 +99,7 @@ snapshots["test_routes_departures[filters2] 1"] = [
         "short_name": "short_name of test trip ",
         "stop_headsign": "stop_headsign of test stop time ",
         "stop_sequence": 1,
+        "stops_after_this": 1,
         "timepoint": 1,
         "wheelchair_accessible": 0,
     },
@@ -115,6 +117,7 @@ snapshots["test_routes_departures[filters2] 2"] = [
         "short_name": "short_name of test trip ",
         "stop_headsign": "stop_headsign of test stop time ",
         "stop_sequence": 2,
+        "stops_after_this": 0,
         "timepoint": 1,
         "wheelchair_accessible": 0,
     },
@@ -129,6 +132,7 @@ snapshots["test_routes_departures[filters2] 2"] = [
         "short_name": "short_name of test trip ",
         "stop_headsign": "stop_headsign of test stop time ",
         "stop_sequence": 2,
+        "stops_after_this": 0,
         "timepoint": 1,
         "wheelchair_accessible": 0,
     },
@@ -146,6 +150,7 @@ snapshots["test_routes_departures[filters3] 1"] = [
         "short_name": "short_name of test trip ",
         "stop_headsign": "stop_headsign of test stop time ",
         "stop_sequence": 1,
+        "stops_after_this": 1,
         "timepoint": 1,
         "wheelchair_accessible": 0,
     }
@@ -163,6 +168,7 @@ snapshots["test_routes_departures[filters3] 2"] = [
         "short_name": "short_name of test trip ",
         "stop_headsign": "stop_headsign of test stop time ",
         "stop_sequence": 2,
+        "stops_after_this": 0,
         "timepoint": 1,
         "wheelchair_accessible": 0,
     }
@@ -180,6 +186,7 @@ snapshots["test_routes_departures[filters4] 1"] = [
         "short_name": "short_name of test trip ",
         "stop_headsign": "stop_headsign of test stop time ",
         "stop_sequence": 1,
+        "stops_after_this": 1,
         "timepoint": 1,
         "wheelchair_accessible": 0,
     }
@@ -197,6 +204,7 @@ snapshots["test_routes_departures[filters4] 2"] = [
         "short_name": "short_name of test trip ",
         "stop_headsign": "stop_headsign of test stop time ",
         "stop_sequence": 2,
+        "stops_after_this": 0,
         "timepoint": 1,
         "wheelchair_accessible": 0,
     }
@@ -214,6 +222,7 @@ snapshots["test_routes_departures[filters5] 1"] = [
         "short_name": "short_name of test trip ",
         "stop_headsign": "stop_headsign of test stop time ",
         "stop_sequence": 1,
+        "stops_after_this": 1,
         "timepoint": 1,
         "wheelchair_accessible": 0,
     }
@@ -231,6 +240,7 @@ snapshots["test_routes_departures[filters5] 2"] = [
         "short_name": "short_name of test trip ",
         "stop_headsign": "stop_headsign of test stop time ",
         "stop_sequence": 2,
+        "stops_after_this": 0,
         "timepoint": 1,
         "wheelchair_accessible": 0,
     }

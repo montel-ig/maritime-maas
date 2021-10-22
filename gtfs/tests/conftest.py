@@ -136,4 +136,7 @@ def route_with_departures(api_id_generator, route_for_maas_operator):
         )
     )
 
+    for trip in trips:
+        trip.populate_stop_times_stops_after_this()
+
     return route

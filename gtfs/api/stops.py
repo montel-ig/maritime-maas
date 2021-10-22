@@ -25,6 +25,7 @@ class StopTimeSerializer(serializers.ModelSerializer):
     departure_headsign = serializers.CharField(source="trip.headsign")
     stop_headsign = serializers.CharField()
     stop_sequence = serializers.IntegerField()
+    stops_after_this = serializers.IntegerField()
     wheelchair_accessible = serializers.IntegerField(
         source="trip.wheelchair_accessible"
     )
@@ -46,6 +47,7 @@ class StopTimeSerializer(serializers.ModelSerializer):
             "departure_headsign",
             "stop_headsign",
             "stop_sequence",
+            "stops_after_this",
             "wheelchair_accessible",
             "bikes_allowed",
             "route_id",
