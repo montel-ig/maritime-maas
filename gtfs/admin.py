@@ -149,16 +149,28 @@ class FeedAdmin(admin.ModelAdmin):
 
 @admin.register(Shape)
 class ShapeAdmin(OSMGeoAdmin):
-    pass
+    list_filter = ("feed",)
 
 
-admin.site.register(Agency, TranslatableAdmin)
-admin.site.register(Departure)
-admin.site.register(Fare, TranslatableAdmin)
-admin.site.register(FareRiderCategory)
-admin.site.register(FareRule)
-admin.site.register(RiderCategory, TranslatableAdmin)
-admin.site.register(Route, TranslatableAdmin)
-admin.site.register(Stop, TranslatableAdmin)
-admin.site.register(StopTime, TranslatableAdmin)
-admin.site.register(Trip, TranslatableAdmin)
+@admin.register(Departure)
+class DepartureAdmin(admin.ModelAdmin):
+    list_filter = ("trip__feed",)
+
+
+class FeedFilterAdmin(admin.ModelAdmin):
+    list_filter = ("feed",)
+
+
+class FeedFilterTranslatableAdmin(TranslatableAdmin):
+    list_filter = ("feed",)
+
+
+admin.site.register(Agency, FeedFilterTranslatableAdmin)
+admin.site.register(Fare, FeedFilterTranslatableAdmin)
+admin.site.register(FareRiderCategory, FeedFilterAdmin)
+admin.site.register(FareRule, FeedFilterAdmin)
+admin.site.register(RiderCategory, FeedFilterTranslatableAdmin)
+admin.site.register(Route, FeedFilterTranslatableAdmin)
+admin.site.register(Stop, FeedFilterTranslatableAdmin)
+admin.site.register(StopTime, FeedFilterTranslatableAdmin)
+admin.site.register(Trip, FeedFilterTranslatableAdmin)
