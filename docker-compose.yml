@@ -8,7 +8,7 @@ services:
             POSTGRES_PASSWORD: maritime_maas
             POSTGRES_DB: maritime_maas
         ports:
-            - 5432:5432
+            - "5432:5432"
         volumes:
           - pgdata:/var/lib/postgresql/data
         container_name: maritime-maas-db
