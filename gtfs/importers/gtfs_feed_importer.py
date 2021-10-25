@@ -9,6 +9,7 @@ from django.contrib.gis.db import models
 from django.contrib.gis.geos import LineString, Point
 from django.db import transaction
 from django.utils import timezone
+from parler.utils.context import switch_language
 
 from gtfs.importers.gtfs_feed_reader import GTFSFeedReader
 from gtfs.models import (
@@ -428,6 +429,33 @@ class GTFSFeedImporter:
 
         return translations_list
 
+    def _initialize_translation(self, instance, lang: str) -> None:
+        """Initialize translation object with values from the default lang.
+
+        This allows a model to have a value for an untranslated fields since parler
+        doesn't use fallback if a translation object exists.
+        """
+        if self.feed_lang == lang:
+            return
+
+        model = instance._meta.model
+        translation_model = model.translations.rel.related_model
+        translation_fields = [f.name for f in translation_model._meta.get_fields()]
+
+        with switch_language(instance, self.feed_lang):
+            init_values = {}
+
+            for model_field_name in self.FIELD_MAPPING[model]:
+                if model_field_name in translation_fields:
+                    if value := getattr(instance, model_field_name):
+                        init_values[model_field_name] = value
+
+        if init_values:
+            with switch_language(instance, lang):
+                for key in init_values:
+                    setattr(instance, key, init_values[key])
+                instance.save()
+
     def _add_translations(self, model, translations_list, feed):
         plural_name = model._meta.verbose_name_plural
         translations_for_model = [
@@ -453,6 +481,8 @@ class GTFSFeedImporter:
             obj = obj_list.get(source_id=trans.get("record_id"))
             field_name = trans.get("field_name", "")
             if field_name in gtfs_fields:
+                if not obj.has_translation(language_code=trans.get("language")):
+                    self._initialize_translation(obj, trans.get("language"))
                 index = gtfs_fields.index(field_name)
                 model_field = model_fields[index]
                 obj.set_current_language(trans.get("language"))

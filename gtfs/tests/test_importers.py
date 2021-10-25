@@ -99,6 +99,13 @@ def test_gtfs_feed_importer():
     assert rider_category.source_id == "pensioner"
     assert rider_category.name == "Eläkeläinen"
     assert rider_category.description == "Eläkeläinen"
+    # Test translation have an untranslated field, which will default to Finnish.
+    rider_category.set_current_language("sv")
+    assert rider_category.name == "Pensionärer"
+    assert rider_category.description == "Eläkeläinen"
+    rider_category.set_current_language("en")
+    assert rider_category.name == "Pensioner"
+    assert rider_category.description == "Eläkeläinen"
 
     assert FeedInfo.objects.count() == 1
     feed_info = FeedInfo.objects.first()

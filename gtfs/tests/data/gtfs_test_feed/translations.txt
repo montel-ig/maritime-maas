@@ -1,3 +1,5 @@
 table_name,field_name,language,translation,record_id
 routes,route_long_name,sv,Skanslandet rutt,vallisaari_rengas
 routes,route_long_name,en,Vallisaari Route,vallisaari_rengas
+rider_categories,rider_category_name,en,Pensioner,pensioner
+rider_categories,rider_category_name,sv,Pensionärer,pensioner
