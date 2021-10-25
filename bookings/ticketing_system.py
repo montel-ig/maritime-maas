@@ -1,7 +1,7 @@
 import json
 import logging
 from json import JSONDecodeError
-from typing import Optional
+from typing import Optional, Tuple, Type
 from urllib.parse import quote, urljoin
 
 import requests
@@ -14,6 +14,8 @@ from .choices import BookingStatus
 from .utils import TokenAuth
 
 logger = logging.getLogger(__name__)
+
+ErrorCodes = Optional[Tuple[str, ...]]
 
 reservation_error_codes = (
     "MAX_CAPACITY_EXCEEDED",
@@ -63,34 +65,29 @@ class ConfirmationSuccessSerializer(serializers.Serializer):
     tickets = serializers.ListField(allow_empty=False)
 
 
-class InnerReservationErrorSerializer(serializers.Serializer):
-    code = serializers.ChoiceField(choices=reservation_error_codes)
-    message = serializers.CharField(required=False, allow_blank=True)
-    details = serializers.CharField(required=False, allow_blank=True)
+class AvailabilitySuccessSerializer(serializers.Serializer):
+    # stupid hax to get this serializer initialized with many=True in
+    # _process_response()
+    _many = True
+
+    trip_id = serializers.CharField()
+    date = serializers.DateField()
+    available = serializers.IntegerField(min_value=0)
+    total = serializers.IntegerField(min_value=0, required=False)
 
 
-class InnerConfirmationErrorSerializer(serializers.Serializer):
-    code = serializers.ChoiceField(choices=confirmation_error_codes)
-    message = serializers.CharField(required=False, allow_blank=True)
-    details = serializers.CharField(required=False, allow_blank=True)
+def _build_error_serializer(
+    error_codes: ErrorCodes = None,
+) -> Type[serializers.Serializer]:
+    class InnerErrorSerializer(serializers.Serializer):
+        code = serializers.ChoiceField(choices=error_codes or ())
+        message = serializers.CharField(required=False, allow_blank=True)
+        details = serializers.CharField(required=False, allow_blank=True)
 
+    class ErrorSerializer(serializers.Serializer):
+        error = InnerErrorSerializer()
 
-class InnerRetrieveErrorSerializer(serializers.Serializer):
-    code = serializers.ChoiceField(choices=retrieve_error_codes)
-    message = serializers.CharField(required=False, allow_blank=True)
-    details = serializers.CharField(required=False, allow_blank=True)
-
-
-class ReservationErrorSerializer(serializers.Serializer):
-    error = InnerReservationErrorSerializer()
-
-
-class ConfirmationErrorSerializer(serializers.Serializer):
-    error = InnerConfirmationErrorSerializer()
-
-
-class RetrieveErrorSerializer(serializers.Serializer):
-    error = InnerRetrieveErrorSerializer()
+    return ErrorSerializer
 
 
 class TicketingSystemAPI:
@@ -101,35 +98,69 @@ class TicketingSystemAPI:
         self.maas_operator = maas_operator
 
     def reserve(self, ticket_data: dict):
-        url = self.ticketing_system.api_url
+        from bookings.serializers import ApiBookingSerializer
+
+        url = self.ticketing_system.bookings_api_url
+        payload = ApiBookingSerializer(
+            {**ticket_data, "maas_operator": self.maas_operator}
+        ).data
+
         return self._post(
-            url, ticket_data, ReservationSuccessSerializer, ReservationErrorSerializer
+            url, payload, ReservationSuccessSerializer, reservation_error_codes
         )
 
     def confirm(self, identifier: str, passed_parameters: Optional[dict] = None):
-        url = urljoin(self.ticketing_system.api_url, f"{quote(identifier)}/confirm/")
+        from bookings.serializers import ApiBookingSerializer
+
+        url = urljoin(
+            self.ticketing_system.bookings_api_url, f"{quote(identifier)}/confirm/"
+        )
+        payload = ApiBookingSerializer(
+            {**(passed_parameters or {}), "maas_operator": self.maas_operator}
+        ).data
+
         return self._post(
             url,
-            passed_parameters or {},
+            payload,
             ConfirmationSuccessSerializer,
-            ConfirmationErrorSerializer,
+            confirmation_error_codes,
         )
 
     def retrieve(self, identifier: str, passed_parameters: Optional[dict] = None):
-        url = urljoin(self.ticketing_system.api_url, f"{quote(identifier)}/")
+        url = urljoin(self.ticketing_system.bookings_api_url, f"{quote(identifier)}/")
 
         return self._get(
             url,
             passed_parameters or {},
             ConfirmationSuccessSerializer,
-            RetrieveErrorSerializer,
+            retrieve_error_codes,
         )
 
-    def _get(self, url: str, passed_parameters, success_serializer, error_serializer):
+    def availability(self, departures):
+        if not (url := self.ticketing_system.availability_api_url):
+            return []
+
+        from .serializers import ApiAvailabilitySerializer
+
+        departures_data = ApiAvailabilitySerializer(departures, many=True).data
+
+        return self._post(
+            url,
+            {"departures": departures_data},
+            AvailabilitySuccessSerializer,
+        )
+
+    def _get(
+        self,
+        url: str,
+        passed_parameters,
+        success_serializer: Type[serializers.Serializer],
+        error_codes: ErrorCodes = None,
+    ):
         if not self.ticketing_system.api_key:
             raise Exception("Ticketing system doesn't define an API key.")
 
-        logger.info(f"Ticketing system API call - URL: {url}")
+        logger.info(f"Ticketing system API call - GET {url}")
 
         response = requests.get(
             url,
@@ -138,20 +169,21 @@ class TicketingSystemAPI:
             auth=TokenAuth(self.ticketing_system.api_key),
         )
 
-        return self._process_response(response, success_serializer, error_serializer)
+        return self._process_response(response, success_serializer, error_codes)
 
-    def _post(self, url: str, data, success_serializer, error_serializer):
-        from bookings.serializers import ApiBookingSerializer
-
-        payload = ApiBookingSerializer(
-            {**data, "maas_operator": self.maas_operator}
-        ).data
+    def _post(
+        self,
+        url: str,
+        payload,
+        success_serializer: Type[serializers.Serializer],
+        error_codes: ErrorCodes = None,
+    ):
 
         if not self.ticketing_system.api_key:
             raise Exception("Ticketing system doesn't define an API key.")
 
         logger.info(
-            f"Ticketing system API call - URL: {url} data: {json.dumps(payload)}"
+            f"Ticketing system API call - POST {url} data: {json.dumps(payload)}"
         )
 
         response = requests.post(
@@ -161,19 +193,23 @@ class TicketingSystemAPI:
             auth=TokenAuth(self.ticketing_system.api_key),
         )
 
-        return self._process_response(response, success_serializer, error_serializer)
+        return self._process_response(response, success_serializer, error_codes)
 
     @staticmethod
-    def _process_response(response, success_serializer, error_serializer):
+    def _process_response(
+        response,
+        success_serializer: Type[serializers.Serializer],
+        error_codes: ErrorCodes = None,
+    ):
         try:
             data = response.json()
             if 400 <= response.status_code <= 499:
-                serializer = error_serializer(data=data)
-                serializer.is_valid(raise_exception=True)
-                raise TicketingSystemRequestError(**serializer.data["error"])
+                error_serializer = _build_error_serializer(error_codes or ())(data=data)
+                error_serializer.is_valid(raise_exception=True)
+                raise TicketingSystemRequestError(**error_serializer.data["error"])
             response.raise_for_status()
-
-            serializer = success_serializer(data=data)
+            many = getattr(success_serializer, "_many", False)
+            serializer = success_serializer(data=data, many=many)
             serializer.is_valid(raise_exception=True)
 
         except (JSONDecodeError, serializers.ValidationError, RequestException) as e:

@@ -1,3 +1,5 @@
+from random import Random
+
 from django.conf import settings
 from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import permissions, serializers, status, viewsets
@@ -23,7 +25,10 @@ class MockTicketParamsSerializer(serializers.Serializer):
 
 
 @extend_schema_view(
-    create=extend_schema(exclude=True), confirm=extend_schema(exclude=True)
+    create=extend_schema(exclude=True),
+    confirm=extend_schema(exclude=True),
+    retrieve=extend_schema(exclude=True),
+    availability=extend_schema(exclude=True),
 )
 class MockTicketViewSet(viewsets.ViewSet):
 
@@ -72,3 +77,25 @@ class MockTicketViewSet(viewsets.ViewSet):
             )
 
         return Response(get_confirmations_data(pk), status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=["post"])
+    def availability(self, request, format=None):
+        data = []
+
+        for t in request.data["departures"]:
+            random = Random()
+            random.seed(t["trip_id"] + t["date"])
+            data.append(
+                {
+                    "trip_id": t["trip_id"],
+                    "date": t["date"],
+                    "available": random.randint(0, 5),
+                    **(
+                        {"total": random.randint(10, 50)}
+                        if random.randint(0, 1)
+                        else {}
+                    ),
+                }
+            )
+
+        return Response(data)

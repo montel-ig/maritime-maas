@@ -28,10 +28,10 @@ def test_api_call_for_reservation(
     maas_operator, fare_test_data, requests_mock, snapshot, caplog
 ):
     ticketing_system = fare_test_data.feed.ticketing_system
-    ticketing_system.api_url = "https://api.example.com"
+    ticketing_system.bookings_api_url = "https://api.example.com"
     ticketing_system.save()
     requests_mock.post(
-        ticketing_system.api_url,
+        ticketing_system.bookings_api_url,
         json=get_reservation_data(),
         status_code=status.HTTP_201_CREATED,
     )
@@ -74,10 +74,12 @@ def test_api_call_for_confirmation(maas_operator, requests_mock, snapshot, caplo
         ticketing_system=feed.ticketing_system,
     )
     ticketing_system = feed.ticketing_system
-    ticketing_system.api_url = "https://api.example.com"
+    ticketing_system.bookings_api_url = "https://api.example.com"
     ticketing_system.save()
     requests_mock.post(
-        urljoin(ticketing_system.api_url, f"{reserved_booking.source_id}/confirm/"),
+        urljoin(
+            ticketing_system.bookings_api_url, f"{reserved_booking.source_id}/confirm/"
+        ),
         json=get_confirmations_data(reserved_booking.source_id, include_qr=False),
         status_code=status.HTTP_200_OK,
     )
@@ -107,10 +109,10 @@ def test_api_call_for_booking_detail(maas_operator, requests_mock, snapshot, cap
         status=Booking.Status.CONFIRMED,
     )
     ticketing_system = feed.ticketing_system
-    ticketing_system.api_url = "https://api.example.com"
+    ticketing_system.bookings_api_url = "https://api.example.com"
     ticketing_system.save()
     requests_mock.get(
-        urljoin(ticketing_system.api_url, f"{confirmed_booking.source_id}/"),
+        urljoin(ticketing_system.bookings_api_url, f"{confirmed_booking.source_id}/"),
         json=get_confirmations_data(confirmed_booking.source_id, include_qr=False),
         status_code=status.HTTP_200_OK,
     )
@@ -134,7 +136,7 @@ def test_ticket_system_call_use_quoted_identifiers(maas_operator, requests_mock)
     feed = get_feed_for_maas_operator(maas_operator, True)
     ticketing_system = feed.ticketing_system
     requests_mock.post(
-        urljoin(ticketing_system.api_url, f"{quote(identifier)}/confirm/"),
+        urljoin(ticketing_system.bookings_api_url, f"{quote(identifier)}/confirm/"),
         json=get_confirmations_data(identifier, include_qr=False),
         status_code=status.HTTP_200_OK,
     )

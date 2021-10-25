@@ -38,7 +38,7 @@ def test_create_booking(
 ):
     ticketing_system = fare_test_data.feed.ticketing_system
     requests_mock.post(
-        ticketing_system.api_url,
+        ticketing_system.bookings_api_url,
         json=get_reservation_data(),
         status_code=status.HTTP_201_CREATED,
     )
@@ -63,7 +63,7 @@ def test_create_booking_passes_extra_parameters(
 ):
     ticketing_system = fare_test_data.feed.ticketing_system
     requests_mock.post(
-        ticketing_system.api_url,
+        ticketing_system.bookings_api_url,
         json=get_reservation_data(),
         status_code=status.HTTP_201_CREATED,
     )
@@ -193,7 +193,7 @@ def test_create_booking_capacity_sales_required_for_outbound_and_inbound(
     requests_mock,
 ):
     requests_mock.post(
-        fare_test_data.feed.ticketing_system.api_url,
+        fare_test_data.feed.ticketing_system.bookings_api_url,
         json=get_reservation_data(),
         status_code=status.HTTP_201_CREATED,
     )
@@ -249,7 +249,9 @@ def test_confirm_booking(maas_api_client, requests_mock, snapshot, source_id_cha
         str(uuid.uuid4()) if source_id_changes else reserved_booking.source_id
     )
     requests_mock.post(
-        urljoin(ticketing_system.api_url, f"{reserved_booking.source_id}/confirm/"),
+        urljoin(
+            ticketing_system.bookings_api_url, f"{reserved_booking.source_id}/confirm/"
+        ),
         json=get_confirmations_data(expected_source_id, include_qr=False),
         status_code=status.HTTP_200_OK,
     )
@@ -286,7 +288,9 @@ def test_confirm_booking_passes_extra_parameters(maas_api_client, requests_mock)
     )
     ticketing_system = feed.ticketing_system
     requests_mock.post(
-        urljoin(ticketing_system.api_url, f"{reserved_booking.source_id}/confirm/"),
+        urljoin(
+            ticketing_system.bookings_api_url, f"{reserved_booking.source_id}/confirm/"
+        ),
         json=get_confirmations_data(reserved_booking.source_id, include_qr=False),
         status_code=status.HTTP_200_OK,
     )
@@ -328,7 +332,7 @@ def test_retrieve_confirmed_booking(maas_api_client, requests_mock, snapshot):
     )
     ticketing_system = feed.ticketing_system
     requests_mock.get(
-        urljoin(ticketing_system.api_url, f"{confirmed_booking.source_id}/"),
+        urljoin(ticketing_system.bookings_api_url, f"{confirmed_booking.source_id}/"),
         json=get_confirmations_data(confirmed_booking.source_id, include_qr=False),
         status_code=status.HTTP_200_OK,
     )
@@ -478,7 +482,7 @@ def test_ticketing_system_errors(
 
     if endpoint in ("reservation", "confirmation"):
         if endpoint == "reservation":
-            mock_url = ticketing_system.api_url
+            mock_url = ticketing_system.bookings_api_url
             api_url = ENDPOINT
             post_data = booking_post_data
         else:
@@ -489,7 +493,8 @@ def test_ticketing_system_errors(
                 ticketing_system=ticketing_system,
             )
             mock_url = urljoin(
-                ticketing_system.api_url, f"{reserved_booking.source_id}/confirm/"
+                ticketing_system.bookings_api_url,
+                f"{reserved_booking.source_id}/confirm/",
             )
             api_url = f"{ENDPOINT}{reserved_booking.api_id}/confirm/"
             post_data = {}
@@ -509,7 +514,9 @@ def test_ticketing_system_errors(
             ticketing_system=ticketing_system,
             status=Booking.Status.CONFIRMED,
         )
-        mock_url = urljoin(ticketing_system.api_url, f"{confirmed_booking.source_id}/")
+        mock_url = urljoin(
+            ticketing_system.bookings_api_url, f"{confirmed_booking.source_id}/"
+        )
         api_url = f"{ENDPOINT}{confirmed_booking.api_id}/"
         post_data = {}
 
@@ -525,3 +532,101 @@ def test_ticketing_system_errors(
     assert response.status_code == 422
 
     snapshot.assert_match(response.json())
+
+
+@pytest.mark.django_db
+def test_fetch_availability(
+    maas_api_client, maas_operator, requests_mock, api_id_generator, snapshot
+):
+    allowed_feed_1 = get_feed_for_maas_operator(maas_operator, True)
+    allowed_feed_2 = get_feed_for_maas_operator(maas_operator, True)
+    disallowed_feed = get_feed_for_maas_operator(maas_operator, False)
+
+    allowed_ticketing_system_1 = allowed_feed_1.ticketing_system
+    allowed_ticketing_system_2 = allowed_feed_2.ticketing_system
+    disallowed_ticketing_system = disallowed_feed.ticketing_system
+
+    allowed_ticketing_system_1.availability_api_url = "http://example.com/allowed1/"
+    allowed_ticketing_system_1.save(update_fields=("availability_api_url",))
+
+    allowed_ticketing_system_2.availability_api_url = "http://example.com/allowed2/"
+    allowed_ticketing_system_2.save(update_fields=("availability_api_url",))
+
+    disallowed_ticketing_system.availability_api_url = "http://example.com/disallowed/"
+    disallowed_ticketing_system.save(update_fields=("availability_api_url",))
+
+    # both of these should be returned by the first ticketing system
+    allowed_departures_1 = baker.make(
+        Departure,
+        trip__feed=allowed_feed_1,
+        trip__source_id=seq("source_id of trip "),
+        api_id=api_id_generator,
+        date=datetime.date(2021, 4, 28),
+        _quantity=2,
+    )
+
+    # the second ticketing system returns only the second one of these
+    allowed_departures_2 = baker.make(
+        Departure,
+        trip__feed=allowed_feed_2,
+        trip__source_id=seq("source_id of trip ", start=3),
+        api_id=api_id_generator,
+        date=datetime.date(2021, 4, 29),
+        _quantity=2,
+    )
+
+    # this will not be in the returned results because it is from a ticketing system we
+    # don't have a permission for
+    disallowed_departure = baker.make(
+        Departure,
+        trip__feed=disallowed_feed,
+        trip__source_id=seq("source_id of trip ", start=5),
+        api_id=api_id_generator,
+        date=datetime.date(2021, 4, 30),
+    )
+
+    requests_mock.post(
+        allowed_ticketing_system_1.availability_api_url,
+        json=[
+            {
+                "trip_id": allowed_departures_1[0].trip.source_id,
+                "date": str(allowed_departures_1[0].date),
+                "available": 1,
+                "total": 10,
+            },
+            {
+                "trip_id": allowed_departures_1[1].trip.source_id,
+                "date": str(allowed_departures_1[1].date),
+                "available": 5,
+            },
+        ],
+        status_code=status.HTTP_200_OK,
+    )
+
+    requests_mock.post(
+        allowed_ticketing_system_2.availability_api_url,
+        json=[
+            {
+                "trip_id": allowed_departures_2[1].trip.source_id,
+                "date": str(allowed_departures_2[1].date),
+                "available": 0,
+                "total": 100,
+            },
+        ],
+        status_code=status.HTTP_200_OK,
+    )
+
+    departures_to_fetch = (
+        allowed_departures_1 + allowed_departures_2 + [disallowed_departure]
+    )
+
+    response = maas_api_client.post(
+        f"{ENDPOINT}availability/",
+        {"departure_ids": [d.api_id for d in departures_to_fetch]},
+    )
+
+    for i, request in enumerate(requests_mock.request_history, 1):
+        snapshot.assert_match(request.url, name=f"request {i} url")
+        snapshot.assert_match(request.json(), name=f"request {i} body")
+
+    snapshot.assert_match(json.loads(response.content), name="response")

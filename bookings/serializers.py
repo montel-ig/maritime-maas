@@ -175,3 +175,10 @@ class ApiBookingSerializer(PassthroughParametersSerializer):
     route_id = serializers.CharField(required=False, source="route.source_id")
     departures = ApiDepartureSerializer(required=False, many=True)
     tickets = ApiTicketSerializer(required=False, many=True)
+
+
+class ApiAvailabilitySerializer(serializers.Serializer):
+    """Serializes Departures to Trips and dates for ticketing system API."""
+
+    trip_id = serializers.CharField(source="trip.source_id")
+    date = serializers.DateField()

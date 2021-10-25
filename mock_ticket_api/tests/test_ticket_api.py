@@ -78,3 +78,19 @@ def test_mock_api_errors(ticket_api_client, error, method):
 
     assert response.status_code == 422
     assert response.json()["error"]["code"] == error
+
+
+def test_availability(ticket_api_client, snapshot):
+    data = {
+        "departures": [
+            {"trip_id": "1", "date": "2021-04-20"},
+            {
+                # no total returned for this one
+                "trip_id": "4",
+                "date": "2021-04-20",
+            },
+        ]
+    }
+    response = ticket_api_client.post(reverse("mockapi-availability"), data)
+
+    snapshot.assert_match(json.loads(response.content))
