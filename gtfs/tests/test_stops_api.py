@@ -74,6 +74,7 @@ def test_stops_allowed_for_maas_operator(maas_api_client, has_permission):
         {"date": "2021-02-18", "direction_id": 0},
         {"date": "2021-02-18", "direction_id": 1},
         {"date": "2021-02-20"},
+        {"date": "2021-02-18", "exclude_last_stops": True},
     ),
 )
 def test_stops_departures(maas_api_client, snapshot, filters, route_with_departures):

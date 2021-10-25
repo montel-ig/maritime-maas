@@ -131,6 +131,8 @@ class StopSerializer(serializers.ModelSerializer):
             queryset = queryset.filter(trip__direction_id=self.context["direction_id"])
         if "route_id" in self.context:
             queryset = queryset.filter(trip__route_id=self.context["route_id"])
+        if self.context.get("exclude_final_stop_departures", False):
+            queryset = queryset.exclude(stops_after_this=0)
 
         return StopTimeSerializer(queryset, many=True, context=self.context).data
 
