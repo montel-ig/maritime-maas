@@ -3,3 +3,4 @@ routes,route_long_name,sv,Skanslandet rutt,vallisaari_rengas
 routes,route_long_name,en,Vallisaari Route,vallisaari_rengas
 rider_categories,rider_category_name,en,Pensioner,pensioner
 rider_categories,rider_category_name,sv,Pensionärer,pensioner
+fare_attributes,fare_name,en,Ticket,vallisaari_rengas_fare

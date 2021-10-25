@@ -88,6 +88,8 @@ def test_gtfs_feed_importer():
     assert fare.name == "Matkalippu"
     assert fare.description == "Lippu vallisaareen ja rengasreitille"
     assert fare.instructions == "Esitä lippu, kun astut alukseen."
+    fare.set_current_language("en")
+    assert fare.name == "Ticket"
 
     assert fare.fare_rider_categories.count() == 3
     fare_rider_category = fare.fare_rider_categories.first()
