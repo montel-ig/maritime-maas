@@ -70,7 +70,7 @@ class BookingViewSet(
             many=True,
             fields={
                 "departure_id": serializers.UUIDField(),
-                "availability": serializers.IntegerField(min_value=0),
+                "available": serializers.IntegerField(min_value=0),
                 "total": serializers.IntegerField(min_value=0, required=False),
             },
         ),
