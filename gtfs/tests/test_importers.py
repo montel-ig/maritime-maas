@@ -88,6 +88,8 @@ def test_gtfs_feed_importer():
     assert fare.name == "Matkalippu"
     assert fare.description == "Lippu vallisaareen ja rengasreitille"
     assert fare.instructions == "Esitä lippu, kun astut alukseen."
+    fare.set_current_language("en")
+    assert fare.name == "Ticket"
 
     assert fare.fare_rider_categories.count() == 3
     fare_rider_category = fare.fare_rider_categories.first()
@@ -98,6 +100,13 @@ def test_gtfs_feed_importer():
     rider_category = RiderCategory.objects.first()
     assert rider_category.source_id == "pensioner"
     assert rider_category.name == "Eläkeläinen"
+    assert rider_category.description == "Eläkeläinen"
+    # Test translation have an untranslated field, which will default to Finnish.
+    rider_category.set_current_language("sv")
+    assert rider_category.name == "Pensionärer"
+    assert rider_category.description == "Eläkeläinen"
+    rider_category.set_current_language("en")
+    assert rider_category.name == "Pensioner"
     assert rider_category.description == "Eläkeläinen"
 
     assert FeedInfo.objects.count() == 1
