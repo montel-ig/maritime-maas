@@ -25,6 +25,7 @@ class StopTimeSerializer(serializers.ModelSerializer):
     departure_headsign = serializers.CharField(source="trip.headsign")
     stop_headsign = serializers.CharField()
     stop_sequence = serializers.IntegerField()
+    stops_after_this = serializers.IntegerField()
     wheelchair_accessible = serializers.IntegerField(
         source="trip.wheelchair_accessible"
     )
@@ -46,6 +47,7 @@ class StopTimeSerializer(serializers.ModelSerializer):
             "departure_headsign",
             "stop_headsign",
             "stop_sequence",
+            "stops_after_this",
             "wheelchair_accessible",
             "bikes_allowed",
             "route_id",
@@ -129,6 +131,8 @@ class StopSerializer(serializers.ModelSerializer):
             queryset = queryset.filter(trip__direction_id=self.context["direction_id"])
         if "route_id" in self.context:
             queryset = queryset.filter(trip__route_id=self.context["route_id"])
+        if self.context.get("exclude_final_stop_departures", False):
+            queryset = queryset.exclude(stops_after_this=0)
 
         return StopTimeSerializer(queryset, many=True, context=self.context).data
 

@@ -66,8 +66,13 @@ def route_for_maas_operator(maas_operator, api_id_generator):
 def route_with_departures(api_id_generator, route_for_maas_operator):
     """
     A route with
-        * 2 trips each having 2 stops and 2 stop times
-        * 3 departures (first trip having two departures on separate days)
+        * 2 trips:
+          - #1: stop #1 13:00 -> stop #2 14:00
+          - #2: stop #2 00:00 -> stop #1 01:00
+        * 3 departures:
+          - #1: trip #1 2021-02-18
+          - #2: trip #2 2021-02-18
+          - #3: trip #1 2021-02-19
     """
     route = route_for_maas_operator
     feed = route_for_maas_operator.feed
@@ -98,20 +103,20 @@ def route_with_departures(api_id_generator, route_for_maas_operator):
         baker.make(
             StopTime,
             trip=trip,
-            stop=iter(stops),
+            stop=iter(stops) if i % 2 == 0 else reversed(stops),
             feed=feed,
-            # 13:00, 13:15, 00:00, 00:15 in Helsinki time
+            # 13:00 -> 14:00, 00:00 -> 01:00 in Helsinki time
             arrival_time=iter(
                 [
-                    timedelta(hours=15, minutes=i * 15),
-                    timedelta(hours=26, minutes=i * 15),
+                    timedelta(hours=15 + i * 11),
+                    timedelta(hours=15 + i * 11 + 1),
                 ]
             ),
-            # 13:00, 13:15, 01:00, 01:15 in Helsinki time
+            # 13:00 -> 14:00, 00:00 -> 01:00 in Helsinki time
             departure_time=iter(
                 [
-                    timedelta(hours=15, minutes=i * 15),
-                    timedelta(hours=27, minutes=i * 15),
+                    timedelta(hours=15 + i * 11),
+                    timedelta(hours=15 + i * 11 + 1),
                 ]
             ),
             stop_headsign="stop_headsign of test stop time ",
@@ -135,5 +140,8 @@ def route_with_departures(api_id_generator, route_for_maas_operator):
             date=date(2021, 2, 19),
         )
     )
+
+    for trip in trips:
+        trip.populate_stop_times_stops_after_this()
 
     return route

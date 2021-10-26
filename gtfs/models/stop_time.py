@@ -39,6 +39,9 @@ class StopTime(TranslatableModel, GTFSModel):
         choices=Timepoint.choices,
         default=Timepoint.EXACT,
     )
+    stops_after_this = models.PositiveSmallIntegerField(
+        verbose_name=_("stops after this"), null=True, blank=True
+    )
 
     class Meta:
         verbose_name = _("stop times")

@@ -43,6 +43,11 @@ class NestedDepartureQueryParamsSerializer(serializers.Serializer):
             "Filters departures of a stop by direction (0=outbound, 1=inbound)"
         ),
     )
+    exclude_final_stop_departures = serializers.BooleanField(
+        default=False,
+        required=False,
+        help_text=_("Exclude departures from their final stops' departure lists."),
+    )
 
     class Meta:
-        fields = ("date", "direction_id")
+        fields = ("date", "direction_id", "exclude_final_stop_departures")
