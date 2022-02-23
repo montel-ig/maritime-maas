@@ -27,6 +27,7 @@ def test_ticket_reservation(ticket_api_client, snapshot):
     snapshot.assert_match(json.loads(response.content))
 
 
+@pytest.mark.django_db
 @freeze_time("2021-04-20")
 def test_ticket_confirmation(ticket_api_client, snapshot):
     response = ticket_api_client.post(
@@ -36,6 +37,7 @@ def test_ticket_confirmation(ticket_api_client, snapshot):
     snapshot.assert_match(json.loads(response.content))
 
 
+@pytest.mark.django_db
 @freeze_time("2021-04-20")
 def test_ticket_details(ticket_api_client, snapshot):
     response = ticket_api_client.get(
