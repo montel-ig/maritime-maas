@@ -5,6 +5,9 @@ from pathlib import PurePath
 
 from django.utils import timezone
 
+from bookings.models import Booking
+from gtfs.models import Route
+
 
 def format_timestamp(d: datetime.datetime):
     return f"{d.replace(tzinfo=None).isoformat()}Z"
@@ -14,47 +17,131 @@ def get_reservation_data() -> dict:
     return {"id": str(uuid.uuid4()), "status": "RESERVED"}
 
 
-def get_confirmations_data(pk, include_qr=True) -> dict:
+def get_confirmations_data(pk, old_pk=None, include_qr=True) -> dict:
     if include_qr:
-        path = PurePath(__file__).parent.joinpath("data", "ticket_qr.png")
-        with open(path.as_posix(), "rb") as f:
+        qr_path = PurePath(__file__).parent.joinpath("data", "ticket_qr.png")
+        with open(qr_path.as_posix(), "rb") as f:
             ticket = f"data:image/png;base64,{base64.b64encode(f.read()).decode()}"
+        agency_path = PurePath(__file__).parent.joinpath(
+            "data", "ticket_agency_image.png"
+        )
+        with open(agency_path.as_posix(), "rb") as f:
+            agency_image = (
+                f"data:image/png;base64,{base64.b64encode(f.read()).decode()}"
+            )
     else:
         ticket = "QR_CODE"
+        agency_image = "AGENCY_IMAGE"
     valid_from = timezone.now()
     departed_at = valid_from + datetime.timedelta(hours=1)
     valid_to = valid_from + datetime.timedelta(days=1)
+    route = {
+        "description": "Nice scenic route from Kauppatori to Korkeasaari",
+        "name": "Kauppatori - Korkeasaari",
+    }
+
+    # Check if route has capacity sales enabled to make data more realistic
+    try:
+        booking = Booking.objects.get(source_id=old_pk or pk)
+        if Route.objects.filter(
+            capacity_sales__gt=0,
+            translations__long_name=booking.route_name,
+        ).exists():
+            route["legs"] = [
+                {
+                    "stops": [
+                        {
+                            "location": {
+                                "lat": "60.16783393799385",
+                                "lon": "24.952470228154326",
+                            },
+                            "name": "Kauppatori, Lyypekinlaituri",
+                            "stop_time": format_timestamp(departed_at),
+                        },
+                        {
+                            "location": {
+                                "lat": "60.16783393799385",
+                                "lon": "24.952470228154326",
+                            },
+                            "name": "Korkeasaari",
+                            "stop_time": format_timestamp(
+                                departed_at + datetime.timedelta(hours=1)
+                            ),
+                        },
+                    ]
+                },
+                {
+                    "stops": [
+                        {
+                            "location": {
+                                "lat": "60.16783393799385",
+                                "lon": "24.952470228154326",
+                            },
+                            "name": "Korkeasaari",
+                            "stop_time": format_timestamp(
+                                departed_at + datetime.timedelta(hours=5)
+                            ),
+                        },
+                        {
+                            "location": {
+                                "lat": "60.16783393799385",
+                                "lon": "24.952470228154326",
+                            },
+                            "name": "Kauppatori, Lyypekinlaituri",
+                            "stop_time": format_timestamp(
+                                departed_at + datetime.timedelta(hours=6)
+                            ),
+                        },
+                    ]
+                },
+            ]
+    except Booking.DoesNotExist:
+        pass
+
     return {
         "id": pk,
         "status": "CONFIRMED",
         "tickets": [
             {
-                "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-                "qr_code": ticket,
-                "departures": [
-                    {
-                        "from": "Kauppatori",
-                        "to": "Vallisaari",
-                        "depart_at": format_timestamp(departed_at),
-                    }
-                ],
-                "name": "Day in Vallisaari",
-                "description": "This is the description of the ticket",
-                "instructions": "These are the instructions of the ticket",
                 "agency": {
-                    "name": "MaaS Line",
-                    "logo_url": "http://www.agency.com/logo.png",
+                    "logo": agency_image,
+                    "name": "Ferry Lines",
+                    "url": "https://www.ferry-lines.fi",
                 },
-                "ticket_html": "<div>...</div>",
-                "ticket_type": "Päivälippu",
-                "customer_type": "Aikuinen",
-                "amount": 12,
-                "currency": "EUR",
-                "terms_of_use": "http://www.terms.and.conditions.fi",
-                "locale": "fi",
-                "valid_from": format_timestamp(valid_from),
-                "valid_to": format_timestamp(valid_to),
+                "created_at": format_timestamp(valid_from),
+                "customer_type": {
+                    "name": "Adult",
+                    "description": "Adult ticket is the full price ticket",
+                },
+                "html": "<div>This is the ticket</div>",
+                "id": "55619d53-bcc0-46df-aa7c-4840cb891262",
+                "locale": "en",
+                "maas_operator_id": "6046d689-06ce-4662-a193-d22cd754a1c2",
+                "price": {
+                    "amount_excluding_vat": "8.5",
+                    "amount_total": "10",
+                    "currency": "EUR",
+                    "vat_amount": "1.5",
+                    "vat_percentage": "15%",
+                },
+                "qr_code": ticket,
+                "receipt_number": "1A2B3C4D5E6F7G8H",
                 "refresh_at": format_timestamp(valid_to),
+                "route": route,
+                "schema_version": 2,
+                "status": "CONFIRMED",
+                "terms_url": "http://www.terms.and.conditions.fi",
+                "ticket_type": {
+                    "description": "Return ticket to Suomenlinna. Can be used as an open ticket on other departures.",
+                    "instructions": "Be ready to show the ticket for the inspector.",
+                    "name": "Return Ticket",
+                },
+                "validity": {
+                    "activates_at": format_timestamp(valid_from),
+                    "deactivates_at": format_timestamp(valid_to),
+                    "ends_at": format_timestamp(valid_to),
+                    "starts_at": format_timestamp(valid_from),
+                },
             }
         ],
     }

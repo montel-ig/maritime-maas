@@ -252,7 +252,9 @@ def test_confirm_booking(maas_api_client, requests_mock, snapshot, source_id_cha
         urljoin(
             ticketing_system.bookings_api_url, f"{reserved_booking.source_id}/confirm/"
         ),
-        json=get_confirmations_data(expected_source_id, include_qr=False),
+        json=get_confirmations_data(
+            expected_source_id, old_pk=reserved_booking.source_id, include_qr=False
+        ),
         status_code=status.HTTP_200_OK,
     )
 

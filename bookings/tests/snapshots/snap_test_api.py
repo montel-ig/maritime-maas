@@ -8,57 +8,95 @@ snapshots = Snapshot()
 
 snapshots["test_confirm_booking[False] 1"] = [
     {
-        "agency": {"logo_url": "http://www.agency.com/logo.png", "name": "MaaS Line"},
-        "amount": 12,
-        "currency": "EUR",
-        "customer_type": "Aikuinen",
-        "departures": [
-            {
-                "depart_at": "2021-04-20T01:00:00Z",
-                "from": "Kauppatori",
-                "to": "Vallisaari",
-            }
-        ],
-        "description": "This is the description of the ticket",
-        "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-        "instructions": "These are the instructions of the ticket",
-        "locale": "fi",
-        "name": "Day in Vallisaari",
+        "agency": {
+            "logo": "AGENCY_IMAGE",
+            "name": "Ferry Lines",
+            "url": "https://www.ferry-lines.fi",
+        },
+        "created_at": "2021-04-20T00:00:00Z",
+        "customer_type": {
+            "description": "Adult ticket is the full price ticket",
+            "name": "Adult",
+        },
+        "html": "<div>This is the ticket</div>",
+        "id": "55619d53-bcc0-46df-aa7c-4840cb891262",
+        "locale": "en",
+        "maas_operator_id": "6046d689-06ce-4662-a193-d22cd754a1c2",
+        "price": {
+            "amount_excluding_vat": "8.5",
+            "amount_total": "10",
+            "currency": "EUR",
+            "vat_amount": "1.5",
+            "vat_percentage": "15%",
+        },
         "qr_code": "QR_CODE",
+        "receipt_number": "1A2B3C4D5E6F7G8H",
         "refresh_at": "2021-04-21T00:00:00Z",
-        "terms_of_use": "http://www.terms.and.conditions.fi",
-        "ticket_html": "<div>...</div>",
-        "ticket_type": "Päivälippu",
-        "valid_from": "2021-04-20T00:00:00Z",
-        "valid_to": "2021-04-21T00:00:00Z",
+        "route": {
+            "description": "Nice scenic route from Kauppatori to Korkeasaari",
+            "name": "Kauppatori - Korkeasaari",
+        },
+        "schema_version": 2,
+        "status": "CONFIRMED",
+        "terms_url": "http://www.terms.and.conditions.fi",
+        "ticket_type": {
+            "description": "Return ticket to Suomenlinna. Can be used as an open ticket on other departures.",
+            "instructions": "Be ready to show the ticket for the inspector.",
+            "name": "Return Ticket",
+        },
+        "validity": {
+            "activates_at": "2021-04-20T00:00:00Z",
+            "deactivates_at": "2021-04-21T00:00:00Z",
+            "ends_at": "2021-04-21T00:00:00Z",
+            "starts_at": "2021-04-20T00:00:00Z",
+        },
     }
 ]
 
 snapshots["test_confirm_booking[True] 1"] = [
     {
-        "agency": {"logo_url": "http://www.agency.com/logo.png", "name": "MaaS Line"},
-        "amount": 12,
-        "currency": "EUR",
-        "customer_type": "Aikuinen",
-        "departures": [
-            {
-                "depart_at": "2021-04-20T01:00:00Z",
-                "from": "Kauppatori",
-                "to": "Vallisaari",
-            }
-        ],
-        "description": "This is the description of the ticket",
-        "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-        "instructions": "These are the instructions of the ticket",
-        "locale": "fi",
-        "name": "Day in Vallisaari",
+        "agency": {
+            "logo": "AGENCY_IMAGE",
+            "name": "Ferry Lines",
+            "url": "https://www.ferry-lines.fi",
+        },
+        "created_at": "2021-04-20T00:00:00Z",
+        "customer_type": {
+            "description": "Adult ticket is the full price ticket",
+            "name": "Adult",
+        },
+        "html": "<div>This is the ticket</div>",
+        "id": "55619d53-bcc0-46df-aa7c-4840cb891262",
+        "locale": "en",
+        "maas_operator_id": "6046d689-06ce-4662-a193-d22cd754a1c2",
+        "price": {
+            "amount_excluding_vat": "8.5",
+            "amount_total": "10",
+            "currency": "EUR",
+            "vat_amount": "1.5",
+            "vat_percentage": "15%",
+        },
         "qr_code": "QR_CODE",
+        "receipt_number": "1A2B3C4D5E6F7G8H",
         "refresh_at": "2021-04-21T00:00:00Z",
-        "terms_of_use": "http://www.terms.and.conditions.fi",
-        "ticket_html": "<div>...</div>",
-        "ticket_type": "Päivälippu",
-        "valid_from": "2021-04-20T00:00:00Z",
-        "valid_to": "2021-04-21T00:00:00Z",
+        "route": {
+            "description": "Nice scenic route from Kauppatori to Korkeasaari",
+            "name": "Kauppatori - Korkeasaari",
+        },
+        "schema_version": 2,
+        "status": "CONFIRMED",
+        "terms_url": "http://www.terms.and.conditions.fi",
+        "ticket_type": {
+            "description": "Return ticket to Suomenlinna. Can be used as an open ticket on other departures.",
+            "instructions": "Be ready to show the ticket for the inspector.",
+            "name": "Return Ticket",
+        },
+        "validity": {
+            "activates_at": "2021-04-20T00:00:00Z",
+            "deactivates_at": "2021-04-21T00:00:00Z",
+            "ends_at": "2021-04-21T00:00:00Z",
+            "starts_at": "2021-04-20T00:00:00Z",
+        },
     }
 ]
 
@@ -172,29 +210,48 @@ snapshots["test_fetch_availability response"] = [
 
 snapshots["test_retrieve_confirmed_booking 1"] = [
     {
-        "agency": {"logo_url": "http://www.agency.com/logo.png", "name": "MaaS Line"},
-        "amount": 12,
-        "currency": "EUR",
-        "customer_type": "Aikuinen",
-        "departures": [
-            {
-                "depart_at": "2021-04-20T01:00:00Z",
-                "from": "Kauppatori",
-                "to": "Vallisaari",
-            }
-        ],
-        "description": "This is the description of the ticket",
-        "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-        "instructions": "These are the instructions of the ticket",
-        "locale": "fi",
-        "name": "Day in Vallisaari",
+        "agency": {
+            "logo": "AGENCY_IMAGE",
+            "name": "Ferry Lines",
+            "url": "https://www.ferry-lines.fi",
+        },
+        "created_at": "2021-04-20T00:00:00Z",
+        "customer_type": {
+            "description": "Adult ticket is the full price ticket",
+            "name": "Adult",
+        },
+        "html": "<div>This is the ticket</div>",
+        "id": "55619d53-bcc0-46df-aa7c-4840cb891262",
+        "locale": "en",
+        "maas_operator_id": "6046d689-06ce-4662-a193-d22cd754a1c2",
+        "price": {
+            "amount_excluding_vat": "8.5",
+            "amount_total": "10",
+            "currency": "EUR",
+            "vat_amount": "1.5",
+            "vat_percentage": "15%",
+        },
         "qr_code": "QR_CODE",
+        "receipt_number": "1A2B3C4D5E6F7G8H",
         "refresh_at": "2021-04-21T00:00:00Z",
-        "terms_of_use": "http://www.terms.and.conditions.fi",
-        "ticket_html": "<div>...</div>",
-        "ticket_type": "Päivälippu",
-        "valid_from": "2021-04-20T00:00:00Z",
-        "valid_to": "2021-04-21T00:00:00Z",
+        "route": {
+            "description": "Nice scenic route from Kauppatori to Korkeasaari",
+            "name": "Kauppatori - Korkeasaari",
+        },
+        "schema_version": 2,
+        "status": "CONFIRMED",
+        "terms_url": "http://www.terms.and.conditions.fi",
+        "ticket_type": {
+            "description": "Return ticket to Suomenlinna. Can be used as an open ticket on other departures.",
+            "instructions": "Be ready to show the ticket for the inspector.",
+            "name": "Return Ticket",
+        },
+        "validity": {
+            "activates_at": "2021-04-20T00:00:00Z",
+            "deactivates_at": "2021-04-21T00:00:00Z",
+            "ends_at": "2021-04-21T00:00:00Z",
+            "starts_at": "2021-04-20T00:00:00Z",
+        },
     }
 ]
 
