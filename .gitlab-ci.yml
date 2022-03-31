@@ -1,0 +1,58 @@
+image: docker:19-dind
+
+stages:
+  - build
+  - release
+
+services:
+  - name: docker:19-dind
+    alias: docker
+    command: ["--tls=false"]
+
+variables:
+  DOCKER_DRIVER: overlay2
+  TEST_IMAGE: $CI_REGISTRY_IMAGE:test-$CI_COMMIT_REF_SLUG-$CI_COMMIT_SHORT_SHA
+  STAGING_IMAGE: $CI_REGISTRY_IMAGE:staging-$CI_COMMIT_REF_SLUG-$CI_COMMIT_SHORT_SHA-$CI_JOB_ID
+  PRODUCTION_IMAGE: $CI_REGISTRY_IMAGE:production-$CI_COMMIT_REF_SLUG-$CI_COMMIT_SHORT_SHA-$CI_JOB_ID
+  CACHE_IMAGE: $CI_REGISTRY_IMAGE:cached
+
+build-image:
+  tags:
+    - montel
+  stage: build
+  before_script:
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
+  script:
+    - docker pull $CACHE_IMAGE
+    - docker build --file ${PWD}/Dockerfile --tag $TEST_IMAGE --cache-from $CACHE_IMAGE --pull --network host --target production .
+    - docker push $TEST_IMAGE
+
+release-image-staging:
+  tags:
+    - montel
+  stage: release
+  only:
+    - develop
+  before_script:
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
+  script:
+    - docker pull $TEST_IMAGE
+    - docker tag $TEST_IMAGE $CACHE_IMAGE
+    - docker tag $TEST_IMAGE $STAGING_IMAGE    
+    - docker push $CACHE_IMAGE
+    - docker push $STAGING_IMAGE
+
+release-image-production:
+  tags:
+    - montel
+  stage: release
+  only:
+    - master
+  before_script:
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
+  script:
+    - docker pull $TEST_IMAGE
+    - docker tag $TEST_IMAGE $CACHE_IMAGE
+    - docker tag $TEST_IMAGE $PRODUCTION_IMAGE    
+    - docker push $CACHE_IMAGE
+    - docker push $PRODUCTION_IMAGE
