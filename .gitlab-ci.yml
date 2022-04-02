@@ -21,15 +21,15 @@ workflow:
         IMAGE_TEST_TAG: $CI_REGISTRY_IMAGE/production:$CI_COMMIT_SHORT_SHA-$CI_COMMIT_TAG-test
         IMAGE_CACHE_TAG: $CI_REGISTRY_IMAGE/production:cache
         CURVE_IMG_VER: $CI_COMMIT_TAG
-#    - if: $CI_COMMIT_BRANCH == "main"
-#      variables:
-#        WORKFLOW_STAGING: "true"
-    - when: always
+    - if: $CI_COMMIT_BRANCH == "main"
       variables:
         WORKFLOW_STAGING: "true"
+    - when: always
+      variables:
+        WORKFLOW_FEATURES: "true"
 
 
-        ## Common CI/CD targets used with extends keyword
+## Common CI/CD targets used with extends keyword
 .build_image_base:
   stage: build
   image: docker:20.10.6
@@ -69,7 +69,6 @@ workflow:
       cobertura: coverage.xml
 
 
-
 #####
 ## WORKFLOW_FEATURES: Build image
 ###
@@ -79,7 +78,6 @@ build-notest:
     IMAGE_TAG: $IMAGE_RELEASE_TAG
   rules:
     - if: $WORKFLOW_FEATURES
-
 
 
 ####
@@ -104,17 +102,13 @@ build-staging-image:
   variables:
     IMAGE_TAG: $IMAGE_RELEASE_TAG
     BUILD_EXTRA_ARGS: '--target=production'
-
   rules:
     - if: $WORKFLOW_STAGING
-
 
 
 ####
 ## WORKFLOW_PRODUCTION: Check semver, Build test image, Run unittest, build release image
 ##
-
-
 accept-valid-tag:
   # test passes if $CI_COMMIT_TAG is release-<semver>
   image: alpine/semver
@@ -125,7 +119,6 @@ accept-valid-tag:
     - semver $(echo $CI_COMMIT_TAG | sed -e "s/release-//")
   rules:
     - if: $WORKFLOW_PRODUCTION
-
 
 build-production-test-image:
   extends: .build_image_base
@@ -140,7 +133,6 @@ run-production-unittest:
   extends: .test_image_base
   rules:
     - if: $WORKFLOW_PRODUCTION
-
 
 build-production-release-image:
   extends: .build_image_base
