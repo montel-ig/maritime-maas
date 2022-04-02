@@ -52,12 +52,6 @@ workflow:
   image: docker:20.10.6
   services:
     - docker:20.10.6-dind
-  variables:
-    POSTGRES_DB: curve
-    DATABASE_URL: "postgresql://postgres:postgres@postgres:5432/$POSTGRES_DB"
-    REDIS_URL: "rediscache://redis:6379/1?client_class=django_redis.client.DefaultClient"
-    SECRET_KEY: ads1234565asd
-    ALLOWED_HOSTS: '127.0.0.1'
   before_script:
     - set -x
     - env
@@ -66,7 +60,7 @@ workflow:
   script:
     - 'eval docker pull $IMAGE_TEST_TAG'
     - 'eval export TEST_IMG=$IMAGE_TEST_TAG'
-    - docker-compose -f docker-compose.yml -f docker-compose.test.override.yml run --rm --name application application
+    - docker-compose -f docker-compose.yml -f docker-compose.test.override.yml run --rm --name unittest django
   artifacts:
     reports:
       cobertura: coverage.xml
@@ -74,7 +68,7 @@ workflow:
 
 
 #####
-## workflow: Build image, deploy image
+## workflow: Build image
 ###
 build-notest:
   extends: .build_image_base
@@ -122,7 +116,7 @@ release_image:
 
 
 ####
-## WORKFLOW_ALPHA: Build test image,Run unittest, release image
+## WORKFLOW_ALPHA: Check semver, Build test image, Run unittest, release image
 ##
 
 
@@ -146,13 +140,13 @@ build-production-test-image:
   rules:
     - if: $WORKFLOW_PRODUCTION
 
-run-aplha-unittest:
+run-production-unittest:
   extends: .test_image_base
   rules:
     - if: $WORKFLOW_PRODUCTION
 
 
-release-alpha-image:
+release-production-image:
   stage: release
   image: docker:20.10.6
   services:
