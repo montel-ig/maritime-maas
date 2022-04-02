@@ -71,7 +71,7 @@ workflow:
 
 
 #####
-## workflow: Build image
+## WORKFLOW_FEATURES: Build image
 ###
 build-notest:
   extends: .build_image_base
@@ -89,7 +89,6 @@ build-test-image:
   extends: .build_image_base
   variables:
     IMAGE_TAG: $IMAGE_TEST_TAG
-    CACHE_TAG: $IMAGE_CACHE_TAG
     BUILD_EXTRA_ARGS: '--target=development'
   rules:
     - if: $WORKFLOW_STAGING
