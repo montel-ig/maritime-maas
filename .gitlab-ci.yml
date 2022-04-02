@@ -58,8 +58,8 @@ workflow:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
     - apk add docker-compose
   script:
-    - 'eval docker pull $IMAGE_TEST_TAG'
     - 'eval export TEST_IMG=$IMAGE_TEST_TAG'
+    - 'eval docker pull $TEST_IMG'
     - docker-compose -f docker-compose.yml -f docker-compose.test.override.yml run --rm --name unittest django
   artifacts:
     reports:

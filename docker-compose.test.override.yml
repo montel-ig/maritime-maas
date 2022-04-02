@@ -1,27 +1,27 @@
 version: '3.7'
 services:
-    django:
-        build:
-            context: .
-            target: development
-        image: ${IMAGE_TEST_TAG:-default-test:latest}
-        environment:
-            DATABASE_URL: postgis://maritime_maas:maritime_maas@maritime-maas-db/maritime_maas
-            DATABASE_HOST: "maritime-maas-db"
-            ALLOWED_HOSTS: "*"
-            DEBUG: "1"
-            APPLY_MIGRATIONS: "1"
-            CREATE_ADMIN_USER: "1"
-            ADMIN_USER_PASSWORD: "admin"
-            MOCK_TICKETING_API: "1"
-        volumes:
-            - .:/app
-            - django-media-volume:/var/media/
-        ports:
-            - "8081:8000"
-        depends_on:
-            - postgres
-        container_name: maritime-maas-backend
-        command:
-            -   pytest
+  django:
+    #build:
+    #    context: .
+    #    target: development
+    image: ${TEST_IMG:-default-test:latest}
+    environment:
+      DATABASE_URL: postgis://maritime_maas:maritime_maas@maritime-maas-db/maritime_maas
+      DATABASE_HOST: "maritime-maas-db"
+      ALLOWED_HOSTS: "*"
+      DEBUG: "1"
+      APPLY_MIGRATIONS: "1"
+      CREATE_ADMIN_USER: "1"
+      ADMIN_USER_PASSWORD: "admin"
+      MOCK_TICKETING_API: "1"
+    volumes:
+      - .:/app
+      - django-media-volume:/var/media/
+    ports:
+      - "8081:8000"
+    depends_on:
+      - postgres
+    container_name: maritime-maas-backend
+    command:
+      - pytest
 
