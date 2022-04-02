@@ -9,7 +9,7 @@ variables:
   IMAGE_RELEASE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG-$CI_COMMIT_SHORT_SHA-$CI_PIPELINE_ID
   IMAGE_TEST_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG-$CI_COMMIT_SHORT_SHA-$CI_PIPELINE_ID-test
   CACHE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG-cache
-  CURVE_IMG_VER: $CI_COMMIT_SHORT_SHA
+  APP_IMG_VER: $CI_COMMIT_SHORT_SHA
 
 workflow:
   rules:
@@ -21,6 +21,9 @@ workflow:
         IMAGE_TEST_TAG: $CI_REGISTRY_IMAGE/production:$CI_COMMIT_SHORT_SHA-$CI_COMMIT_TAG-test
         IMAGE_CACHE_TAG: $CI_REGISTRY_IMAGE/production:cache
         CURVE_IMG_VER: $CI_COMMIT_TAG
+#    - if: $CI_COMMIT_BRANCH == "main"
+#      variables:
+#        WORKFLOW_STAGING: "true"
     - when: always
       variables:
         WORKFLOW_STAGING: "true"
@@ -42,7 +45,7 @@ workflow:
   script:
     #  defaults: --build-arg REQUIREMENTS=requirements_prod.txt
     - 'eval docker pull $CACHE_TAG || true'
-    - 'eval docker build --build-arg CURVE_IMG_VER=$CURVE_IMG_VER --cache-from $CACHE_TAG --tag $IMAGE_TAG --tag $CACHE_TAG .'
+    - 'eval docker build --build-arg APP_IMG_VER=$APP_IMG_VER $BUILD_EXTRA_ARGS --cache-from $CACHE_TAG --tag $IMAGE_TAG --tag $CACHE_TAG .'
     - 'eval docker push $IMAGE_TAG'
     - 'eval docker push $CACHE_TAG'
 
@@ -75,48 +78,41 @@ build-notest:
   variables:
     IMAGE_TAG: $IMAGE_RELEASE_TAG
   rules:
-    - if: $WORKFLOW_STAGING
+    - if: $WORKFLOW_FEATURES
 
 
 
 ####
-## workflow: Build test image,Run unittest, release image, deploy image
+## WORKFLOW_STAGING: Build test image,Run unittest, build release image,
 ##
 build-test-image:
   extends: .build_image_base
   variables:
     IMAGE_TAG: $IMAGE_TEST_TAG
+    CACHE_TAG: $IMAGE_CACHE_TAG
+    BUILD_EXTRA_ARGS: '--target=development'
   rules:
-    - if: $WORKFLOW_TEST
+    - if: $WORKFLOW_STAGING
 
 run-unittest:
   extends: .test_image_base
   rules:
-    - if: $WORKFLOW_TEST
+    - if: $WORKFLOW_STAGING
 
-
-release_image:
+build-staging-image:
+  extends: .build_image_base
   stage: release
-  image: docker:20.10.6
-  services:
-    - docker:20.10.6-dind
   variables:
-    GIT_STRATEGY: none
-  before_script:
-    - set -x
-    - env
-    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
-  script:
-    - 'eval docker pull $IMAGE_TEST_TAG'
-    - 'eval docker tag $IMAGE_TEST_TAG $IMAGE_RELEASE_TAG'
-    - 'eval docker push $IMAGE_RELEASE_TAG'
+    IMAGE_TAG: $IMAGE_RELEASE_TAG
+    BUILD_EXTRA_ARGS: '--target=production'
+
   rules:
-    - if: $WORKFLOW_TEST
+    - if: $WORKFLOW_STAGING
 
 
 
 ####
-## WORKFLOW_ALPHA: Check semver, Build test image, Run unittest, release image
+## WORKFLOW_PRODUCTION: Check semver, Build test image, Run unittest, build release image
 ##
 
 
@@ -137,6 +133,7 @@ build-production-test-image:
   variables:
     IMAGE_TAG: $IMAGE_TEST_TAG
     CACHE_TAG: $IMAGE_CACHE_TAG
+    BUILD_EXTRA_ARGS: '--target=development'
   rules:
     - if: $WORKFLOW_PRODUCTION
 
@@ -146,20 +143,11 @@ run-production-unittest:
     - if: $WORKFLOW_PRODUCTION
 
 
-release-production-image:
+build-production-release-image:
+  extends: .build_image_base
   stage: release
-  image: docker:20.10.6
-  services:
-    - docker:20.10.6-dind
   variables:
-    GIT_STRATEGY: none
-  before_script:
-    - set -x
-    - env
-    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
-  script:
-    - 'eval docker pull $IMAGE_TEST_TAG'
-    - 'eval docker tag $IMAGE_TEST_TAG $IMAGE_RELEASE_TAG'
-    - 'eval docker push $IMAGE_RELEASE_TAG'
+    IMAGE_TAG: $IMAGE_RELEASE_TAG
+    BUILD_EXTRA_ARGS: '--target=production'
   rules:
     - if: $WORKFLOW_PRODUCTION
