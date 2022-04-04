@@ -17,8 +17,6 @@ services:
         build:
             context: .
             target: development
-        env_file:
-            - docker-compose.env.yaml
         environment:
             DATABASE_URL: postgis://maritime_maas:maritime_maas@maritime-maas-db/maritime_maas
             DATABASE_HOST: "maritime-maas-db"
@@ -30,6 +28,7 @@ services:
         depends_on:
             - postgres
         container_name: maritime-maas-backend
+
 
 volumes:
         pgdata:

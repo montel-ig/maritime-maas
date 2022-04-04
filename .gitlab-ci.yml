@@ -1,58 +1,144 @@
-image: docker:19-dind
-
 stages:
+  - check
   - build
+  - test
   - release
-
-services:
-  - name: docker:19-dind
-    alias: docker
-    command: ["--tls=false"]
+  - deploy
 
 variables:
-  DOCKER_DRIVER: overlay2
-  TEST_IMAGE: $CI_REGISTRY_IMAGE:test-$CI_COMMIT_REF_SLUG-$CI_COMMIT_SHORT_SHA
-  STAGING_IMAGE: $CI_REGISTRY_IMAGE:staging-$CI_COMMIT_REF_SLUG-$CI_COMMIT_SHORT_SHA-$CI_JOB_ID
-  PRODUCTION_IMAGE: $CI_REGISTRY_IMAGE:production-$CI_COMMIT_REF_SLUG-$CI_COMMIT_SHORT_SHA-$CI_JOB_ID
-  CACHE_IMAGE: $CI_REGISTRY_IMAGE:cached
+  IMAGE_RELEASE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG-$CI_COMMIT_SHORT_SHA-$CI_PIPELINE_ID
+  IMAGE_TEST_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG-$CI_COMMIT_SHORT_SHA-$CI_PIPELINE_ID-test
+  CACHE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG-cache
+  APP_IMG_VER: $CI_COMMIT_SHORT_SHA
 
-build-image:
-  tags:
-    - montel
+workflow:
+  rules:
+    # Rule for direct commit to production branch, MR is recommended
+    - if: $CI_COMMIT_TAG
+      variables:
+        WORKFLOW_PRODUCTION: "true"
+        IMAGE_RELEASE_TAG: $CI_REGISTRY_IMAGE/production:$CI_COMMIT_TAG
+        IMAGE_TEST_TAG: $CI_REGISTRY_IMAGE/production:$CI_COMMIT_SHORT_SHA-$CI_COMMIT_TAG-test
+        IMAGE_CACHE_TAG: $CI_REGISTRY_IMAGE/production:cache
+        CURVE_IMG_VER: $CI_COMMIT_TAG
+    - if: $CI_COMMIT_BRANCH == "main"
+      variables:
+        WORKFLOW_STAGING: "true"
+    - when: always
+      variables:
+        WORKFLOW_FEATURES: "true"
+
+
+## Common CI/CD targets used with extends keyword
+.build_image_base:
   stage: build
+  image: docker:20.10.6
+  services:
+    - docker:20.10.6-dind
+  variables:
+    IMAGE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG-$CI_COMMIT_SHORT_SHA-$CI_PIPELINE_ID
+    CACHE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG-cache
   before_script:
+    - set -x
+    - env
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
   script:
-    - docker pull $CACHE_IMAGE
-    - docker build --file ${PWD}/Dockerfile --tag $TEST_IMAGE --cache-from $CACHE_IMAGE --pull --network host --target production .
-    - docker push $TEST_IMAGE
+    #  defaults: --build-arg REQUIREMENTS=requirements_prod.txt
+    - 'eval docker pull $CACHE_TAG || true'
+    - 'eval docker build --build-arg APP_IMG_VER=$APP_IMG_VER $BUILD_EXTRA_ARGS --cache-from $CACHE_TAG --tag $IMAGE_TAG --tag $CACHE_TAG .'
+    - 'eval docker push $IMAGE_TAG'
+    - 'eval docker push $CACHE_TAG'
 
-release-image-staging:
-  tags:
-    - montel
-  stage: release
-  only:
-    - develop
-  before_script:
-    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
-  script:
-    - docker pull $TEST_IMAGE
-    - docker tag $TEST_IMAGE $CACHE_IMAGE
-    - docker tag $TEST_IMAGE $STAGING_IMAGE    
-    - docker push $CACHE_IMAGE
-    - docker push $STAGING_IMAGE
 
-release-image-production:
-  tags:
-    - montel
-  stage: release
-  only:
-    - main
+.test_image_base:
+  stage: test
+  image: docker:20.10.6
+  services:
+    - docker:20.10.6-dind
   before_script:
+    - set -x
+    - env
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
+    - apk add docker-compose
   script:
-    - docker pull $TEST_IMAGE
-    - docker tag $TEST_IMAGE $CACHE_IMAGE
-    - docker tag $TEST_IMAGE $PRODUCTION_IMAGE    
-    - docker push $CACHE_IMAGE
-    - docker push $PRODUCTION_IMAGE
+    - 'eval export TEST_IMG=$IMAGE_TEST_TAG'
+    - 'eval docker pull $TEST_IMG'
+    - docker-compose -f docker-compose.yml -f docker-compose.test.override.yml run --rm --name unittest django
+  artifacts:
+    reports:
+      cobertura: coverage.xml
+
+
+#####
+## WORKFLOW_FEATURES: Build image
+###
+build-notest:
+  extends: .build_image_base
+  variables:
+    IMAGE_TAG: $IMAGE_RELEASE_TAG
+  rules:
+    - if: $WORKFLOW_FEATURES
+
+
+####
+## WORKFLOW_STAGING: Build test image,Run unittest, build release image,
+##
+build-test-image:
+  extends: .build_image_base
+  variables:
+    IMAGE_TAG: $IMAGE_TEST_TAG
+    BUILD_EXTRA_ARGS: '--target=development'
+  rules:
+    - if: $WORKFLOW_STAGING
+
+run-unittest:
+  extends: .test_image_base
+  rules:
+    - if: $WORKFLOW_STAGING
+
+build-staging-image:
+  extends: .build_image_base
+  stage: release
+  variables:
+    IMAGE_TAG: $IMAGE_RELEASE_TAG
+    BUILD_EXTRA_ARGS: '--target=production'
+  rules:
+    - if: $WORKFLOW_STAGING
+
+
+####
+## WORKFLOW_PRODUCTION: Check semver, Build test image, Run unittest, build release image
+##
+accept-valid-tag:
+  # test passes if $CI_COMMIT_TAG is release-<semver>
+  image: alpine/semver
+  stage: check
+  script:
+    - set -ex
+    - env
+    - semver $(echo $CI_COMMIT_TAG | sed -e "s/release-//")
+  rules:
+    - if: $WORKFLOW_PRODUCTION
+
+build-production-test-image:
+  extends: .build_image_base
+  variables:
+    IMAGE_TAG: $IMAGE_TEST_TAG
+    CACHE_TAG: $IMAGE_CACHE_TAG
+    BUILD_EXTRA_ARGS: '--target=development'
+  rules:
+    - if: $WORKFLOW_PRODUCTION
+
+run-production-unittest:
+  extends: .test_image_base
+  rules:
+    - if: $WORKFLOW_PRODUCTION
+
+build-production-release-image:
+  extends: .build_image_base
+  stage: release
+  variables:
+    IMAGE_TAG: $IMAGE_RELEASE_TAG
+    BUILD_EXTRA_ARGS: '--target=production'
+  rules:
+    - if: $WORKFLOW_PRODUCTION
