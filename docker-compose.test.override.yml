@@ -23,5 +23,9 @@ services:
       - postgres
     container_name: maritime-maas-backend
     command:
-      - pytest -ra -vv --doctest-modules --cov=.
+      - pytest 
+      - -ra 
+      - -vv 
+      - --doctest-modules 
+      - --cov=.
 
