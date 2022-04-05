@@ -63,10 +63,19 @@ workflow:
   script:
     - 'eval export TEST_IMG=$IMAGE_TEST_TAG'
     - 'eval docker pull $TEST_IMG'
-    - docker-compose -f docker-compose.yml -f docker-compose.test.override.yml run --rm --name unittest django
+    - docker-compose -f docker-compose.yml -f docker-compose.test.override.yml run --rm --name unittest django pytest -ra -vv --doctest-modules --cov=.
   artifacts:
     reports:
       cobertura: coverage.xml
+
+
+.lint_image_base:
+  extends: .test_image_base
+  script:
+    - 'eval export TEST_IMG=$IMAGE_TEST_TAG'
+    - 'eval docker pull $TEST_IMG'
+    - docker-compose -f docker-compose.yml -f docker-compose.test.override.yml run --rm --name unittest django ./run-coding-style-checks.sh
+
 
 
 #####
@@ -88,8 +97,9 @@ build-test-image:
   variables:
     IMAGE_TAG: $IMAGE_TEST_TAG
     BUILD_EXTRA_ARGS: '--target=development'
-  rules:
-    - if: $WORKFLOW_STAGING
+
+run-codestyle-checks:
+  extends: .lint_image_base
 
 run-unittest:
   extends: .test_image_base

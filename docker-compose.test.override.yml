@@ -22,10 +22,3 @@ services:
     depends_on:
       - postgres
     container_name: maritime-maas-backend
-    command:
-      - pytest 
-      - -ra 
-      - -vv 
-      - --doctest-modules 
-      - --cov=.
-
